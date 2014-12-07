@@ -1,0 +1,4 @@
+Required third-party libs;
+* libpng
+* png++
+* Eigen 
