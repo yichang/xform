@@ -2,8 +2,8 @@
 #include "util.h"
 #include "png.hpp"
 
-
-void readPngToEigen(const string& filename, ImageType_3& image){
+/* Implment through png++ */
+void imread(const string& filename, ImageType_3* image){
 
   //TODO(yichang): replace reference with pointer
   // TODO(yichang): error handling when sizes are not equal.
@@ -11,23 +11,22 @@ void readPngToEigen(const string& filename, ImageType_3& image){
   int height = buf_image.get_height();
   int width = buf_image.get_width();
 
-  for(int i=0; i<image.rows(); i++){
-    image(i) = ImageType_1(height, width);
+  for(int i=0; i<image->rows(); i++){
+    (*image)(i) = ImageType_1(height, width);
   }
 
   png::rgb_pixel pix; 
-  for(int j=0; j<width; j++){
-    for(int i=0; i<height; i++){
+  for(int i=0; i<height; i++){
+    for(int j=0; j<width; j++){
       pix = buf_image.get_pixel(j, i);
-      image(0)(i,j) = static_cast<PixelType>(pix.red)/255.0;
-      image(1)(i,j) = static_cast<PixelType>(pix.green)/255.0;
-      image(2)(i,j) = static_cast<PixelType>(pix.blue)/255.0;
+      (*image)(0)(i,j) = static_cast<PixelType>(pix.red)/255.0;
+      (*image)(1)(i,j) = static_cast<PixelType>(pix.green)/255.0;
+      (*image)(2)(i,j) = static_cast<PixelType>(pix.blue)/255.0;
     }
   }
 }
 
-
-void writePngToEigen(const ImageType_3& image, const string& filename){
+void imwrite(const ImageType_3& image, const string& filename){
   int height = image(0).rows();
   int width = image(0).cols();
   int r, g, b;
