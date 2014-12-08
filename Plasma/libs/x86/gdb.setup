@@ -1,0 +1,3 @@
+set solib-search-path ./obj/local/x86
+source /Users/yichangshih/Development/android-ndk-r10d/prebuilt/common/gdb/common.setup
+directory /Users/yichangshih/Development/android-ndk-r10d/platforms/android-9/arch-x86/usr/include jni /Users/yichangshih/Development/android-ndk-r10d/sources/cxx-stl/system

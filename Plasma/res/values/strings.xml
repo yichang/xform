@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Plasma</string>
+    <string name="edit_message">Edit me</string>
+    <string name="button_send">Process</string>
+    <string name="current_image">Current result</string>
+</resources>
