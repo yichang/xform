@@ -10,13 +10,22 @@ int main(){
 
   ColorSpace color_space; 
 
+  /* test yuv space */
   ImageType_3 in_yuv, in_rgb; 
   color_space.rgb2yuv(my_image, &in_yuv); 
   in_yuv(0) *= 0.7; 
   color_space.yuv2rgb(in_yuv, &in_rgb); 
-
   imwrite(in_yuv, "yuv.png");
   imwrite(in_rgb, "rgb.png");
+
+  /* test lab space */
+  ImageType_3 rgb_2_lab, lab_2_rgb; 
+  color_space.rgb2lab(my_image, &rgb_2_lab); 
+  //color_space.yuv2rgb(in_yuv, &in_rgb); 
+  imwrite(rgb_2_lab, "rgb_2_lab.png");
+  //imwrite(in_rgb, "yuv_2_rgb.png");
+
+
 
   return 0;
 }
