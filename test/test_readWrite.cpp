@@ -22,7 +22,7 @@ int main(){
   //my_image(1).setZero(my_image(0).rows(), my_image(0).cols()); 
 
   /* Modify image value */
-  my_image(1) *= 2.0; 
+  my_image(1).array() = my_image(1).array() + 0.4; 
 
   /* Change size */
   //for(int i=0; i < 3; i++)

@@ -11,21 +11,20 @@ int main(){
   ColorSpace color_space; 
 
   /* test yuv space */
-  ImageType_3 in_yuv, in_rgb; 
-  color_space.rgb2yuv(my_image, &in_yuv); 
-  in_yuv(0) *= 0.7; 
-  color_space.yuv2rgb(in_yuv, &in_rgb); 
-  imwrite(in_yuv, "yuv.png");
-  imwrite(in_rgb, "rgb.png");
+  ImageType_3 rgb_2_yuv, yuv_2_rgb;  
+  color_space.rgb2yuv(my_image, &rgb_2_yuv); 
+  //in_yuv(0) *= 0.7; 
+  color_space.yuv2rgb(rgb_2_yuv, &yuv_2_rgb); 
+  imwrite(rgb_2_yuv, "rgb_2_yuv.png");
+  imwrite(yuv_2_rgb, "yuv_2_rgb.png");
 
   /* test lab space */
   ImageType_3 rgb_2_lab, lab_2_rgb; 
   color_space.rgb2lab(my_image, &rgb_2_lab); 
-  //color_space.yuv2rgb(in_yuv, &in_rgb); 
   imwrite(rgb_2_lab, "rgb_2_lab.png");
-  //imwrite(in_rgb, "yuv_2_rgb.png");
-
-
+  rgb_2_lab(0) = rgb_2_lab(0) * 0.8; 
+  color_space.lab2rgb(rgb_2_lab, &lab_2_rgb); 
+  imwrite(lab_2_rgb, "lab_2_rgb.png");
 
   return 0;
 }
