@@ -1,1 +1,4 @@
 - Build up testing frame work with gTest
+- CMake
+- Image class
+- namespace
