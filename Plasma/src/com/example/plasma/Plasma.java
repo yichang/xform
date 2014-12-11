@@ -44,9 +44,6 @@ public class Plasma extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        //Display display = getWindowManager().getDefaultDisplay().;
-        //setContentView(new PlasmaView(this, display.getWidth(), display.getHeight()));
-        //setContentView(new PlasmaView(this, 100, 100));
         setContentView(R.layout.activity_main);
         imageview=(ImageView)findViewById(R.id.view1);
         input = getBitmapFromAsset(this, "yichang.png");
@@ -75,17 +72,23 @@ public class Plasma extends Activity
     /* load our native library */
     static {
 
-        System.loadLibrary("plasma");
+        //System.loadLibrary("plasma");
+    	System.loadLibrary("filter");
+    	//System.loadLibrary("ndk1");
     }
 
     /* implementend by libplasma.so */
-    private static native void renderPlasma(Bitmap  bitmap, long time_ms);
+    //private static native void renderPlasma(Bitmap  bitmap, long time_ms);
+    private  native void boxblur(String  blah);
+    //private native void helloLog(String logThis);
     
     public void sendMessage(View view) {
         // Do something in response to button
     	System.out.println("theButtonIsPressed");
     	gradient();
     	//renderPlasma(output, System.currentTimeMillis() - mStartTime);
+    	boxblur("blah");
+    	//helloLog("This will log to LogCat via the native call.");
     	imageview.setImageBitmap(output);
     	input = output;   	
     }
