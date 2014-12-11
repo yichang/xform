@@ -7,8 +7,9 @@ include $(CLEAR_VARS)
 
 ROOT = ../../
 NDK = ../../../android-ndk-r10d/
+
 LOCAL_MODULE    := filter
-LOCAL_SRC_FILES := boxblur.cpp
+LOCAL_SRC_FILES := boxblur.cpp $(ROOT)src/filter.cpp
 ARCH = armeabi-v7a
 LOCAL_C_INCLUDES += $(ROOT)
 LOCAL_C_INCLUDES += $(ROOT)/third_party/eigen-eigen-1306d75b4a21/
@@ -18,6 +19,6 @@ LOCAL_C_INCLUDES += $(NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ARCH)/includ
 #LOCAL_MODULE    := ndk1
 #LOCAL_SRC_FILES := naive.c
 
-LOCAL_LDLIBS    := -lm -llog -ljnigraphics
+LOCAL_LDLIBS    := -lm -llog -ljnigraphics 
 
 include $(BUILD_SHARED_LIBRARY)

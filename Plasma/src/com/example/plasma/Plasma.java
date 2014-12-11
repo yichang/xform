@@ -47,10 +47,9 @@ public class Plasma extends Activity
         setContentView(R.layout.activity_main);
         imageview=(ImageView)findViewById(R.id.view1);
         input = getBitmapFromAsset(this, "yichang.png");
-        output = Bitmap.createBitmap(input.getWidth(), input.getHeight(), Bitmap.Config.RGB_565);
+        output = Bitmap.createBitmap(input.getWidth(), input.getHeight(), Bitmap.Config.ARGB_8888);
         imageview.setImageBitmap(input);
         mStartTime = System.currentTimeMillis();
-
     }
     
     /* Helpers*/
@@ -79,15 +78,16 @@ public class Plasma extends Activity
 
     /* implementend by libplasma.so */
     //private static native void renderPlasma(Bitmap  bitmap, long time_ms);
-    private  native void boxblur(String  blah);
+    private  native void boxblur(Bitmap bitmap);
     //private native void helloLog(String logThis);
     
     public void sendMessage(View view) {
         // Do something in response to button
     	System.out.println("theButtonIsPressed");
-    	gradient();
+    	//gradient();
     	//renderPlasma(output, System.currentTimeMillis() - mStartTime);
-    	boxblur("blah");
+    	output = input; 
+    	boxblur(output);
     	//helloLog("This will log to LogCat via the native call.");
     	imageview.setImageBitmap(output);
     	input = output;   	

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "filter.h"
 
 void Filter::box(const ImageType_3& im_in, int b_width, ImageType_3* im_out)const{
