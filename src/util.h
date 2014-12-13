@@ -9,6 +9,7 @@ using namespace std;
 typedef double PixelType;
 typedef Eigen::Matrix<PixelType, Eigen::Dynamic, Eigen::Dynamic> ImageType_1;
 typedef Eigen::Matrix<ImageType_1, 3, 1> ImageType_3; 
+typedef Eigen::Matrix<ImageType_1, Eigen::Dynamic, 1> ImageType_N; 
 typedef Eigen::Matrix<PixelType, 3, 3> ColorMatType;  
 
 // Image in range of [0,1]

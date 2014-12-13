@@ -4,5 +4,9 @@ obj/
 third_party/gtest-1.7.0/
 third_party/eigen-eigen-1306d75b4a21/
 third_party/png++-0.2.5/
+make/*.o
+make/*.a
+make/*.png
+make/
 .metadata/
 .DS_Store
