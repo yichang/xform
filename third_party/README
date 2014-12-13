@@ -2,3 +2,4 @@ Required third-party libs;
 * libpng
 * png++ (might have to add "#include <string>" in error.h if using png++--2.05)
 * Eigen 
+* gTest framework 
