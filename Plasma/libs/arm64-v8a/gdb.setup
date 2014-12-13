@@ -1,3 +1,0 @@
-set solib-search-path ./obj/local/arm64-v8a
-source /Users/yichangshih/Development/android-ndk-r10d/prebuilt/common/gdb/common.setup
-directory /Users/yichangshih/Development/android-ndk-r10d/platforms/android-21/arch-arm64/usr/include jni /Users/yichangshih/Development/android-ndk-r10d/sources/cxx-stl/system
