@@ -1,7 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include "color_space.h"
-#include "util/util.h"
+#include "util.h"
 
 ColorSpace::ColorSpace(){
 

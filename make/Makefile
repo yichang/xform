@@ -26,7 +26,7 @@ EIGEN_LIB = eigen-eigen-1306d75b4a21
 PNG_LIB = png++-0.2.5
 
 CPPFLAGS += -isystem $(GTEST_DIR)/include\
-	    -I./../ \
+	    -I./../src \
 	    -I./../third_party/$(EIGEN_LIB)/\
 	    -I./../third_party/$(PNG_LIB)/\
 	    -lpng15
@@ -82,9 +82,9 @@ gtest_main.a : gtest-all.o gtest_main.o
 sample1.o : $(USER_DIR)/sample1.cc $(USER_DIR)/sample1.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1.cc
 
-util.o : ../util/util.cpp \
+util.o : ../src/util.cpp \
         $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../util/util.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/util.cpp
 
 color_space.o : ../src/color_space.cpp \
         $(GTEST_HEADERS)

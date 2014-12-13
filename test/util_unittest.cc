@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "util/util.h"
+#include "util.h"
 
 TEST(UtilTest, Read) {
   string filename = "../images/yichang.png";

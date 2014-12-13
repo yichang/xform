@@ -1,5 +1,5 @@
 #include <Eigen/Dense>
-#include "util/util.h"
+#include "util.h"
 
 #ifndef SRC_COLOR_SPACE_H
 #define SRC_COLOR_SPACE_H
