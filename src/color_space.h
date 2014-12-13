@@ -4,6 +4,8 @@
 #ifndef SRC_COLOR_SPACE_H
 #define SRC_COLOR_SPACE_H
 
+namespace xform{
+
 class ColorSpace{
  public:
   ColorSpace();
@@ -28,5 +30,7 @@ class ColorSpace{
   PixelType thres_1; 
   PixelType thres_2; 
 };
+
+} // namespace xform
 
 #endif //SRC_COLOR_SPACE_H

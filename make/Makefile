@@ -36,7 +36,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = my_unittest util_unittest x_image_unittest
+TESTS = my_unittest util_unittest x_image_unittest color_space_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -86,13 +86,13 @@ util.o : ../src/util.cpp \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/util.cpp
 
-color_space.o : ../src/color_space.cpp \
-        $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/color_space.cpp
-
 x_image.o : ../src/x_image.cpp \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/x_image.cpp
+
+color_space.o : ../src/color_space.cpp \
+        $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/color_space.cpp
 
 # Unit tests
 util_unittest.o : $(USER_DIR)/util_unittest.cc \
@@ -107,6 +107,13 @@ x_image_unittest.o : $(USER_DIR)/x_image_unittest.cc \
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/x_image_unittest.cc
 
 x_image_unittest : x_image_unittest.o x_image.o util.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+color_space_unittest.o : $(USER_DIR)/color_space_unittest.cc \
+                $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/color_space_unittest.cc
+
+color_space_unittest : color_space_unittest.o color_space.o x_image.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
 my_unittest.o : $(USER_DIR)/my_unittest.cc \

@@ -3,6 +3,8 @@
 #include "color_space.h"
 #include "util.h"
 
+using namespace xform;
+
 ColorSpace::ColorSpace(){
 
   rgb_2_yuv <<  0.299,    0.587, 0.144, 
@@ -143,5 +145,4 @@ void ColorSpace::linearMap(const ImageType_3& im_in,
     (*im_out)(i) = buf;
   }
 }
-
 
