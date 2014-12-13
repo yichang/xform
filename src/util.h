@@ -6,6 +6,8 @@
 #include <Eigen/Dense>
 using namespace std; 
 
+namespace xform{
+
 typedef double PixelType;
 typedef Eigen::Matrix<PixelType, Eigen::Dynamic, Eigen::Dynamic> ImageType_1;
 typedef Eigen::Matrix<ImageType_1, 3, 1> ImageType_3; 
@@ -17,5 +19,7 @@ bool imread(const string& filename, ImageType_3* image);
 
 // Input image in range of [0, 1], otherwise truncate the image
 bool imwrite(const ImageType_3& image, const string& filename);
+
+} // namespace xform
 
 #endif //UTIL_UTIL_H 

@@ -2,16 +2,16 @@
 #include "util.h"
 
 TEST(UtilTest, Read) {
-  string filename = "../images/yichang.png";
-  ImageType_3 my_image;  
-  ASSERT_TRUE(imread(filename, &my_image));
+  std::string filename = "../images/yichang.png";
+  xform::ImageType_3 my_image;  
+  ASSERT_TRUE(xform::imread(filename, &my_image));
 }
 
 TEST(UtilTest, Write) {
-  string filename = "../images/yichang.png";
-  ImageType_3 my_image;  
-  imread(filename, &my_image);
+  std::string filename = "../images/yichang.png";
+  xform::ImageType_3 my_image;  
+  xform::imread(filename, &my_image);
   my_image(1).array() = my_image(1).array() + 0.4; 
-  ASSERT_TRUE(imwrite(my_image, "here.png"));
+  ASSERT_TRUE(xform::imwrite(my_image, "here.png"));
 }
 

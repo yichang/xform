@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "x_Image.h" 
 using namespace xform;
 
@@ -15,16 +16,17 @@ XImage::XImage(int num_rows, int num_cols, int num_channels)
 
 // Need to check this carefully
 ImageType_1& XImage::at(int channel){
-  //TODO(yichang): check this->rows() > channel and handle the eeror
+  assert(channel < this->channels());
   return nd_array(channel); 
 }
 
 int XImage::cols() const{
-  //TODO(yichang): check this->rows() > 0 and handle the eeror
+  assert(this->channels() > 0);
   return nd_array(0).cols(); 
 }
 
 int XImage::rows() const{
+  assert(this->channels() > 0);
   return nd_array(0).rows(); 
 }
 
@@ -48,6 +50,7 @@ bool XImage::read(const std::string& filename){
 }
 bool XImage::write(const std::string& filename){
   //TODO: change this
+  assert(this->channels() == 3);
   ImageType_3 foo; 
   for(int i=0; i < 3; i++)
     foo(i) = this->at(i);

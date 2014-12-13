@@ -2,6 +2,7 @@
 #include "util.h"
 #include "png.hpp"
 
+namespace xform{
 /* Implment through png++ */
 bool imread(const string& filename, ImageType_3* image){
 
@@ -44,3 +45,4 @@ bool imwrite(const ImageType_3& image, const string& filename){
  buf_image.write(filename);
  return true;
 }
+}// namespace xform
