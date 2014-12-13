@@ -36,7 +36,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = my_unittest
+TESTS = my_unittest util_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -48,7 +48,7 @@ GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
 all : $(TESTS)
 
 clean :
-	rm -f $(TESTS) gtest.a gtest_main.a *.o
+	rm -f $(TESTS) gtest.a gtest_main.a *.o *.png
 
 # Builds gtest.a and gtest_main.a.
 
@@ -78,12 +78,26 @@ gtest_main.a : gtest-all.o gtest_main.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
+# Libraries
 sample1.o : $(USER_DIR)/sample1.cc $(USER_DIR)/sample1.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1.cc
 
 util.o : ../util/util.cpp \
-                $(GTEST_HEADERS)
+        $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../util/util.cpp
+
+color_space.o : ../src/color_space.cpp \
+        $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/color_space.cpp
+
+
+# Unit tests
+util_unittest.o : $(USER_DIR)/util_unittest.cc \
+                $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/util_unittest.cc
+
+util_unittest : util_unittest.o util.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
 my_unittest.o : $(USER_DIR)/my_unittest.cc \
                 $(GTEST_HEADERS)

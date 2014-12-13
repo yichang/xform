@@ -3,7 +3,7 @@
 #include "png.hpp"
 
 /* Implment through png++ */
-void imread(const string& filename, ImageType_3* image){
+bool imread(const string& filename, ImageType_3* image){
 
   //TODO(yichang): replace reference with pointer
   // TODO(yichang): error handling when sizes are not equal.
@@ -24,9 +24,10 @@ void imread(const string& filename, ImageType_3* image){
       (*image)(2)(i,j) = static_cast<PixelType>(pix.blue)/255.0;
     }
   }
+  return true;
 }
 
-void imwrite(const ImageType_3& image, const string& filename){
+bool imwrite(const ImageType_3& image, const string& filename){
   int height = image(0).rows();
   int width = image(0).cols();
   int r, g, b;
@@ -41,4 +42,5 @@ void imwrite(const ImageType_3& image, const string& filename){
     }
   }
  buf_image.write(filename);
+ return true;
 }

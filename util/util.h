@@ -12,9 +12,9 @@ typedef Eigen::Matrix<ImageType_1, 3, 1> ImageType_3;
 typedef Eigen::Matrix<PixelType, 3, 3> ColorMatType;  
 
 // Image in range of [0,1]
-void imread(const string& filename, ImageType_3* image);
+bool imread(const string& filename, ImageType_3* image);
 
 // Input image in range of [0, 1], otherwise truncate the image
-void imwrite(const ImageType_3& image, const string& filename);
+bool imwrite(const ImageType_3& image, const string& filename);
 
 #endif //UTIL_UTIL_H 
