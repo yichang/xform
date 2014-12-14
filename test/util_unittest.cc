@@ -1,13 +1,13 @@
 #include "gtest/gtest.h"
 #include "util.h"
 
-TEST(UtilTest, Read) {
+TEST(UtilTest, read) {
   std::string filename = "../images/yichang.png";
   xform::ImageType_3 my_image;  
   ASSERT_TRUE(xform::imread(filename, &my_image));
 }
 
-TEST(UtilTest, Write) {
+TEST(UtilTest, write) {
   std::string filename = "../images/yichang.png";
   xform::ImageType_3 my_image;  
   xform::imread(filename, &my_image);

@@ -1,22 +1,27 @@
 #include "filter.h"
+#include "x_image.h"
 
-void Filter::box(const ImageType_3& im_in, int b_width, ImageType_3* im_out)const{
-  // Width need to be odd number. 
-  // TODO(yichang): Error handling. Use gTest instead of std::Exception
-  for(int i=0; i < im_in.rows(); i++){
-    box(im_in(i), b_width, &((*im_out)(i)));
+using namespace xform;
+
+void Filter::box(const XImage& im_in, int b_width, XImage* im_out)const{
+
+  assert((b_width%2)==1);
+  (*im_out) = XImage(im_in.channels());
+  for(int i=0; i < im_in.channels(); i++){
+    box(im_in.at(i), b_width, &(im_out->at(i)));
   }
+
+  /* Normalization */
+  ImageType_1 z(im_in.rows(), im_in.cols()), nn;
+  z.setOnes();
+  recursiveBoxFilter(z, b_width, &nn);
+  for(int i=0; i < im_in.channels(); i++)
+    im_out->at(i).array() = im_out->at(i).array() / nn.array();
 }
 
 void Filter::box(const ImageType_1& im_in, int b_width, 
                                   ImageType_1* im_out) const{
   recursiveBoxFilter(im_in, b_width, im_out);
-
-  /* Normalization */ 
-  ImageType_1 z(im_in.rows(), im_in.cols()), nn;
-  z.setOnes();
-  recursiveBoxFilter(z, b_width, &nn);
-  im_out->array() = im_out->array()/nn.array(); 
 }
 
 void Filter::recursiveBoxFilter(const ImageType_1& im_in, int b_width, 
