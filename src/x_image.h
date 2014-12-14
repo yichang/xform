@@ -12,6 +12,7 @@ class XImage{
   XImage(int num_channels);
   XImage(int num_rows, int num_cols, int num_channels);
   ImageType_1& at(int channel);
+  const ImageType_1& at(int channel) const;
   int cols() const; 
   int rows() const;
   int channels() const;

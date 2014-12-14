@@ -20,6 +20,11 @@ ImageType_1& XImage::at(int channel){
   return nd_array(channel); 
 }
 
+const ImageType_1& XImage::at(int channel) const{
+  assert(channel < this->channels());
+  return nd_array(channel); 
+}
+
 int XImage::cols() const{
   assert(this->channels() > 0);
   return nd_array(0).cols(); 

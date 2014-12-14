@@ -36,7 +36,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = my_unittest util_unittest x_image_unittest color_space_unittest
+TESTS =  util_unittest x_image_unittest color_space_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
