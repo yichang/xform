@@ -35,9 +35,9 @@ bool imwrite(const ImageType_3& image, const string& filename){
   png::image<png::rgb_pixel> buf_image(width, height);
   for (size_t y = 0; y < height; ++y){
     for (size_t x = 0; x < width; ++x){
-      r = 255.0f * std::max(std::min(image(0)(y,x), 1.0), 0.0);
-      g = 255.0f * std::max(std::min(image(1)(y,x), 1.0), 0.0);
-      b = 255.0f * std::max(std::min(image(2)(y,x), 1.0), 0.0);
+      r = 255.0f * std::max(std::min(image(0)(y,x), UPPER_BOUND), LOWER_BOUND);
+      g = 255.0f * std::max(std::min(image(1)(y,x), UPPER_BOUND), LOWER_BOUND);
+      b = 255.0f * std::max(std::min(image(2)(y,x), UPPER_BOUND), LOWER_BOUND);
       buf_image[y][x] = png::rgb_pixel(r, g, b);
          // non-checking equivalent of image.set_pixel(x, y, ...);
     }

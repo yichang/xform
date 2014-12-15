@@ -8,11 +8,15 @@ using namespace std;
 
 namespace xform{
 
-typedef double PixelType;
+//typedef double PixelType;
+typedef float PixelType;
 typedef Eigen::Matrix<PixelType, Eigen::Dynamic, Eigen::Dynamic> ImageType_1;
 typedef Eigen::Matrix<ImageType_1, 3, 1> ImageType_3; 
 typedef Eigen::Matrix<ImageType_1, Eigen::Dynamic, 1> ImageType_N; 
 typedef Eigen::Matrix<PixelType, 3, 3> ColorMatType;  
+
+#define UPPER_BOUND 1.0f
+#define LOWER_BOUND 0.0f
 
 // Image in range of [0,1]
 bool imread(const string& filename, ImageType_3* image);

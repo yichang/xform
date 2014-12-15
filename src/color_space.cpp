@@ -122,7 +122,7 @@ void ColorSpace::lab2rgb(const XImage& im_in, XImage* im_out) const{
   for(int k=0; k<im_in.channels(); k++)
     for(int i=0; i <im_in.rows(); i++)
       for(int j=0; j<im_in.cols(); j++)
-        im_out->at(k)(i,j) = std::max(std::min(im_out->at(k)(i,j), 1.0), 0.0);
+        im_out->at(k)(i,j) = std::max(std::min(im_out->at(k)(i,j), UPPER_BOUND), LOWER_BOUND);
 }
 
 double ColorSpace::abMap(PixelType in_val) const{
