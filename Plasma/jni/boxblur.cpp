@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <android/log.h>
 #include <android/bitmap.h>
-#include "util/util.h"
-#include "src/filter.h"
+#include "x_image.h"
+#include "filter.h"
 
 #define DEBUG_TAG "NDK_AndroidNDK1SampleActivity"
 
@@ -40,36 +40,36 @@ void Java_com_example_plasma_Plasma_boxblur(JNIEnv * env, jobject obj, jobject b
 	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "HEIGHT: [%d]",info.height);
 	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "WIDTH: [%d]", info.width);
 
-	ImageType_3 input, output;
-	for(int i=0; i < input.rows(); i++)
-		input(i) = ImageType_1(info.height,info.width);
+        xform::XImage input(info.height, info.width, 3), output;
+	//for(int i=0; i < .rows(); i++)
+	//	input(i) = ImageType_1(info.height,info.width);
 
 	/* Parse */
 	for (int x = info.width - 1; x >= 0; --x){
 	    for (int y = 0; y < info.height; ++y)
 	      {
 	    	uint32_t zz = src[info.width * y + x];
-	    	PixelType b = static_cast<PixelType>((zz%256))/255.0;  zz /= 256;
-	    	PixelType g = static_cast<PixelType>((zz%256))/255.0;  zz /= 256;
-	    	PixelType r = static_cast<PixelType>((zz%256))/255.0;  zz /= 256;
-	    	input(0)(y,x) = r;
-	    	input(1)(y,x) = g;
-	    	input(2)(y,x) = b;
+                xform::PixelType b = static_cast<xform::PixelType>((zz%256))/255.0;  zz /= 256;
+                xform::PixelType g = static_cast<xform::PixelType>((zz%256))/255.0;  zz /= 256;
+                xform::PixelType r = static_cast<xform::PixelType>((zz%256))/255.0;  zz /= 256;
+	    	input.at(0)(y,x) = r;
+	    	input.at(1)(y,x) = g;
+	    	input.at(2)(y,x) = b;
 	    	//__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK:LC: [%d]", (int)(r*255));
 	      }
 	}
 
 	/* Blur */
-	Filter filt;
+        xform::Filter filt;
 	filt.box(input, 33, &output);
 
 	/* Fill */
 	for (int x = info.width - 1; x >= 0; --x){
 	    for (int y = 0; y < info.height; ++y)
 	      {
-	    	int r = static_cast<int>(output(0)(y,x) * 255.0);
-	    	int g = static_cast<int>(output(1)(y,x) * 255.0);
-	    	int b = static_cast<int>(output(2)(y,x) * 255.0);
+	    	int r = static_cast<int>(output.at(0)(y,x) * 255.0);
+	    	int g = static_cast<int>(output.at(1)(y,x) * 255.0);
+	    	int b = static_cast<int>(output.at(2)(y,x) * 255.0);
 	    	src[info.width * y + x] = createPixel(r, g, b, 0xff);
 	      }
 	}

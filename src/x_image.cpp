@@ -44,6 +44,7 @@ bool XImage::setZero(){
     this->at(i).setZero();
 }
 
+#ifndef __ANDROID__
 bool XImage::read(const std::string& filename){
   //TODO: change this
   ImageType_3 foo; 
@@ -62,5 +63,6 @@ bool XImage::write(const std::string& filename){
   imwrite(foo, filename);
   return true;
 }
+#endif
 
 
