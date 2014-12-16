@@ -36,7 +36,8 @@ CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS =  util_unittest x_image_unittest color_space_unittest filter_unittest
+TESTS =  util_unittest x_image_unittest color_space_unittest\
+	 filter_unittest warp_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -98,6 +99,10 @@ filter.o : ../src/filter.cpp \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/filter.cpp
 
+warp.o : ../src/warp.cpp \
+        $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/warp.cpp
+
 # Unit tests
 util_unittest.o : $(USER_DIR)/util_unittest.cc \
                 $(GTEST_HEADERS)
@@ -125,5 +130,12 @@ filter_unittest.o : $(USER_DIR)/filter_unittest.cc \
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/filter_unittest.cc
 
 filter_unittest : filter_unittest.o filter.o x_image.o util.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+warp_unittest.o : $(USER_DIR)/warp_unittest.cc \
+                $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/warp_unittest.cc
+
+warp_unittest : warp_unittest.o warp.o x_image.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 

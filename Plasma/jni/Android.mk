@@ -12,7 +12,8 @@ LOCAL_MODULE    := filter
 LOCAL_SRC_FILES := boxblur.cpp\
 		   $(ROOT)src/filter.cpp\
 		   $(ROOT)src/x_image.cpp\
-APP_CPPFLAGS += -std=c++11
+LOCAL_CFLAGS += -std=c++11 
+LOCAL_CFLAGS += -Ofast
 ARCH = armeabi-v7a
 LOCAL_C_INCLUDES += $(ROOT)/src/
 LOCAL_C_INCLUDES += $(ROOT)/third_party/eigen-eigen-1306d75b4a21/
