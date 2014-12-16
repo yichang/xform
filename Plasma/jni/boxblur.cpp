@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <android/log.h>
 #include <android/bitmap.h>
-#include "x_image.h"
-#include "filter.h"
+#include "XImage.h"
+#include "Filter.h"
 
 #define DEBUG_TAG "NDK_AndroidNDK1SampleActivity"
 

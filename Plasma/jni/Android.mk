@@ -10,8 +10,8 @@ NDK = ../../../android-ndk-r10d/
 
 LOCAL_MODULE    := filter
 LOCAL_SRC_FILES := boxblur.cpp\
-		   $(ROOT)src/filter.cpp\
-		   $(ROOT)src/x_image.cpp\
+		   $(ROOT)src/Filter.cpp\
+		   $(ROOT)src/XImage.cpp\
 LOCAL_CFLAGS += -std=c++11 
 LOCAL_CFLAGS += -Ofast
 ARCH = armeabi-v7a
