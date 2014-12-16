@@ -15,8 +15,10 @@ typedef Eigen::Matrix<ImageType_1, 3, 1> ImageType_3;
 typedef Eigen::Matrix<ImageType_1, Eigen::Dynamic, 1> ImageType_N; 
 typedef Eigen::Matrix<PixelType, 3, 3> ColorMatType;  
 
-#define UPPER_BOUND 1.0f
-#define LOWER_BOUND 0.0f
+const PixelType PIX_UPPER_BOUND = 1.0f;
+const PixelType PIX_LOWER_BOUND = 0.0f;
+const PixelType PNG_RANGE = 255.0f;
+
 
 // Image in range of [0,1]
 bool imread(const string& filename, ImageType_3* image);

@@ -20,12 +20,16 @@ bool imread(const string& filename, ImageType_3* image){
   for(int i=0; i<height; i++){
     for(int j=0; j<width; j++){
       pix = buf_image.get_pixel(j, i);
-      (*image)(0)(i,j) = static_cast<PixelType>(pix.red)/255.0;
-      (*image)(1)(i,j) = static_cast<PixelType>(pix.green)/255.0;
-      (*image)(2)(i,j) = static_cast<PixelType>(pix.blue)/255.0;
+      (*image)(0)(i,j) = static_cast<PixelType>(pix.red)/PNG_RANGE;
+      (*image)(1)(i,j) = static_cast<PixelType>(pix.green)/PNG_RANGE;
+      (*image)(2)(i,j) = static_cast<PixelType>(pix.blue)/PNG_RANGE;
     }
   }
   return true;
+}
+
+inline PixelType clamp(PixelType val){
+  return std::max(std::min(val, PIX_UPPER_BOUND), PIX_LOWER_BOUND);
 }
 
 bool imwrite(const ImageType_3& image, const string& filename){
@@ -35,9 +39,9 @@ bool imwrite(const ImageType_3& image, const string& filename){
   png::image<png::rgb_pixel> buf_image(width, height);
   for (size_t y = 0; y < height; ++y){
     for (size_t x = 0; x < width; ++x){
-      r = 255.0f * std::max(std::min(image(0)(y,x), UPPER_BOUND), LOWER_BOUND);
-      g = 255.0f * std::max(std::min(image(1)(y,x), UPPER_BOUND), LOWER_BOUND);
-      b = 255.0f * std::max(std::min(image(2)(y,x), UPPER_BOUND), LOWER_BOUND);
+      r = PNG_RANGE * clamp(image(0)(y, x)); 
+      g = PNG_RANGE * clamp(image(1)(y, x)); 
+      b = PNG_RANGE * clamp(image(2)(y, x)); 
       buf_image[y][x] = png::rgb_pixel(r, g, b);
          // non-checking equivalent of image.set_pixel(x, y, ...);
     }
