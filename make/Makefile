@@ -32,7 +32,7 @@ CPPFLAGS += -isystem $(GTEST_DIR)/include\
 	    -lpng15
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11
+CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
