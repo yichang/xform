@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "x_image.h"
+#include "XImage.h"
 
 TEST(XImageTest, init_by_nchannels) {
   xform::XImage image(3); 

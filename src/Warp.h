@@ -1,5 +1,5 @@
 #include <Eigen/Dense>
-#include "x_image.h"
+#include "XImage.h"
 #include "util.h"
 
 #ifndef SRC_WARP_H

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "color_space.h"
+#include "ColorSpace.h"
 #include "util.h"
 
 TEST(ColorSpaceTest, rgb2yuv) {

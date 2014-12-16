@@ -36,8 +36,8 @@ CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS =  util_unittest x_image_unittest color_space_unittest\
-	 filter_unittest warp_unittest
+TESTS =  util_unittest XImage_unittest ColorSpace_unittest\
+	 Filter_unittest Warp_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -87,21 +87,21 @@ util.o : ../src/util.cpp \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/util.cpp
 
-x_image.o : ../src/x_image.cpp \
+XImage.o : ../src/XImage.cpp \
         $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/x_image.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/XImage.cpp
 
-color_space.o : ../src/color_space.cpp \
+ColorSpace.o : ../src/ColorSpace.cpp \
         $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/color_space.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/ColorSpace.cpp
 
-filter.o : ../src/filter.cpp \
+Filter.o : ../src/Filter.cpp \
         $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/filter.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/Filter.cpp
 
-warp.o : ../src/warp.cpp \
+Warp.o : ../src/Warp.cpp \
         $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/warp.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/Warp.cpp
 
 # Unit tests
 util_unittest.o : $(USER_DIR)/util_unittest.cc \
@@ -111,31 +111,31 @@ util_unittest.o : $(USER_DIR)/util_unittest.cc \
 util_unittest : util_unittest.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
-x_image_unittest.o : $(USER_DIR)/x_image_unittest.cc \
+XImage_unittest.o : $(USER_DIR)/XImage_unittest.cc \
                 $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/x_image_unittest.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/XImage_unittest.cc
 
-x_image_unittest : x_image_unittest.o x_image.o util.o gtest_main.a
+XImage_unittest : XImage_unittest.o XImage.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
-color_space_unittest.o : $(USER_DIR)/color_space_unittest.cc \
+ColorSpace_unittest.o : $(USER_DIR)/ColorSpace_unittest.cc \
                 $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/color_space_unittest.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/ColorSpace_unittest.cc
 
-color_space_unittest : color_space_unittest.o color_space.o x_image.o util.o gtest_main.a
+ColorSpace_unittest : ColorSpace_unittest.o ColorSpace.o XImage.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
-filter_unittest.o : $(USER_DIR)/filter_unittest.cc \
+Filter_unittest.o : $(USER_DIR)/Filter_unittest.cc \
                 $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/filter_unittest.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Filter_unittest.cc
 
-filter_unittest : filter_unittest.o filter.o x_image.o util.o gtest_main.a
+Filter_unittest : Filter_unittest.o Filter.o XImage.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
-warp_unittest.o : $(USER_DIR)/warp_unittest.cc \
+Warp_unittest.o : $(USER_DIR)/Warp_unittest.cc \
                 $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/warp_unittest.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Warp_unittest.cc
 
-warp_unittest : warp_unittest.o warp.o x_image.o util.o gtest_main.a
+Warp_unittest : Warp_unittest.o Warp.o XImage.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 

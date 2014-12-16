@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "x_image.h"
-#include "filter.h"
+#include "XImage.h"
+#include "Filter.h"
 
 TEST(FilterTest, box_blur_default){
   std::string filename = "../images/yichang.png";

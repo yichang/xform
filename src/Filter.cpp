@@ -1,6 +1,6 @@
 #include <stdlib.h>
-#include "filter.h"
-#include "x_image.h"
+#include "XImage.h"
+#include "Filter.h"
 
 using namespace xform;
 

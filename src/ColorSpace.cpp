@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <assert.h>
-#include "x_image.h"
-#include "color_space.h"
+#include "XImage.h"
+#include "ColorSpace.h"
 #include "util.h"
 
 using namespace xform;

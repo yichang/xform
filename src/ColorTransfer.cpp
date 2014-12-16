@@ -1,7 +1,7 @@
 #include <algorithm>
-#include "color_space.h"
+#include "ColorSpace.h"
+#include "ColorTransfer.h"
 #include "util.h"
-#include "color_space.h"
 
 using namespace xform; 
 

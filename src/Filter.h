@@ -1,5 +1,5 @@
 #include <Eigen/Dense>
-#include "x_image.h"
+#include "XImage.h"
 
 #ifndef SRC_FILTER_H
 #define SRC_FILTER_H

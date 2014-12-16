@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <math.h>
-#include "x_image.h"
-#include "warp.h"
+#include "XImage.h"
+#include "Warp.h"
 
 using namespace xform; 
 

@@ -1,4 +1,4 @@
-#include "pyramid.h"
+#include "Pyramid.h"
 
 using namespace xform; 
 

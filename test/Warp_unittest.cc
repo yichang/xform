@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "x_image.h"
-#include "warp.h"
+#include "XImage.h"
+#include "Warp.h"
 
 TEST(WarpTest, resize_05){
   std::string filename = "../images/yichang.png";

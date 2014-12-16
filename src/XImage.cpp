@@ -1,5 +1,5 @@
 #include <assert.h>
-#include "x_Image.h" 
+#include "XImage.h" 
 using namespace xform;
 
 XImage::XImage(int num_channels){
