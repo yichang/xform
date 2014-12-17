@@ -8,14 +8,16 @@ namespace xform{
 
 class Pyramid{
  public:
+
   enum FilterType{
     LAPLACIAN,
     GAUSSIAN,
-  }
-  Pyramid(){};
-  Pyramid(const int num_levels);
+  };
+
+  Pyramid(const FilterType filter_type);
+  Pyramid(const int num_levels, const FilterType filter_type);
   Pyramid(const ImageType_1& im_in, const int num_levels, 
-          FilterType filter_type);
+          const FilterType filter_type); 
 
   // Modifers
   ImageType_1& at(int level);
@@ -29,9 +31,9 @@ class Pyramid{
 
   int levels() const;
   bool setZero();
-  bool write(const std::string& filename);
+  bool write(const std::string& prefix);
  private:
-  FilterType filter_type;
+  const FilterType filter_type;
   ImageType_N nd_array; 
 };
 

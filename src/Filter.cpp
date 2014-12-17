@@ -32,14 +32,20 @@ void Filter::box_iteration(const XImage& im_in, const int b_width,
   assert(b_width < std::min(im_in.rows(), im_in.cols()));
 
   (*im_out) = XImage(im_in.channels());
-  for(int i=0; i < im_in.channels(); i++){
-    ImageType_1 in = im_in.at(i), out; 
-    for(int j = 0; j < n_iter; j++){
-      box(in, b_width, REPLICATE, &out);
-      in = out/(b_width * b_width); 
-    }
-    im_out->at(i) = in; 
+  for(int i=0; i < im_in.channels(); i++)
+    box_iteration(im_in.at(i),b_width, n_iter, &(im_out->at(i))); 
+}
+void Filter::box_iteration(const ImageType_1& im_in, const int b_width, 
+                     const int n_iter, ImageType_1* im_out) const{
+  assert((b_width%2)==1);
+  assert(b_width < std::min(im_in.rows(), im_in.cols()));
+
+  ImageType_1 in = im_in, out; 
+  for(int j = 0; j < n_iter; j++){
+    box(in, b_width, SYMMETRIC, &out);
+    in = out/(b_width * b_width); 
   }
+  (*im_out) = in; 
 }
 void Filter::box(const XImage& im_in, const int b_width, 
                  const BoundaryType boundary_type, XImage* im_out)const{

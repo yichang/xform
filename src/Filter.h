@@ -28,6 +28,8 @@ class Filter{
   void box(const XImage& im_in, const int b_width, XImage* im_out) const;
   void box_iteration(const XImage& im_in, const int b_width, 
                      const int n_iter, XImage* im_out) const;
+  void box_iteration(const ImageType_1& im_in, const int b_width, 
+                     const int n_iter, ImageType_1* im_out) const;
   void box(const XImage& im_in, const int b_width, 
            const BoundaryType boundary_type, XImage* im_out) const;
   void box(const ImageType_1& im_in, const int b_width, 

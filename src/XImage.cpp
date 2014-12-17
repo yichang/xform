@@ -64,5 +64,3 @@ bool XImage::write(const std::string& filename){
   return true;
 }
 #endif
-
-

@@ -34,20 +34,20 @@ void Warp::imresize(const ImageType_1& im_in, const int new_h,
   (*im_out) = ImageType_1(new_h, new_w);
 
   const double x_scale = (static_cast<double>(new_w)-1.0) / 
-                         (static_cast<double>(im_in.cols())-1.0);
+                         (static_cast<double>(im_in.cols())-2.0);
   const double y_scale = (static_cast<double>(new_h)-1.0) / 
-                         (static_cast<double>(im_in.rows())-1.0);
+                         (static_cast<double>(im_in.rows())-2.0);
 
   double l, r, u, b, x, y; 
   if  (interp_type == BILINEAR)
     for(double i=0; i < (double)new_h; i++){
       y = i / y_scale; 
       u = floor(y);  
-      b = std::min(u + 1, (double)(im_in.rows()-1)); 
+      b = u + 1; 
       for(double j=0; j < (double)new_w; j++){
         x = j / x_scale; 
         l = floor(x);  
-        r = std::min(l + 1, (double)(im_in.cols()-1));
+        r = l + 1; 
         (*im_out)(i, j) = (y - u) * (x - l) * im_in(b, r) +  
                           (y - u) * (r - x) * im_in(b, l) +  
                           (b - y) * (x - l) * im_in(u, r) +  
@@ -62,7 +62,7 @@ void Warp::imresize(const ImageType_1& im_in, const int new_h,
         (*im_out)(i,j) = im_in(y, x);
       }}
   }else{ // BICUBIC
-    //TODO(yichang): bicubic 
+    //TODO(yichang): bicubic interpolation 
   }
 }
 

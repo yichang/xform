@@ -103,6 +103,10 @@ Warp.o : ../src/Warp.cpp \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/Warp.cpp
 
+Pyramid.o : ../src/Pyramid.cpp \
+        $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/Pyramid.cpp
+
 # Unit tests
 util_unittest.o : $(USER_DIR)/util_unittest.cc \
                 $(GTEST_HEADERS)
@@ -137,5 +141,12 @@ Warp_unittest.o : $(USER_DIR)/Warp_unittest.cc \
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Warp_unittest.cc
 
 Warp_unittest : Warp_unittest.o Warp.o XImage.o util.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+Pyramid_unittest.o : $(USER_DIR)/Pyramid_unittest.cc \
+                $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Pyramid_unittest.cc
+
+Pyramid_unittest : Pyramid_unittest.o Pyramid.o Warp.o XImage.o Filter.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
