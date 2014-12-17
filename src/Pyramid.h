@@ -10,7 +10,7 @@ class Pyramid{
  public:
   enum FilterType{
     LAPLACIAN,
-    
+    GAUSSIAN,
   }
   Pyramid(){};
   Pyramid(const int num_levels);

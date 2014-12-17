@@ -4,7 +4,24 @@
 
 using namespace xform;
 
+// Separable filter
 
+void Filter::sep_kernel(const XImage& im_in, const KernelType_1D& kernel, 
+    const BoundaryType boundary_type, XImage* im_out) const{
+
+  const int num_channels = im_in.channels(); 
+  assert(num_channels > 0);
+  (*im_out) = XImage(num_channels);
+  for(int i=0; i < num_channels; i++)
+    sep_kernel(im_in.at(i), kernel, boundary_type, &(im_out->at(i)));
+}
+void Filter::sep_kernel(const ImageType_1& im_in, const KernelType_1D& kernel, 
+    const BoundaryType boundary_type, ImageType_1* im_out) const{ 
+  //TODO(yichang): two pass separable filter
+}
+
+
+// Box filter using recursive implementation 
 void Filter::box(const XImage& im_in, const int b_width, XImage* im_out)const{
   box(im_in, b_width, SYMMETRIC, im_out);
 }

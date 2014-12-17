@@ -17,6 +17,14 @@ class Filter{
         ZERO_PAD}; 
 
   Filter(){};
+
+  // Filter by separable kernel in two pass
+  void sep_kernel(const XImage& im_in, const KernelType_1D& kernel, 
+        const BoundaryType boundary_type, XImage* im_out) const; 
+  void sep_kernel(const ImageType_1& im_in, const KernelType_1D& kernel, 
+        const BoundaryType boundary_type, ImageType_1* im_out) const;     
+
+  //  Box filters
   void box(const XImage& im_in, const int b_width, XImage* im_out) const;
   void box_iteration(const XImage& im_in, const int b_width, 
                      const int n_iter, XImage* im_out) const;
