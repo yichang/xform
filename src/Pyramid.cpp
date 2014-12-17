@@ -36,13 +36,27 @@ void Pyramid::construct(const ImageType_1& im_in, const int num_levels){
     if (filter_type == LAPLACIAN) {
       ImageType_1 recon; 
       warp.imresize(next_, blur.rows(), blur.cols(), Warp::BILINEAR, &recon); 
-      this->at(i) = recon - current; 
+      this->at(i) =  current - recon; 
     } else { // GAUSSIAN
       this->at(i) = current; 
     }
     current = next_; 
   }
   this->at(this->levels()-1) = current; 
+}
+void Pyramid::collapse(ImageType_1* im_out) const{ 
+  assert(filter_type == LAPLACIAN);
+
+  Warp warp;
+  ImageType_1 current = this->at(this->levels()-1); 
+  for(int i=this->levels()-1; i > 0; i--){ 
+    ImageType_1 next_;   
+    const int next_height = this->at(i-1).rows(); 
+    const int next_width  = this->at(i-1).cols();
+    warp.imresize(current, next_height, next_width, Warp::BILINEAR, &next_);
+    current = next_ + this->at(i-1); 
+  }
+  (*im_out) = current;
 }
 
 ImageType_1& Pyramid::at(int level){
