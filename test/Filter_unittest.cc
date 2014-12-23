@@ -1,6 +1,77 @@
 #include "gtest/gtest.h"
 #include "XImage.h"
 #include "Filter.h"
+#include "util.h"
+
+TEST(FilterTest, horizontal_gradient){
+  std::string filename = "../images/yichang.png";
+  xform::XImage my_image, out; 
+  my_image.read(filename); 
+  xform::Filter filt; 
+  xform::KernelType_2D kernel(1,2);
+  kernel(0,0) =   1;
+  kernel(0,1) =  -1;
+  filt.convolve(my_image, kernel, xform::Filter::REPLICATE, &out);
+  for(int i=0; i < my_image.channels(); i++)
+    out.at(i).array() += 0.5;
+  out.write("FilterTest_gradient_h.png");
+}
+TEST(FilterTest, horizontal_laplacian){
+  std::string filename = "../images/yichang.png";
+  xform::XImage my_image, out; 
+  my_image.read(filename); 
+  xform::Filter filt; 
+  xform::KernelType_2D kernel(1,3);
+  kernel(0,0) =  -1;
+  kernel(0,1) =  2;
+  kernel(0,2) =  -1;
+  filt.convolve(my_image, kernel, xform::Filter::REPLICATE, &out);
+  for(int i=0; i < my_image.channels(); i++)
+    out.at(i).array() += 0.5;
+  out.write("FilterTest_laplacian_h.png");
+}
+TEST(FilterTest, vertical_gradient){
+  std::string filename = "../images/yichang.png";
+  xform::XImage my_image, out; 
+  my_image.read(filename); 
+  xform::Filter filt; 
+  xform::KernelType_2D kernel(2,1);
+  kernel(0,0) =   1;
+  kernel(1,0) =  -1;
+  filt.convolve(my_image, kernel, xform::Filter::REPLICATE, &out);
+  for(int i=0; i < my_image.channels(); i++)
+    out.at(i).array() += 0.5;
+  out.write("FilterTest_gradient_v.png");
+}
+TEST(FilterTest, vertical_laplacian){
+  std::string filename = "../images/yichang.png";
+  xform::XImage my_image, out; 
+  my_image.read(filename); 
+  xform::Filter filt; 
+  xform::KernelType_2D kernel(3,1);
+  kernel(0,0) =  -1;
+  kernel(1,0) =  2;
+  kernel(2,0) =  -1;
+  filt.convolve(my_image, kernel, xform::Filter::REPLICATE, &out);
+  for(int i=0; i < my_image.channels(); i++)
+    out.at(i).array() += 0.5;
+  out.write("FilterTest_laplacian_v.png");
+}
+TEST(FilterTest, 2D_laplacian){
+  std::string filename = "../images/yichang.png";
+  xform::XImage my_image, out; 
+  my_image.read(filename); 
+  xform::Filter filt; 
+  xform::KernelType_2D kernel(3,1);
+  kernel(0,0) =  -1;
+  kernel(1,0) =  2;
+  kernel(2,0) =  -1;
+  filt.sep_kernel(my_image, kernel, xform::Filter::REPLICATE, &out);
+  for(int i=0; i < my_image.channels(); i++)
+    out.at(i).array() += 0.5;
+  out.write("FilterTest_laplacian_2d.png");
+}
+
 
 TEST(FilterTest, box_blur_sum_area_tab){
   std::string filename = "../images/yichang.png";

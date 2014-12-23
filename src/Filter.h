@@ -17,6 +17,13 @@ class Filter{
 
   Filter(){};
 
+  // Generic convolution
+  void convolve(const XImage& im_in, const KernelType_2D& kernel,
+        const BoundaryType boundary_type, XImage* im_out) const; 
+
+  void convolve(const ImageType_1& im_in, const KernelType_2D& kernel,
+        const BoundaryType boundary_type, ImageType_1* im_out) const; 
+
   // Filter by separable kernel in two pass
   void sep_kernel(const XImage& im_in, const KernelType_1D& kernel, 
         const BoundaryType boundary_type, XImage* im_out) const; 

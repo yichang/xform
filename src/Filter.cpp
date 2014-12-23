@@ -4,8 +4,59 @@
 
 using namespace xform;
 
-// Separable filter
+// Generic convolution
+void Filter::convolve(const XImage& im_in, const KernelType_2D& kernel, 
+    const BoundaryType boundary_type, XImage* im_out) const{
 
+  const int num_channels = im_in.channels(); 
+  assert(num_channels > 0);
+  (*im_out) = XImage(num_channels);
+  for(int i=0; i < num_channels; i++)
+    convolve(im_in.at(i), kernel, boundary_type, &(im_out->at(i)));
+}
+
+void Filter::convolve(const ImageType_1& im_in, const KernelType_2D& kernel, 
+    const BoundaryType boundary_type, ImageType_1* im_out) const{ 
+
+  assert(boundary_type == REPLICATE);
+
+  // Only handle one-dimensional case now 
+  assert((kernel.rows() == 1) || (kernel.cols() == 1));
+  
+  const int height = im_in.rows();
+  const int width = im_in.cols();
+
+  if (kernel.rows() == 1){ // Horizontal filtering 
+    const int kernel_size = kernel.cols(); 
+    // Only take two taps or odd size kernel
+    assert((kernel_size%2 == 1)||(kernel_size==2));
+    const int half_kernel_size = (kernel_size-1)/2; 
+
+    *im_out = ImageType_1(height, width);
+    im_out->setZero();
+    for(int j = 0; j < width; j++)
+      for(int k=0; k < kernel_size; k++)
+        im_out->col(j) += kernel(k) * im_in.col(
+            reflect(j + k - half_kernel_size, width, boundary_type));
+  } else if (kernel.cols() == 1) { // Vertical filtering 
+    const int kernel_size = kernel.rows(); 
+    assert((kernel_size%2 == 1)||(kernel_size==2));
+    const int half_kernel_size = (kernel_size-1)/2; 
+
+    *im_out = ImageType_1(height, width);
+    im_out->setZero();
+    for(int i = 0; i < height; i++)
+      for(int k = 0; k < kernel_size; k++)
+        im_out->row(i) += kernel(k, 0) * im_in.row(
+            reflect(i + k - half_kernel_size, height, boundary_type));
+  }else {
+    //TODO(yichang): generic 2D filtering.:
+  }
+}
+
+
+
+// Separable filter
 void Filter::sep_kernel(const XImage& im_in, const KernelType_1D& kernel, 
     const BoundaryType boundary_type, XImage* im_out) const{
 
@@ -17,7 +68,12 @@ void Filter::sep_kernel(const XImage& im_in, const KernelType_1D& kernel,
 }
 void Filter::sep_kernel(const ImageType_1& im_in, const KernelType_1D& kernel, 
     const BoundaryType boundary_type, ImageType_1* im_out) const{ 
-  //TODO(yichang): two pass separable filter
+  assert(boundary_type == REPLICATE);
+
+  ImageType_1 buf;
+  convolve(im_in, kernel, boundary_type, &buf);
+  convolve(buf, kernel.transpose(), boundary_type, im_out);
+
 }
 
 
