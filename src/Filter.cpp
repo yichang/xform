@@ -172,3 +172,67 @@ void Filter::recursiveBoxFilterZeroPad(const ImageType_1& im_in,
 
   *im_out = v_buf.block(half_width, half_width, height, width); 
 }
+void Filter::boxBySumArea(const XImage& im_in, const int b_width, 
+        const BoundaryType boundary_type, XImage* im_out) const{
+  int num_channels = im_in.channels(); 
+  *im_out = XImage(num_channels); 
+  for(int i=0; i < num_channels; i++)
+    boxBySumArea(im_in.at(i), b_width, boundary_type, &(im_out->at(i)));
+}
+
+void Filter::boxBySumArea(const ImageType_1& im_in, const int b_width, 
+        const BoundaryType boundary_type, ImageType_1* im_out) const{   
+  const int half_width = (b_width-1)/2;
+  const int height = im_in.rows();
+  const int width = im_in.cols();
+  ImageType_1 buf(height + b_width - 1, width + b_width - 1);
+  buf.setZero();
+  buf.block(half_width, half_width, height, width) = im_in;
+  
+  assert(boundary_type == REPLICATE);
+
+  if (boundary_type == REPLICATE){
+    for(int j = 0; j < half_width; j++)
+      buf.block(half_width, j, height, 1) = im_in.col(0);
+    for(int j = width + half_width - 1; j < width + b_width - 1; j++)
+      buf.block(half_width, j, height, 1) = im_in.col(width-1);
+    for(int i = 0; i < half_width; i++)
+      buf.block(i, half_width, 1, width) = im_in.row(0);
+    for(int i = height + half_width - 1; i < height + b_width - 1; i++)
+      buf.block(i, half_width, 1, width) = im_in.row(height-1);
+
+    // Four corners, top left
+    for(int i=0; i<half_width; i++)
+      for(int j=0; j<half_width; j++)
+        buf(i,j) = im_in(0,0);
+
+    // Bottom left 
+    for(int i = half_width + height - 1; i< height + b_width - 1; i++)
+      for(int j = 0; j < half_width; j++)
+        buf(i, j) = im_in(height - 1,0);
+
+    // Top right
+    for(int i = 0; i < half_width; i++)
+      for(int j = half_width + width - 1; j < width + b_width - 1; j++)
+        buf(i,j) = im_in(0, width - 1);
+
+    // Bottom right
+    for(int i = half_width + height - 1; i< height + b_width - 1; i++)
+      for(int j = half_width + width - 1; j < width + b_width - 1; j++)
+        buf(i,j) = im_in(height - 1, width - 1);
+  }
+
+  for(int j=1; j < buf.cols(); j++)
+    buf.col(j) = buf.col(j) + buf.col(j-1);
+
+  for(int i=1; i < buf.rows(); i++)
+    buf.row(i) = buf.row(i) + buf.row(i-1);
+
+  *im_out = buf.block(b_width-1, b_width-1, height, width) 
+            + buf.block(0, 0, height, width)
+            - buf.block(b_width-1, 0, height, width)
+            - buf.block(0, b_width-1, height, width);
+
+  *im_out = (*im_out)/static_cast<PixelType>(b_width * b_width); 
+}
+

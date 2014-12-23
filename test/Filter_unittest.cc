@@ -2,6 +2,15 @@
 #include "XImage.h"
 #include "Filter.h"
 
+TEST(FilterTest, box_blur_sum_area_tab){
+  std::string filename = "../images/yichang.png";
+  xform::XImage my_image, blur_out; 
+  my_image.read(filename); 
+  xform::Filter filt; 
+  filt.boxBySumArea(my_image, 33, xform::Filter::REPLICATE, &blur_out);
+  blur_out.write("FilterTest_box_blur_sum_area.png");
+}
+
 TEST(FilterTest, box_blur_default){
   std::string filename = "../images/yichang.png";
   xform::XImage my_image, blur_out; 
