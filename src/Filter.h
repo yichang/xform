@@ -6,7 +6,6 @@
 
 namespace xform{
 
-
 class Filter{
  public:
 
