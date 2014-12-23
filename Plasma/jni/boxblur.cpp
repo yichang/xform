@@ -61,7 +61,7 @@ void Java_com_example_plasma_Plasma_boxblur(JNIEnv * env, jobject obj, jobject b
 
 	/* Blur */
         xform::Filter filt;
-	filt.box(input, 33, &output);
+	filt.box(input, 101, &output);
 
 	/* Fill */
 	for (int x = info.width - 1; x >= 0; --x){

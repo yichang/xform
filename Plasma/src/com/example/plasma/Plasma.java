@@ -46,7 +46,7 @@ public class Plasma extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         imageview=(ImageView)findViewById(R.id.view1);
-        input = getBitmapFromAsset(this, "yichang.png");
+        input = getBitmapFromAsset(this, "6M.png");
         output = Bitmap.createBitmap(input.getWidth(), input.getHeight(), Bitmap.Config.ARGB_8888);
         imageview.setImageBitmap(input);
         mStartTime = System.currentTimeMillis();

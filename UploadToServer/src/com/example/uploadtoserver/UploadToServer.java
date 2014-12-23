@@ -38,7 +38,7 @@ public class UploadToServer extends Activity {
      
     /**********  File Path *************/
     final String localFileName = "local.jpg";
-    final String remoteSrcFileName = "http://people.csail.mit.edu/yichangshih/mywebsite/headshot_YCShih.jpg";
+    final String remoteSrcFileName = "http://people.csail.mit.edu/yichangshih/6M.jpg";
      
     @Override
     public void onCreate(Bundle savedInstanceState) {
