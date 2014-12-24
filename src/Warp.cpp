@@ -40,7 +40,24 @@ void Warp::resize_1d(const VecType &in, const InterpType interp_type,
 
     switch(interp_type){
     case Warp::NEAREST:
+    {
+        for(double i = 0; i < out->rows(); ++i  )
+        {
+            double u = i*inv_scale + 0.5f*(-1.0f+inv_scale);
+            int l = floor(u);
+            int r = l+1;
+            if(u-l > r-u ) {
+                if((r >=0) && (r<length)){
+                    (*out)(i) = in(r);
+                }
+            }else {
+                if((l >=0) && (l<length)){
+                    (*out)(i) = in(l);
+                }
+            }
+        }
         break;
+    }
     case Warp::BILINEAR:
     {
         int kernel_width = 1;
