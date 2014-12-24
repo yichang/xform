@@ -26,8 +26,9 @@ public:
 
 private:
     int height,width,n_chan_i,n_chan_o;
-    int* quantize_mins;
-    int* quantize_maxs;
+    int quantize_levels;
+    PixelType* quantize_mins;
+    PixelType* quantize_maxs;
     XImage dc;
     ImageType_1 ac; 
 };

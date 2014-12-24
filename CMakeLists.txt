@@ -5,7 +5,7 @@ set(CMAKE_BUILD_TYPE debug)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
 # No optimization, gdb-friendly, warnings
-set(CMAKE_CXX_FLAGS "-O0 -Wall -ggdb3 -std=c++11 -stdlib=libstdc++")
+set(CMAKE_CXX_FLAGS "-O0 -Wall -ggdb3 -std=c++11 -stdlib=libc++")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 set(CMAKE_EXPORT_COMPILECOMMANDS ON)
 
@@ -14,6 +14,7 @@ message("Compiler flags: ${CMAKE_CXX_FLAGS}")
 message("Compiler: ${CMAKE_C_COMPILER}")
 
 find_package(PNG REQUIRED)
+find_package(JPEG REQUIRED)
 
 # Boost
 find_package(Boost COMPONENTS 

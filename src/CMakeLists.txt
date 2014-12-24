@@ -21,4 +21,5 @@ add_executable( xform
 
 target_link_libraries(xform
     ${PNG_LIBRARIES}
+    ${JPEG_LIBRARIES}
 )

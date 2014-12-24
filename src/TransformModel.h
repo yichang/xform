@@ -14,8 +14,8 @@ public:
 
     void set_images(const XImage &input, const XImage &output);
 
-    void process();
-    XImage reconstruct();
+    void fit();
+    XImage predict();
 
 private:
     // Input data
@@ -38,6 +38,7 @@ private:
     
     // Pipeline operations
     void fit_recipe();
+    XImage reconstruct();
 
     // Helpers
     void check_fit_io();

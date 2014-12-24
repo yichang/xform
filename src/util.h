@@ -32,6 +32,9 @@ bool imread(const string& filename, ImageType_1* image);
 bool imwrite(const ImageType_3& image, const string& filename);
 bool imwrite(const ImageType_1& image, const string& filename);
 
+bool write_jpeg(const ImageType_3& image, const string& filename, int quality = 75);
+bool read_jpeg(const string& filename, ImageType_3* image);
+
 } // namespace xform
 
 #endif //UTIL_UTIL_H 

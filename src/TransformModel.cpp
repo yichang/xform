@@ -43,8 +43,16 @@ void TransformModel::set_images(const XImage &input, const XImage &output) {
     mdl_w = ceil(1.0f*width/step);
 }
 
-void TransformModel::process() {
+void TransformModel::fit() {
     fit_recipe();
+    recipe->quantize();
+    recipe->write("../output/recipe");
+}
+
+XImage TransformModel::predict() {
+    recipe->dequantize();
+    XImage out = reconstruct();
+    return out;
 }
 
 void TransformModel::check_fit_io(){
