@@ -73,13 +73,51 @@ void Warp::resize_1d(const VecType &in, const InterpType interp_type,
         break;
     }
     case Warp::BICUBIC:
+    {
+        int kernel_width = 4;
+        for(double i = 0; i < out->rows(); ++i  )
+        {
+            double u = i*inv_scale + 0.5f*(-1.0f+inv_scale);
+            int l = floor(u-kernel_width/2);
+            int r = l+kernel_width;
+            double val = 0;
+            double w = 0;
+            double weight = 0;
+            for(int x = l; x<=r; ++x)
+            {
+                if(x<0 || x>=length){
+                    continue;
+                }
+                w = kernel_cubic(u-x,scale);
+                val += w*in(x);
+                weight += w;
+                // printf("%d, %.2f ", x, w);
+            }
+            // printf("\n");
+            if(weight>0)
+            {
+                val/= weight;
+            }
+            (*out)(i) = val;
+        }
         break;
     }
+    } // switch
 }
 
 double Warp::kernel_linear(double x, double scale) const {
     x = fabs(x*scale);
     double f = x<1 ? 1-x : 0;
+    f *= scale;
+    return f;
+}
+
+double Warp::kernel_cubic(double x, double scale) const {
+    x = fabs(x*scale);
+    double x2 = x*x;
+    double x3 = x2*x;
+    double f = x<=1 ? (1.5*x3-2.5*x2+1) : 0;
+    f += (1<x && x <= 2) ? (-0.5*x3+2.5*x2 - 4*x +2) : 0;
     f *= scale;
     return f;
 }

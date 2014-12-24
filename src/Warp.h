@@ -28,6 +28,7 @@ class Warp{
  private:
     void resize_1d(const VecType &in, const InterpType interp_type, double inv_scale, VecType* out) const;
     double kernel_linear(double x, double scale) const;
+    double kernel_cubic(double x, double scale) const;
 
 };
 

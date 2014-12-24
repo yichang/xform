@@ -58,14 +58,14 @@ void TransformModel::fit_recipe() {
     // Lowpass
     XImage lp_input, lp_output;
     Warp warp;
-    warp.imresize(*input, height/wSize, width/wSize,Warp::BILINEAR, &lp_input);
-    warp.imresize(*output, height/wSize, width/wSize,Warp::BILINEAR, &lp_output);
+    warp.imresize(*input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
+    warp.imresize(*output, height/wSize, width/wSize,Warp::BICUBIC, &lp_output);
     printf("lp size %dx%d\n", lp_input.rows(),lp_input.cols());
 
     // Highpass
     XImage hp_input, hp_output;
-    warp.imresize(lp_input, height,width,Warp::BILINEAR, &hp_input);
-    warp.imresize(lp_output, height,width,Warp::BILINEAR, &hp_output);
+    warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input);
+    warp.imresize(lp_output, height,width,Warp::BICUBIC, &hp_output);
     hp_input = *(this->input) - hp_input;
     hp_output = *(this->output) - hp_output;
 
@@ -118,17 +118,17 @@ XImage TransformModel::reconstruct() {
     // Lowpass
     XImage lp_input;
     Warp warp;
-    warp.imresize(*input, height/wSize, width/wSize,Warp::BILINEAR, &lp_input);
+    warp.imresize(*input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
 
     // Highpass
     XImage hp_input;
-    warp.imresize(lp_input, height,width,Warp::BILINEAR, &hp_input);
+    warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input);
     hp_input = *(this->input) - hp_input;
 
     // Result
     XImage reconstructed(height, width, n_chan_o);
     XImage dc;
-    warp.imresize(recipe->get_dc(), height, width, Warp::BILINEAR, &dc);
+    warp.imresize(recipe->get_dc(), height, width, Warp::BICUBIC, &dc);
     
     // Reconstruct each patch
     int progress = 0;
