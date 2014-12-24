@@ -45,7 +45,6 @@ void TransformModel::set_images(const XImage &input, const XImage &output) {
 
 void TransformModel::process() {
     fit_recipe();
-    // recipe->write("../output/recipe");
 }
 
 void TransformModel::check_fit_io(){

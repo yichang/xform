@@ -13,17 +13,12 @@ int main(int argc, char *argv[])
     XImage output; 
     output.read("../data/processed.png");
 
-    // XImage lp_input;
-    // Warp warp;
-    // int wSize = 8;
-    // int height = input.rows();
-    // int width = input.cols();
-    // warp.imresize(input, height/wSize, width/wSize,Warp::BILINEAR, &lp_input);
-    // lp_input.write("../output/lowpass.png");
-
+    // Server side
     TransformModel model;
     model.set_images(input, output);
     model.process();
+
+    // Client side
     XImage reconstructed = model.reconstruct();
     reconstructed.write("../output/reconstructed.png");
     output.write("../output/ref.png");
