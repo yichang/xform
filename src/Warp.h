@@ -24,7 +24,11 @@ class Warp{
         const int new_w, const InterpType interp_type, XImage* im_out) const; 
   void imresize(const ImageType_1& im_in, const int new_h, 
     const int new_w, const InterpType interp_type, ImageType_1* im_out) const; 
+
  private:
+    void resize_1d(const VecType &in, const InterpType interp_type, double inv_scale, VecType* out) const;
+    double kernel_linear(double x, double scale) const;
+    double kernel_cubic(double x, double scale) const;
 
 };
 

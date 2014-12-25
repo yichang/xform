@@ -10,6 +10,8 @@ namespace xform{
 
 //typedef double PixelType;
 typedef float PixelType;
+typedef Eigen::Matrix<PixelType,Eigen::Dynamic, Eigen::Dynamic> MatType;
+typedef Eigen::Matrix<PixelType,Eigen::Dynamic, 1> VecType;
 typedef Eigen::Matrix<PixelType, Eigen::Dynamic, Eigen::Dynamic> ImageType_1;
 typedef Eigen::Matrix<ImageType_1, 3, 1> ImageType_3; 
 typedef Eigen::Matrix<ImageType_1, Eigen::Dynamic, 1> ImageType_N; 
@@ -24,9 +26,14 @@ const PixelType PNG_RANGE = 255.0f;
 
 // Image in range of [0,1]
 bool imread(const string& filename, ImageType_3* image);
+bool imread(const string& filename, ImageType_1* image);
 
 // Input image in range of [0, 1], otherwise truncate the image
 bool imwrite(const ImageType_3& image, const string& filename);
+bool imwrite(const ImageType_1& image, const string& filename);
+
+bool write_jpeg(const ImageType_3& image, const string& filename, int quality = 75);
+bool read_jpeg(const string& filename, ImageType_3* image);
 
 } // namespace xform
 
