@@ -29,7 +29,8 @@ CPPFLAGS += -isystem $(GTEST_DIR)/include\
 	    -I./../src \
 	    -I./../third_party/$(EIGEN_LIB)/\
 	    -I./../third_party/$(PNG_LIB)/\
-	    -lpng15
+	    -lpng15\
+	    -ljpeg
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
@@ -37,7 +38,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 TESTS =  util_unittest XImage_unittest ColorSpace_unittest\
-	 Filter_unittest Warp_unittest
+	 Filter_unittest Warp_unittest Pyramid_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
