@@ -38,7 +38,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 TESTS =  util_unittest XImage_unittest ColorSpace_unittest\
-	 Filter_unittest Warp_unittest Pyramid_unittest
+	 Filter_unittest Warp_unittest Pyramid_unittest SparseGrid_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -108,6 +108,10 @@ Pyramid.o : ../src/Pyramid.cpp \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/Pyramid.cpp
 
+SparseGrid.o : ../src/SparseGrid.cpp \
+        $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/SparseGrid.cpp
+
 # Unit tests
 util_unittest.o : $(USER_DIR)/util_unittest.cc \
                 $(GTEST_HEADERS)
@@ -150,4 +154,12 @@ Pyramid_unittest.o : $(USER_DIR)/Pyramid_unittest.cc \
 
 Pyramid_unittest : Pyramid_unittest.o Pyramid.o Warp.o XImage.o Filter.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+SparseGrid_unittest.o : $(USER_DIR)/SparseGrid_unittest.cc \
+                $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/SparseGrid_unittest.cc
+
+SparseGrid_unittest : SparseGrid_unittest.o SparseGrid.o XImage.o util.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
 
