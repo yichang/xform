@@ -13,7 +13,7 @@ TEST(CurveTest, s_shape){
   color_space.rgb2lab(my_image, &lab);
   
   xform::Curve curve;
-  curve.sShape(lab.at(0), 10, 60, 0.2, &(new_lab.at(0)));
+  curve.sShape(lab.at(0), 10, 35, 0.25, &(new_lab.at(0)));
   new_lab.at(1) = lab.at(1);
   new_lab.at(2) = lab.at(2);
 

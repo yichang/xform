@@ -1,4 +1,4 @@
-#include <algorithm>
+#include <math.h>
 #include "Curve.h"
 #include "util.h"
 
