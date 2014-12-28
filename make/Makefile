@@ -38,7 +38,8 @@ CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 TESTS =  util_unittest XImage_unittest ColorSpace_unittest\
-	 Filter_unittest Warp_unittest Pyramid_unittest SparseGrid_unittest
+	 Filter_unittest Warp_unittest Pyramid_unittest SparseGrid_unittest\
+	 Curve_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -112,6 +113,10 @@ SparseGrid.o : ../src/SparseGrid.cpp \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/SparseGrid.cpp
 
+Curve.o : ../src/Curve.cpp \
+        $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/Curve.cpp
+
 # Unit tests
 util_unittest.o : $(USER_DIR)/util_unittest.cc \
                 $(GTEST_HEADERS)
@@ -161,5 +166,14 @@ SparseGrid_unittest.o : $(USER_DIR)/SparseGrid_unittest.cc \
 
 SparseGrid_unittest : SparseGrid_unittest.o SparseGrid.o XImage.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+Curve_unittest.o : $(USER_DIR)/Curve_unittest.cc \
+                $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Curve_unittest.cc
+
+Curve_unittest : Curve_unittest.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+
 
 

@@ -11,8 +11,9 @@ namespace xform{
 class Curve{
  public:
   Curve(){};
-  void sShape(const ImageType_1& im_in, const PixelValue sigma, 
-            const PixelValue g, const double alpha, ImageType_1* im_out) const;
+  // r(i) = g0 + sign(i-g0) * sigma * (|i-g0|/sigma)^alpha0
+  void sShape(const ImageType_1& im_in, const PixelType sigma, 
+            const PixelType g, const double alpha, ImageType_1* im_out) const;
   void expShape(const ImageType_1& im_in) const; //More parameters...
 
 
