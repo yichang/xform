@@ -15,6 +15,9 @@ class LocalLaplacian{
   void adjustDetails(const ImageType_1& im_in,  
                                    const PixelType sigma, // Detail range
                                    const PixelType alpha, // Power curve
+                                   const int num_levels,
+                                   const float interval, // on g 
+                                   const float full_range, // 100 for L
                                          ImageType_1* im_out) const;
 };
 

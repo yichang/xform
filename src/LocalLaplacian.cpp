@@ -10,16 +10,16 @@ using namespace xform;
 void LocalLaplacian::adjustDetails(const ImageType_1& im_in,  
                                    const PixelType sigma, // Detail range
                                    const PixelType alpha, // Power curve
+                                   const int num_levels,
+                                   const float interval, // on g 
+                                   const float full_range, // 100 for L
                                          ImageType_1* im_out) const{
 
 
   // Build Gaussian pyramid
-  const int num_levels = 7;
   Pyramid gaussian_pyr(im_in, num_levels, Pyramid::GAUSSIAN); 
 
   // Build Laplacian Pyramids
-  const float full_range = 100;
-  const float interval = 7;
   const int num_samples = static_cast<int>(full_range/interval) + 1;
   vector<Pyramid> laplacian_pyrs;
   Curve curve;

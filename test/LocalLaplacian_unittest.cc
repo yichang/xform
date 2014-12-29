@@ -17,7 +17,11 @@ TEST(LocalLaplacianTest, adjust_details){
   xform::LocalLaplacian local_laplacian;
   const xform::PixelType sigma = 8;
   const xform::PixelType alpha = 4;
-  local_laplacian.adjustDetails(lab.at(0), sigma, alpha, &(new_lab.at(0)));
+  const int num_levels = 7;
+  const float interval = 7.0f;
+  const float l_range = 100.0f;
+  local_laplacian.adjustDetails(lab.at(0), sigma, alpha, num_levels, interval, 
+                                l_range, &(new_lab.at(0)));
   new_lab.at(1) = lab.at(1);
   new_lab.at(2) = lab.at(2);
 
