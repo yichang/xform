@@ -39,7 +39,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
 # created to the list.
 TESTS =  util_unittest XImage_unittest ColorSpace_unittest\
 	 Filter_unittest Warp_unittest Pyramid_unittest SparseGrid_unittest\
-	 Curve_unittest
+	 Curve_unittest LocalLaplacian_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -117,6 +117,10 @@ Curve.o : ../src/Curve.cpp \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/Curve.cpp
 
+LocalLaplacian.o : ../src/LocalLaplacian.cpp \
+        $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/LocalLaplacian.cpp
+
 # Unit tests
 util_unittest.o : $(USER_DIR)/util_unittest.cc \
                 $(GTEST_HEADERS)
@@ -173,6 +177,16 @@ Curve_unittest.o : $(USER_DIR)/Curve_unittest.cc \
 
 Curve_unittest : Curve_unittest.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+LocalLaplacian_unittest.o : $(USER_DIR)/LocalLaplacian_unittest.cc \
+                $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/LocalLaplacian_unittest.cc
+
+LocalLaplacian_unittest : LocalLaplacian_unittest.o LocalLaplacian.o Warp.o Pyramid.o Filter.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+
+
 
 
 
