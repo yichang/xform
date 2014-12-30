@@ -4,7 +4,7 @@
 #include "util.h"
 
 TEST(SparseGridTest, splat_3D){
-  std::string filename = "../images/noisy.png";
+  std::string filename = "../images/alice.png";
   xform::XImage my_image; 
   my_image.read(filename); 
   xform::SparseGrid sparse_grid; 
@@ -30,6 +30,7 @@ TEST(SparseGridTest, splat_3D){
     sparse_grid.blur();
     sparse_grid.blur();
     sparse_grid.blur();
+    sparse_grid.normalize();
     sparse_grid.slice(my_image, &(out.at(i)));
   }
 
@@ -37,16 +38,16 @@ TEST(SparseGridTest, splat_3D){
 }
 
 TEST(SparseGridTest, splat_5D){
-  std::string filename = "../images/noisy.png";
+  std::string filename = "../images/alice.png";
   xform::XImage my_image; 
   my_image.read(filename); 
   xform::SparseGrid sparse_grid; 
   Eigen::VectorXf cell_size(5);
-  cell_size(0) = 14;
-  cell_size(1) = 14;
-  cell_size(2) = 0.2;
-  cell_size(3) = 0.2;
-  cell_size(4) = 0.2;
+  cell_size(0) = 20;
+  cell_size(1) = 20;
+  cell_size(2) = 0.1;
+  cell_size(3) = 0.1;
+  cell_size(4) = 0.1;
 
   Eigen::VectorXf pixel_range(5);
   pixel_range(0) = my_image.rows();
@@ -64,6 +65,7 @@ TEST(SparseGridTest, splat_5D){
     sparse_grid.blur();
     sparse_grid.blur();
     sparse_grid.blur();
+    sparse_grid.normalize();
     sparse_grid.slice(my_image, &(out.at(i)));
   }
   out.write("SparseGridTest_splat_5D.png");

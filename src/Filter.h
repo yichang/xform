@@ -30,7 +30,7 @@ class Filter{
   void sep_kernel(const ImageType_1& im_in, const KernelType_1D& kernel, 
         const BoundaryType boundary_type, ImageType_1* im_out) const;     
 
-  //  Box filters by recursive filter
+  // Box filters by recursive filter
   void box(const XImage& im_in, const int b_width, XImage* im_out) const;
   void box(const XImage& im_in, const int b_width, 
            const BoundaryType boundary_type, XImage* im_out) const;

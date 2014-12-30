@@ -4,6 +4,7 @@
 #include <iostream>
 
 using namespace xform;
+using namespace std;
 
 void SparseGrid::setDimensions(const Eigen::VectorXf& cell_size_, 
                                const Eigen::VectorXf& pixel_range_){
@@ -80,6 +81,7 @@ void SparseGrid::construct(const XImage& guidance){
                              acc_grid_num.array()).sum(); 
 
       // Build the mapping through hash table
+      // TODO(yichang): pad the grid.
       if (sample_to_vertex.find(sample_index) == sample_to_vertex.end()){
         sample_to_vertex[sample_index] = vertex_index;
         vertices.push_back(sample.cast<Index>());
@@ -115,22 +117,41 @@ bool SparseGrid::isNeighbor(const Vertex& a, const Vertex& b) const{
 }
 
 void SparseGrid::blur(){
-  pixels = edge.cast<float>() * pixels + dims() * pixels;
-  pixel_weights = edge.cast<float>() * pixel_weights + 
+  pixels = edge.cast<PixelType>() * pixels + dims() * pixels;
+  pixel_weights = edge.cast<PixelType>() * pixel_weights + 
                                        dims() * pixel_weights;
 }
-
+void SparseGrid::normalize(){
+  pixels.array() /= pixel_weights.array();
+}
+void SparseGrid::neighborPattern(const int dim, vector<Vertex>* out) const{ 
+  const int num_neighbors = pow(2, dim);
+  for(int i=0; i < num_neighbors; i++){
+    Vertex z = Vertex(dim);
+    int count = i;
+    for(int j=0; j < dim; j++){
+      z(j) = count%2;
+      count /=2;
+    }
+    out->push_back(z);
+  }
+}
 void SparseGrid::slice(const XImage& guidance, ImageType_1* im_out) const{
   // Compute boundary index through hash table
   // Interpolation
   const int height = guidance.rows();
   const int width  = guidance.cols();
+  const bool FLAG_multi_linear_interp = true;
 
   Sample sample(dims());
 
   *im_out = ImageType_1(height, width);
 
   LongIndex sample_index, vertex_index;
+
+  vector<Vertex> neighbors;
+  neighborPattern(dims(), &neighbors); 
+  const int num_neighbors = neighbors.size();
 
   for(int i=0; i < height; i++){
     for(int j=0; j < width; j++){
@@ -140,15 +161,53 @@ void SparseGrid::slice(const XImage& guidance, ImageType_1* im_out) const{
       for(int k=2; k < cell_size.size(); k++)
         sample(k) = guidance.at(k-2)(i,j)/cell_size(k);
 
-      // Index of the grid at the rounded sample
-      sample_index = (sample.cast<LongIndex>().array() 
-                        * acc_grid_num.array()).sum(); 
-
-      vertex_index = sample_to_vertex.at(sample_index);
-      // TODO(yichang): multi-linear interpolation
-      
-      (*im_out)(i, j) = pixels(vertex_index)/pixel_weights(vertex_index); 
+      if (FLAG_multi_linear_interp){
+        Weight weight_sum = 0;
+        PixelType pixel = 0;
+        Weight weight;
+        for(int k = 0; k < num_neighbors; k++){
+          Vertex cur_vert = sample.cast<Index>() + neighbors[k];
+          sample_index = (cur_vert.cast<LongIndex>().array() 
+                          * acc_grid_num.array()).sum(); 
+          
+          if (sample_to_vertex.find(sample_index) != sample_to_vertex.end()){
+            // Multi-linear weight
+            Sample rel_sample = sample - cur_vert.cast<float>();
+            weight = multiLinearWeight(rel_sample); 
+            // Sample at neightbors
+            vertex_index = sample_to_vertex.at(sample_index);
+            pixel += weight * pixels(vertex_index);
+            weight_sum += weight;
+          }
+        }
+        (*im_out)(i, j) = pixel/weight_sum; 
+      } else { // Hard truncate
+        // Index of the grid at the rounded sample
+        sample_index = (sample.cast<LongIndex>().array() 
+                          * acc_grid_num.array()).sum(); 
+        vertex_index = sample_to_vertex.at(sample_index);
+        (*im_out)(i, j) = pixels(vertex_index); 
+     }
   }}
+}
+
+SparseGrid::Weight SparseGrid::multiLinearWeight(const Sample& rel_sample) 
+const{ 
+  // Corresponding weight in multi-linear interp
+  const int dim = dims();
+  Weight out = 1.0f;
+  for(int i=0; i < dim; i++){
+    if (rel_sample(i) > 0.0f)
+      out *= (1.0f - rel_sample(i));
+    else if (rel_sample(i) < 0)
+      out *= (1.0f + rel_sample(i));
+    else if (rel_sample(i) == 1)
+      return 0.0f;
+    else{}
+  }
+  assert(out >= 0);
+  assert(out <= 1);
+  return abs(out);
 }
 
 int SparseGrid::dims() const{ 

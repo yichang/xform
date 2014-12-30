@@ -20,7 +20,8 @@ class SparseGrid{
   typedef Eigen::Matrix<Index, Eigen::Dynamic, 1> Vertex; 
   typedef Eigen::Matrix<float, Eigen::Dynamic, 1> Sample; 
   typedef Eigen::Matrix<PixelType, Eigen::Dynamic, 1> Pixels;
-  typedef Eigen::Matrix<float, Eigen::Dynamic, 1> PixelWeights;
+  typedef float Weight;
+  typedef Eigen::Matrix<Weight, Eigen::Dynamic, 1> PixelWeights;
   typedef Eigen::SparseMatrix<bool> Edge; 
 
   SparseGrid(){};
@@ -34,6 +35,9 @@ class SparseGrid{
   // Blur by [1 2 1] filter along each dim
   void blur(); 
 
+  // Normalization vertices by weights
+  void normalize(); 
+
   // Interpolation
   void slice(const XImage& guidance, ImageType_1* im_out) const;
 
@@ -46,6 +50,11 @@ class SparseGrid{
 
  private:
   bool isNeighbor(const Vertex& a, const Vertex& b) const;
+
+  /* Tools for multi-linear interpolation */
+  void neighborPattern(const int dim, std::vector<Vertex>* out) const; 
+
+  Weight multiLinearWeight(const Sample& sample) const; 
 
   Eigen::VectorXf cell_size;
   Eigen::VectorXf pixel_range;
