@@ -13,16 +13,18 @@ public:
     virtual ~TransformModel();
 
     void set_images(const XImage &input, const XImage &output);
+    void set_recipe(Recipe* recipe);
 
     void fit();
     XImage predict();
+    Recipe *recipe;
+    int get_step() const;
 
 private:
     // Input data
     const XImage *input;
     const XImage *output;
 
-    Recipe *recipe;
 
     // Parameters
     int wSize;

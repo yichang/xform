@@ -17,6 +17,10 @@ public:
     bool write(const std::string& filename);
 
     void set_dc(XImage& src);
+    void set_ac(ImageType_1& src);
+    void set_quantize_mins(const PixelType* in, int len);
+    void set_quantize_maxs(const PixelType* in, int len);
+
     XImage& get_dc();
     void set_coefficients(int i, int j, const MatType &coef);
     void get_coefficients(int i, int j, MatType &coef);
@@ -24,13 +28,14 @@ public:
     void quantize();
     void dequantize();
 
-private:
+
     int height,width,n_chan_i,n_chan_o;
     int quantize_levels;
     PixelType* quantize_mins;
     PixelType* quantize_maxs;
     XImage dc;
     ImageType_1 ac; 
+private:
 };
 
 } // namespace xform

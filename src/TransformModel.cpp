@@ -27,6 +27,9 @@ TransformModel::~TransformModel() {
         recipe = NULL;
     }
 }
+int TransformModel::get_step() const{
+  return step;
+}
 
 void TransformModel::set_images(const XImage &input, const XImage &output) {
     this->input = &input;
@@ -41,6 +44,9 @@ void TransformModel::set_images(const XImage &input, const XImage &output) {
     // Size of the recipe
     mdl_h = ceil(1.0f*height/step);
     mdl_w = ceil(1.0f*width/step);
+}
+void TransformModel::set_recipe(Recipe* saved_recipe){
+  recipe = saved_recipe;
 }
 
 void TransformModel::fit() {
