@@ -46,7 +46,7 @@ void TransformModel::set_images(const XImage &input, const XImage &output) {
 void TransformModel::fit() {
     fit_recipe();
     recipe->quantize();
-    recipe->write("../output/recipe");
+    recipe->write("recipe");
 }
 
 XImage TransformModel::predict() {

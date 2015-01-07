@@ -39,7 +39,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
 # created to the list.
 TESTS =  util_unittest XImage_unittest ColorSpace_unittest\
 	 Filter_unittest Warp_unittest Pyramid_unittest SparseGrid_unittest\
-	 Curve_unittest LocalLaplacian_unittest
+	 Curve_unittest LocalLaplacian_unittest TransformModel_unittest
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -121,6 +121,14 @@ LocalLaplacian.o : ../src/LocalLaplacian.cpp \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/LocalLaplacian.cpp
 
+Recipe.o :  ../src/Recipe.cpp\
+        $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/Recipe.cpp
+
+TransformModel.o : ../src/TransformModel.cpp\
+        $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/TransformModel.cpp 
+
 # Unit tests
 util_unittest.o : $(USER_DIR)/util_unittest.cc \
                 $(GTEST_HEADERS)
@@ -184,6 +192,15 @@ LocalLaplacian_unittest.o : $(USER_DIR)/LocalLaplacian_unittest.cc \
 
 LocalLaplacian_unittest : LocalLaplacian_unittest.o LocalLaplacian.o Warp.o Pyramid.o Filter.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+TransformModel_unittest.o : $(USER_DIR)/TransformModel_unittest.cc \
+                $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/TransformModel_unittest.cc
+
+TransformModel_unittest : TransformModel_unittest.o Recipe.o TransformModel.o LocalLaplacian.o Warp.o Pyramid.o Filter.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+
 
 
 

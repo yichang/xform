@@ -19,6 +19,9 @@ class XImage{
   bool setZero();
   bool read(const std::string& filename);
   bool write(const std::string& filename);
+
+  XImage operator+(const XImage& rhs) const;
+  XImage operator-(const XImage& rhs) const;
  private:
   ImageType_N nd_array; 
 };

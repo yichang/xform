@@ -42,6 +42,26 @@ int XImage::channels() const{
 bool XImage::setZero(){
   for(int i=0; i < this->channels(); i++)
     this->at(i).setZero();
+  return true;
+}
+
+XImage XImage::operator+(const XImage& rhs) const {
+    // TODO: check same size
+    XImage out(this->rows(), this->cols(), this->channels());
+    for(int i=0; i < this->channels(); i++)
+    {
+        out.at(i)  = this->at(i) + rhs.at(i);
+    }
+    return out;
+}
+XImage XImage::operator-(const XImage& rhs) const {
+    // TODO: check same size
+    XImage out(this->rows(), this->cols(), this->channels());
+    for(int i=0; i < this->channels(); i++)
+    {
+        out.at(i)  = this->at(i) - rhs.at(i);
+    }
+    return out;
 }
 
 #ifndef __ANDROID__
