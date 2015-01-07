@@ -24,14 +24,42 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.view.Display;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
 
 import android.content.res.AssetManager;
 import android.graphics.BitmapFactory;
+
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.net.URL;
 
 import com.example.plasma.R;
+
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import java.io.DataOutputStream;
+
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
 
 public class Plasma extends Activity
 {
@@ -40,6 +68,9 @@ public class Plasma extends Activity
 	private Bitmap input; 
 	private Bitmap output; 
 	private long mStartTime;
+	final String localFileName = "local.jpg";
+	final String remoteSrcFileName = "http://groups.csail.mit.edu/graphics/face/xform/uploads/IMG_20140317_195316.jpg";
+	
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -81,6 +112,7 @@ public class Plasma extends Activity
     private  native void boxblur(Bitmap bitmap);
     //private native void helloLog(String logThis);
     
+    // Buttons 
     public void sendMessage(View view) {
         // Do something in response to button
     	System.out.println("theButtonIsPressed");
@@ -92,6 +124,16 @@ public class Plasma extends Activity
     	imageview.setImageBitmap(output);
     	input = output;   	
     }
+
+    public void updateImage(View v) {
+        	try{
+        		imageview.setImageBitmap(BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), localFileName))));
+        	}catch (Exception e){
+        		e.printStackTrace();
+        	};
+    }
+
+    
     public void gradient(){
     	// Do something on mBitmap
     	int w = input.getWidth();
@@ -105,6 +147,32 @@ public class Plasma extends Activity
     		}
     	}
     }
+      
+
+    public void downloadFile(View v){
+   	
+ 	   try {
+ 		   	  String sourceFileUri = remoteSrcFileName;  		  
+			   URL u = new URL(sourceFileUri);
+			   InputStream is = u.openStream();
+
+			   DataInputStream dis = new DataInputStream(is);
+
+			   byte[] buff = new byte[10*1024*1024]; //Max 10 MB
+			   int length;
+
+	            FileOutputStream fos = new FileOutputStream(new File(getFilesDir(), localFileName));
+	            while ((length = dis.read(buff))>0) {
+	              fos.write(buff, 0, length);
+	            }
+			
+	            fos.close();
+
+		} catch (Exception e1) {
+
+			e1.printStackTrace();
+		}
+ }
 }
 
 

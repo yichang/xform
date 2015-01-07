@@ -3,5 +3,7 @@
     <string name="app_name">Plasma</string>
     <string name="edit_message">Edit me</string>
     <string name="button_send">Process</string>
+    <string name="button_download">Download input from server</string>
+    <string name="button_update">Update the image</string>
     <string name="current_image">Current result</string>
 </resources>
