@@ -38,7 +38,7 @@ public class UploadToServer extends Activity {
      
     /**********  File Path *************/
     final String localFileName = "local.jpg";
-    final String remoteSrcFileName = "http://people.csail.mit.edu/yichangshih/6M.jpg";
+    final String remoteSrcFileName = "http://groups.csail.mit.edu/graphics/face/xform/uploads/IMG_20140317_195316.jpg";
      
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,11 +70,13 @@ public class UploadToServer extends Activity {
                                     public void run() {
                                         messageText.setText("uploading started.....");
                                     }
-                                });                      
-                           
-                             //uploadFile(uploadFilePath + "" + uploadFileName);
-                             //downloadFile(remoteSrcFileName, localFileName);
+                                });                
+                             
+                             // Upload and run the image
                              uploadFile(localFileName);
+                             
+                             // Download the result
+                             downloadFile(upLoadServerRepo + localFileName, localFileName);  
                                                       
                         }
                       }).start();        
@@ -149,6 +151,18 @@ public class UploadToServer extends Activity {
    	            }
    			
    	            fos.close();
+   	            
+                if(serverResponseCode == 200){
+                    
+                    runOnUiThread(new Runnable() {
+                         public void run() {                              
+                             String msg = "Download complteted \n\n";                              
+                             messageText.setText(msg);
+                             Toast.makeText(UploadToServer.this, "File Download Complete.", 
+                                          Toast.LENGTH_SHORT).show();
+                         }
+                     });                
+                }   
    			
    			
    		} catch (Exception e1) {
