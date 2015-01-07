@@ -1,4 +1,7 @@
+#include <iostream>
+#include <fstream>
 #include "Recipe.h"
+
 
 using namespace xform;
 
@@ -30,11 +33,33 @@ bool Recipe::read(const std::string& filename) {
 bool Recipe::write(const std::string& filename) {
     imwrite(this->ac, filename+"_ac.png");
     this->dc.write(filename+"_dc.png");
+
+    /* write max/mins in quantization*/
+    std::ofstream out_file;
+    out_file.open("quant.meta");
+    for(int i=0; i < n_chan_i * n_chan_o; i++)
+      out_file<<quantize_mins[i]<<" ";
+    for(int i=0; i < n_chan_i * n_chan_o; i++)
+      out_file<<quantize_maxs[i]<<" ";
+    out_file.close();
+
     return true;
 }
 
 void Recipe::set_dc(XImage& src) {
     dc = src;
+}
+void Recipe::set_quantize_mins(const PixelType* in, int len) {
+  for(int i=0; i < len; i++)
+    quantize_mins[i] = in[i];
+}
+
+void Recipe::set_quantize_maxs(const PixelType* in, int len) {
+  for(int i=0; i < len; i++)
+    quantize_maxs[i] = in[i];
+}
+void Recipe::set_ac(ImageType_1& src) {
+    ac = src;
 }
 
 XImage& Recipe::get_dc() {

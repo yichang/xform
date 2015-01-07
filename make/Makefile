@@ -29,7 +29,7 @@ CPPFLAGS += -isystem $(GTEST_DIR)/include\
 	    -I./../src \
 	    -I./../third_party/$(EIGEN_LIB)/\
 	    -I./../third_party/$(PNG_LIB)/\
-	    -lpng15\
+	    -lpng16\
 	    -ljpeg
 
 # Flags passed to the C++ compiler.
