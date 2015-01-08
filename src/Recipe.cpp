@@ -1,5 +1,7 @@
+#ifndef __ANDROID__
 #include <iostream>
 #include <fstream>
+#endif 
 #include "Recipe.h"
 
 
@@ -30,6 +32,7 @@ Recipe::~Recipe(){
 bool Recipe::read(const std::string& filename) {
     return true;
 }
+#ifndef __ANDROID__
 bool Recipe::write(const std::string& filename) {
     imwrite(this->ac, filename+"_ac.png");
     this->dc.write(filename+"_dc.png");
@@ -45,6 +48,7 @@ bool Recipe::write(const std::string& filename) {
 
     return true;
 }
+#endif
 
 void Recipe::set_dc(XImage& src) {
     dc = src;

@@ -1,7 +1,7 @@
 #include "TransformModel.h"
 #include "Warp.h"
 
-#include <iostream>
+//#include <iostream>
 
 using namespace std;
 
@@ -39,7 +39,7 @@ void TransformModel::set_images(const XImage &input, const XImage &output) {
     width    = input.cols();
     n_chan_o = output.channels();
     n_chan_i = input.channels();
-    printf("input size %dx%dx%d\n", height, width,n_chan_i);
+    //printf("input size %dx%dx%d\n", height, width,n_chan_i);
     
     // Size of the recipe
     mdl_h = ceil(1.0f*height/step);
@@ -49,11 +49,33 @@ void TransformModel::set_recipe(Recipe* saved_recipe){
   recipe = saved_recipe;
 }
 
+void TransformModel::set_from_recipe(const XImage& input, ImageType_1& ac, 
+                                    XImage& dc, const PixelType* meta){
+  
+  const int width = ceil(static_cast<float>(input.cols())/static_cast<float>(get_step()));
+  const int height = ceil(static_cast<float>(input.rows())/static_cast<float>(get_step()));
+  const int n_chan_i = 3; 
+  const int n_chan_o = 3; 
+  recipe = new Recipe(height, width, n_chan_i, n_chan_o);
+  recipe->set_dc(dc);
+  recipe->set_ac(ac);
+
+  const int num_chan = n_chan_i * n_chan_o;
+  for(int i=0; i < num_chan; i++){
+    recipe->quantize_mins[i] = meta[i];
+    recipe->quantize_maxs[i] = meta[num_chan+i];
+  }
+  set_images(input, input); // the second one is dummy
+
+}
+
+#ifndef __ANDROID__
 void TransformModel::fit() {
     fit_recipe();
     recipe->quantize();
     recipe->write("recipe");
 }
+#endif
 
 XImage TransformModel::predict() {
     recipe->dequantize();

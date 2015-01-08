@@ -14,6 +14,8 @@ public:
 
     void set_images(const XImage &input, const XImage &output);
     void set_recipe(Recipe* recipe);
+    void set_from_recipe(const XImage& input, ImageType_1& ac, 
+                                    XImage& dc, const PixelType* meta);
 
     void fit();
     XImage predict();
