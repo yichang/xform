@@ -21,10 +21,11 @@ public final class R {
     }
     public static final class string {
         public static final int app_name=0x7f040000;
-        public static final int button_download=0x7f040003;
-        public static final int button_send=0x7f040002;
-        public static final int button_update=0x7f040004;
-        public static final int current_image=0x7f040005;
+        public static final int button_blur=0x7f040002;
+        public static final int button_download=0x7f040004;
+        public static final int button_local_laplacian=0x7f040003;
+        public static final int button_update=0x7f040005;
+        public static final int current_image=0x7f040006;
         public static final int edit_message=0x7f040001;
     }
 }

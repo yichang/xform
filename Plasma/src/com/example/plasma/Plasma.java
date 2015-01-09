@@ -103,26 +103,41 @@ public class Plasma extends Activity
     static {
 
         //System.loadLibrary("plasma");
-    	System.loadLibrary("filter");
+    	//System.loadLibrary("filter");
+    	System.loadLibrary("native");
     	//System.loadLibrary("ndk1");
     }
 
     /* implementend by libplasma.so */
     //private static native void renderPlasma(Bitmap  bitmap, long time_ms);
-    private  native void boxblur(Bitmap bitmap);
+    //private  native void boxblur(Bitmap bitmap);
+    private  native void localLaplacian(Bitmap bitmap);
     //private native void helloLog(String logThis);
     
     // Buttons 
-    public void sendMessage(View view) {
+    public void blur(View view) {
         // Do something in response to button
     	System.out.println("theButtonIsPressed");
     	//gradient();
     	//renderPlasma(output, System.currentTimeMillis() - mStartTime);
     	output = input; 
-    	boxblur(output);
+    	//boxblur(output);
     	//helloLog("This will log to LogCat via the native call.");
     	imageview.setImageBitmap(output);
     	input = output;   	
+    }
+    
+    public void local_laplacian(View view){
+    	try{
+    	input = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), localFileName)));
+    	localLaplacian(input);
+        FileOutputStream obuffer = new FileOutputStream(new File(getFilesDir(), localFileName));
+        input.compress(Bitmap.CompressFormat.JPEG, 100, obuffer); 
+        obuffer.close();
+		}  catch (IOException e) {
+            //You'll need to add proper error handling here
+			e.printStackTrace();
+    	}
     }
 
     public void updateImage(View v) {

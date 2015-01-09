@@ -19,14 +19,20 @@
    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="sendMessage" 
-        android:text="@string/button_send" />
+        android:onClick="blur" 
+        android:text="@string/button_blur" />
    
    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="downloadFile" 
         android:text="@string/button_download" />
+   
+	 <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="local_laplacian" 
+        android:text="@string/button_local_laplacian" />
       
    <Button
         android:layout_width="wrap_content"
