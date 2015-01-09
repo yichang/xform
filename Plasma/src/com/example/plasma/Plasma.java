@@ -69,7 +69,7 @@ public class Plasma extends Activity
 	private Bitmap output; 
 	private long mStartTime;
 	final String localFileName = "local.jpg";
-	final String remoteSrcFileName = "http://groups.csail.mit.edu/graphics/face/xform/uploads/IMG_20140317_195316.jpg";
+	final String remoteSrcFileName = "http://groups.csail.mit.edu/graphics/face/xform/uploads/input_image.jpg";
 	
     @Override
     public void onCreate(Bundle savedInstanceState)

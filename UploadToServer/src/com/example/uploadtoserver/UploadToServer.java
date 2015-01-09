@@ -46,7 +46,7 @@ public class UploadToServer extends Activity {
      
     /**********  File Path *************/
     final String localFileName = "local.jpg";
-    final String remoteSrcFileName = "http://groups.csail.mit.edu/graphics/face/xform/uploads/IMG_20140317_195316.jpg";
+    final String remoteSrcFileName = "http://groups.csail.mit.edu/graphics/face/xform/uploads/input_image.jpg";
      
     /* load our native library */
     static {
