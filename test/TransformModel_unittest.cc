@@ -100,7 +100,7 @@ TEST(TransformModelTest, recon_from_recipe){
   new_lab.at(2) = lab.at(2);
 
   color_space.lab2rgb(new_lab, &out);
-  out.write("TransformTest_recon_gnt.png");
+  out.write("TransformTest_recon_by_recipe_gnt.png");
 
   xform::XImage output; 
 
@@ -127,6 +127,6 @@ TEST(TransformModelTest, recon_from_recipe){
   xform::TransformModel client_model;
   client_model.set_from_recipe(client_image, ac.at(0), dc, meta);
   xform::XImage reconstructed = client_model.predict();
-  reconstructed.write("TransformTest_recon.png");
+  reconstructed.write("TransformTest_recon_by_recipe.png");
 }
  
