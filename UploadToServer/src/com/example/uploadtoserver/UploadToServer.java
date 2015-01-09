@@ -1,8 +1,12 @@
 package com.example.uploadtoserver;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.DataInputStream;
 import java.io.FileOutputStream;
@@ -11,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,16 +35,25 @@ public class UploadToServer extends Activity {
     Button downloadInputButton;
     Button downloadResultButton;
     Button updateImageButton;
+    Button reconInputButton;
     int serverResponseCode = 0;
     ProgressDialog dialog = null;
         
     String upLoadServerUri = null;
+    String recipeServerUri = null;
     String upLoadServerRepo = null;
+    String serverRoot = null;
      
     /**********  File Path *************/
     final String localFileName = "local.jpg";
     final String remoteSrcFileName = "http://groups.csail.mit.edu/graphics/face/xform/uploads/IMG_20140317_195316.jpg";
      
+    /* load our native library */
+    static {
+    	System.loadLibrary("xformRecon");
+    } 
+    private native void recon(Bitmap input, Bitmap ac, Bitmap dc, float[] bitmap);
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
          
@@ -50,13 +64,16 @@ public class UploadToServer extends Activity {
         downloadInputButton = (Button)findViewById(R.id.downloadInputButton);
         downloadResultButton = (Button)findViewById(R.id.downloadResultButton);
         updateImageButton = (Button)findViewById(R.id.updateImage);
+        reconInputButton = (Button)findViewById(R.id.reconInputButton);
         messageText  = (TextView)findViewById(R.id.messageText);
         currentImage = (ImageView)findViewById(R.id.currentImage);
          
         messageText.setText("Uploading file path :-" + localFileName );
          
         /************* PhP script path ****************/
+        serverRoot = "http://groups.csail.mit.edu/graphics/face/xform/";
         upLoadServerUri = "http://groups.csail.mit.edu/graphics/face/xform/uploads.php";
+        recipeServerUri = "http://groups.csail.mit.edu/graphics/face/xform/recipe.php";
         upLoadServerRepo = "http://groups.csail.mit.edu/graphics/face/xform/uploads/"; 
         uploadButton.setOnClickListener(new OnClickListener() {            
             @Override
@@ -73,7 +90,7 @@ public class UploadToServer extends Activity {
                                 });                
                              
                              // Upload and run the image
-                             uploadFile(localFileName);
+                             uploadFile(localFileName, upLoadServerUri);
                              
                              // Download the result
                              downloadFile(upLoadServerRepo + localFileName, localFileName);  
@@ -82,6 +99,69 @@ public class UploadToServer extends Activity {
                       }).start();        
                 }
             });
+        
+        reconInputButton.setOnClickListener(new OnClickListener() {            
+            @Override
+            public void onClick(View v) {
+                 
+                dialog = ProgressDialog.show(UploadToServer.this, "", "Play recipe...", true);
+                 
+                new Thread(new Runnable() {
+                        public void run() {
+                             runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        messageText.setText("downloading started.....");
+                                    }
+                                });                      
+                           
+                             uploadFile(localFileName, recipeServerUri);
+                             downloadFile(serverRoot + "recipe_ac.png", "recipe_ac.png"); 
+                             downloadFile(serverRoot + "recipe_dc.png", "recipe_dc.png"); 
+                             downloadFile(serverRoot + "quant.meta", "quant.meta"); 
+                             
+
+
+                             
+                             try {
+                            	final Bitmap input = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), localFileName)));
+								final Bitmap dc = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_dc.png")));
+								final Bitmap ac = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_ac.png")));
+	                             
+								// meta data
+	                            File file = new File(getFilesDir(), "quant.meta");
+	                            StringBuilder text = new StringBuilder();
+                                BufferedReader br = new BufferedReader(new FileReader(file));
+                                String line = br.readLine();
+                                String[] ar=line.split(" ");
+                                float[] myFloats = new float[ar.length];
+                                for(int i=0; i < ar.length; i++)
+                               	 myFloats[i] = Float.valueOf(ar[i]);
+                                
+                                for (float f: myFloats){
+                               	 System.out.println(f);
+                                }
+								
+                                recon(input, ac, dc, myFloats );
+                                
+                                FileOutputStream out = new FileOutputStream(new File(getFilesDir(), localFileName));
+                                input.compress(Bitmap.CompressFormat.JPEG, 100, out); 
+                                out.close();
+                                
+							}  catch (FileNotFoundException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}  catch (IOException e) {
+                                //You'll need to add proper error handling here
+								e.printStackTrace();
+                            }  catch (Exception e) {
+                                e.printStackTrace();
+                            } 
+                            
+                        }
+                      }).start();        
+                }
+            });
+        
         downloadInputButton.setOnClickListener(new OnClickListener() {            
             @Override
             public void onClick(View v) {
@@ -174,7 +254,7 @@ public class UploadToServer extends Activity {
     	return 0;
     }
       
-    public int uploadFile(String sourceFileName) {
+    public int uploadFile(String sourceFileName, String dest) {
                      
           String fileName = sourceFileName;
   
@@ -211,7 +291,7 @@ public class UploadToServer extends Activity {
                     
                      // open a URL connection to the Servlet
                    FileInputStream fileInputStream = new FileInputStream(sourceFile);
-                   URL url = new URL(upLoadServerUri);
+                   URL url = new URL(dest);
                     
                    // Open a HTTP  connection to  the URL
                    conn = (HttpURLConnection) url.openConnection(); 
