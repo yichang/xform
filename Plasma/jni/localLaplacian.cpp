@@ -42,9 +42,9 @@ void copy_to_HImage(JNIEnv * env, const jobject& bitmap, Image<uint16_t>* input)
 	    for (int y = 0; y < info.height; ++y)
 	      {
 	    	uint32_t zz = src[info.width * y + x];
-                uint16_t b = static_cast<uint16_t>((zz%256));  zz /= 256;
-                uint16_t g = static_cast<uint16_t>((zz%256));  zz /= 256;
-                uint16_t r = static_cast<uint16_t>((zz%256));  zz /= 256;
+                uint16_t b = static_cast<uint16_t>((zz%256))*256;  zz /= 256;
+                uint16_t g = static_cast<uint16_t>((zz%256))*256;  zz /= 256;
+                uint16_t r = static_cast<uint16_t>((zz%256))*256;  zz /= 256;
 	    	(*input)(x,y,0) = r;
 	    	(*input)(x,y,1) = g;
 	    	(*input)(x,y,2) = b;
@@ -75,9 +75,9 @@ void copy_to_jBuffer(JNIEnv * env, const Image<uint16_t>& output, jobject& bitma
 
 	for (int x = info.width - 1; x >= 0; --x){
 	    for (int y = 0; y < info.height; ++y){
-	    	int r = static_cast<int>(output(x,y,0));
-	    	int g = static_cast<int>(output(x,y,1));
-	    	int b = static_cast<int>(output(x,y,2));
+	    	int r = static_cast<int>(output(x,y,0)/256);
+	    	int g = static_cast<int>(output(x,y,1)/256);
+	    	int b = static_cast<int>(output(x,y,2)/256);
 	    	src[info.width * y + x] = createPixel(r, g, b, 0xff);
             }
 	}
@@ -108,7 +108,7 @@ void Java_com_example_plasma_Plasma_localLaplacian(JNIEnv * env, jobject obj, jo
     local_laplacian(levels, alpha/(float(levels-1)), beta, input, output);
 
     // Clamp to 0-255
-    for(int z=0; z < input.channels(); z++){
+    /*for(int z=0; z < input.channels(); z++){
       for(int x=0; x < input.width(); x++){
     	for(int y=0; y < input.height(); y++){
     		if(output(x,y,z) > 255)
@@ -117,7 +117,7 @@ void Java_com_example_plasma_Plasma_localLaplacian(JNIEnv * env, jobject obj, jo
     			output(x,y,z) = 0;
     	} 
       }
-    }
+    }*/
     copy_to_jBuffer(env, output, bitmap);
 }
 
