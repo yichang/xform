@@ -18,6 +18,7 @@ import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -43,6 +44,10 @@ public class UploadToServer extends Activity {
     String recipeServerUri = null;
     String upLoadServerRepo = null;
     String serverRoot = null;
+    
+    Boolean Sleep_mode = true;
+    int Sleep_time_xform = 4000;
+    int Sleep_time_jpeg =  4000;
      
     /**********  File Path *************/
     final String localFileName = "local.jpg";
@@ -72,9 +77,16 @@ public class UploadToServer extends Activity {
          
         /************* PhP script path ****************/
         serverRoot = "http://groups.csail.mit.edu/graphics/face/xform/";
-        upLoadServerUri = "http://groups.csail.mit.edu/graphics/face/xform/uploads.php";
-        recipeServerUri = "http://groups.csail.mit.edu/graphics/face/xform/recipe.php";
+        
+        if (Sleep_mode){
+        	upLoadServerUri = "http://groups.csail.mit.edu/graphics/face/xform/uploads_sleep.php";
+        	recipeServerUri = "http://groups.csail.mit.edu/graphics/face/xform/recipe_sleep.php";       	
+        } else{ 
+        	upLoadServerUri = "http://groups.csail.mit.edu/graphics/face/xform/uploads.php";
+        	recipeServerUri = "http://groups.csail.mit.edu/graphics/face/xform/recipe.php";
+        }
         upLoadServerRepo = "http://groups.csail.mit.edu/graphics/face/xform/uploads/"; 
+        
         uploadButton.setOnClickListener(new OnClickListener() {            
             @Override
             public void onClick(View v) {
@@ -92,6 +104,19 @@ public class UploadToServer extends Activity {
                              // Upload and run the image
                              uploadFile(localFileName, upLoadServerUri);
                              
+                             if (Sleep_mode){
+
+                            	 runOnUiThread(new Runnable() {public void run() {                       
+                            		 messageText.setText("Sleep mode started.... \n\n");
+                                     }});   
+                            	 SystemClock.sleep(Sleep_time_jpeg);
+                            	 
+                             	 
+                             }
+                        	 runOnUiThread(new Runnable() {public void run() {                       
+                        		 messageText.setText("Download started... \n\n");
+                                 }});  
+                        	 
                              // Download the result
                              downloadFile(upLoadServerRepo + localFileName, localFileName);  
                                                       
@@ -110,18 +135,31 @@ public class UploadToServer extends Activity {
                         public void run() {
                              runOnUiThread(new Runnable() {
                                     public void run() {
-                                        messageText.setText("downloading started.....");
+                                        messageText.setText("upload started.....");
                                     }
                                 });                      
                            
                              uploadFile(localFileName, recipeServerUri);
+                             
+                             if (Sleep_mode){
+
+                            	 runOnUiThread(new Runnable() {public void run() {                       
+                            		 messageText.setText("Sleep mode started.... \n\n");
+                                     }});   
+                            	 SystemClock.sleep(Sleep_time_xform);             	 
+                             }
+                        	 runOnUiThread(new Runnable() {public void run() {                       
+                        		 messageText.setText("Download mode started.... \n\n");
+                        	 }});   
+                             
                              downloadFile(serverRoot + "recipe_ac.png", "recipe_ac.png"); 
                              downloadFile(serverRoot + "recipe_dc.png", "recipe_dc.png"); 
                              downloadFile(serverRoot + "quant.meta", "quant.meta"); 
-                             
 
-
-                             
+                             runOnUiThread(new Runnable() {public void run() {                       
+                           	 		messageText.setText("Reconstucting from recipe.... \n\n");
+                           	 	}});   
+                        	 	
                              try {
                             	final Bitmap input = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), localFileName)));
 								final Bitmap dc = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_dc.png")));
@@ -139,8 +177,8 @@ public class UploadToServer extends Activity {
                                 
                                 for (float f: myFloats){
                                	 System.out.println(f);
-                                }
-								
+                                }								
+                           	 
                                 recon(input, ac, dc, myFloats );
                                 
                                 FileOutputStream out = new FileOutputStream(new File(getFilesDir(), localFileName));
@@ -155,7 +193,10 @@ public class UploadToServer extends Activity {
 								e.printStackTrace();
                             }  catch (Exception e) {
                                 e.printStackTrace();
-                            } 
+                            }
+                        	runOnUiThread(new Runnable() {public void run() {                       
+                           	 		messageText.setText("Reconstruction Copmlete. \n\n");
+                           	}});   
                             
                         }
                       }).start();        
@@ -222,7 +263,7 @@ public class UploadToServer extends Activity {
 
    			   DataInputStream dis = new DataInputStream(is);
 
-   			   byte[] buff = new byte[10*1024*1024]; //Max 10 MB
+   			   byte[] buff = new byte[1024*1024]; //Max 1 MB
    			   int length;
 
    	            FileOutputStream fos = new FileOutputStream(new File(getFilesDir(), localFileName));
@@ -236,7 +277,7 @@ public class UploadToServer extends Activity {
                     
                     runOnUiThread(new Runnable() {
                          public void run() {                              
-                             String msg = "Download complteted \n\n";                              
+                             String msg = "Download Complete \n\n";                              
                              messageText.setText(msg);
                              Toast.makeText(UploadToServer.this, "File Download Complete.", 
                                           Toast.LENGTH_SHORT).show();
@@ -265,7 +306,7 @@ public class UploadToServer extends Activity {
           String boundary = "*****";
           int bytesRead, bytesAvailable, bufferSize;
           byte[] buffer;
-          int maxBufferSize = 10 * 1024 * 1024; // Max 10 MB
+          int maxBufferSize = 1024 * 1024; // Max 1 MB
           File sourceFile = new File(getFilesDir(), sourceFileName);  
           
           if (!sourceFile.isFile()) {
