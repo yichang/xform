@@ -19,6 +19,76 @@ uint32_t createPixel(int r, int g, int b, int a) {
        | ((g & 0xff) << 8)
        | ((b & 0xff));
 }
+void copy_to_HImage(JNIEnv * env, const jobject& bitmap, Image<float>* input){
+
+	AndroidBitmapInfo  info;
+	uint32_t          *pixels;
+	int                ret;
+
+	AndroidBitmap_getInfo(env, bitmap, &info);
+
+	if(info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+	  __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK:LC: [%s]", "NOT RGBA_8888");
+	}
+
+	void* bitmapPixels;
+	AndroidBitmap_lockPixels(env, bitmap, &bitmapPixels);
+	uint32_t* src = (uint32_t*) bitmapPixels;
+	int stride = info.stride;
+	int pixelsCount = info.height * info.width;
+	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "HEIGHT: [%d]",info.height);
+	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "WIDTH: [%d]", info.width);
+
+	/* Parse */
+	for (int x = info.width - 1; x >= 0; --x){
+	    for (int y = 0; y < info.height; ++y)
+	      {
+	    	uint32_t zz = src[info.width * y + x];
+                float b = static_cast<float>((zz%256))/256;  zz /= 256;
+                float g = static_cast<float>((zz%256))/256;  zz /= 256;
+                float r = static_cast<float>((zz%256))/256;  zz /= 256;
+	    	(*input)(x,y,0) = r;
+	    	if (input->channels() > 1){
+                  (*input)(x,y,1) = g;
+                  (*input)(x,y,2) = b;
+                }
+	    	//__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK:LC: [%d]", (int)(r*255));
+	      }
+	}
+}
+
+void copy_to_jBuffer(JNIEnv * env, const Image<float>& output, jobject& bitmap){
+
+	AndroidBitmapInfo  info;
+	uint32_t          *pixels;
+	int                ret;
+
+	AndroidBitmap_getInfo(env, bitmap, &info);
+
+	if(info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+	  __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK:LC: [%s]", "NOT RGBA_8888");
+	}
+
+	void* bitmapPixels;
+	AndroidBitmap_lockPixels(env, bitmap, &bitmapPixels);
+	uint32_t* src = (uint32_t*) bitmapPixels;
+	int stride = info.stride;
+	int pixelsCount = info.height * info.width;
+	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "HEIGHT: [%d]",info.height);
+	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "WIDTH: [%d]", info.width);
+
+	for (int x = info.width - 1; x >= 0; --x){
+	    for (int y = 0; y < info.height; ++y){
+	    	int r = static_cast<int>(output(x,y,0)*256);
+	    	int g = static_cast<int>(output(x,y,1)*256);
+	    	int b = static_cast<int>(output(x,y,2)*256);
+	    	src[info.width * y + x] = createPixel(r, g, b, 0xff);
+            }
+	}
+}
+
+
+
 
 void copy_to_XImage(JNIEnv * env, const jobject& bitmap, xform::XImage* input){
 
@@ -102,11 +172,6 @@ void write_to_bitmap(JNIEnv * env, const xform::XImage& output, jobject& bitmap)
 void Java_com_example_uploadtoserver_UploadToServer_recon(JNIEnv * env, jobject obj, jobject input_bp, jobject ac_bp, jobject dc_bp, jfloatArray meta)
 {
 
-	xform::XImage input,ac, dc;
-
-	copy_to_XImage(env, input_bp, &input);
-	copy_to_XImage(env, ac_bp, &ac);
-	copy_to_XImage(env, dc_bp, &dc);
 	xform::PixelType* my_meta = new xform::PixelType[18];
 
 	jfloat* flt1 = env->GetFloatArrayElements(meta,0);
@@ -116,7 +181,13 @@ void Java_com_example_uploadtoserver_UploadToServer_recon(JNIEnv * env, jobject 
 		my_meta[i] = static_cast<xform::PixelType>(flt1[i]);
 	}
 
-	/* Recon */
+
+	/*xform::XImage input,ac, dc;
+	copy_to_XImage(env, input_bp, &input);
+	copy_to_XImage(env, ac_bp, &ac);
+	copy_to_XImage(env, dc_bp, &dc);
+
+	// Recon 
 	xform::TransformModel client_model;
 	client_model.set_from_recipe(input, ac.at(0), dc, my_meta);
 	xform::XImage output  = client_model.predict();
@@ -132,8 +203,18 @@ void Java_com_example_uploadtoserver_UploadToServer_recon(JNIEnv * env, jobject 
 			}
 		}
 	}
+	write_to_bitmap(env, output, input_bp);*/
 
-	write_to_bitmap(env, output, input_bp);
+        /* Recon by Halide */
+        Image<float> HL_input, HL_ac, HL_dc, HL_output;
+        copy_to_HImage(env, input_bp, &HL_input); 
+        copy_to_HImage(env, ac_bp, &HL_ac); 
+        copy_to_HImage(env, dc_bp, &HL_dc); 
+
+        xform::TransformModel client_model_halide;
+        client_model_halide.reconstruct_by_Halide(HL_input, HL_ac, HL_dc, my_meta, &HL_output);
+        copy_to_jBuffer(env, HL_output, input_bp); 
+
 	AndroidBitmap_unlockPixels(env, input_bp);
 	AndroidBitmap_unlockPixels(env, ac_bp);
 	AndroidBitmap_unlockPixels(env, dc_bp);
