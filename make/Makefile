@@ -206,7 +206,7 @@ TransformModel_unittest.o : $(USER_DIR)/TransformModel_unittest.cc \
                 $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/TransformModel_unittest.cc
 
-TransformModel_unittest : TransformModel_unittest.o Recipe.o TransformModel.o $(HALIDE_OBJ_PATH)halide_resize.o $(HALIDE_OBJ_PATH)halide_recon.o LocalLaplacian.o Warp.o Pyramid.o Filter.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
+TransformModel_unittest : TransformModel_unittest.o Recipe.o TransformModel.o $(HALIDE_OBJ_PATH)halide_resize.o $(HALIDE_OBJ_PATH)halide_recon.o $(HALIDE_OBJ_PATH)halide_dequant.o LocalLaplacian.o Warp.o Pyramid.o Filter.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
 

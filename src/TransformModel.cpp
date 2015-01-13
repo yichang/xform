@@ -9,6 +9,7 @@
 // HALIDE
 #include "halide_resize.h"
 #include "halide_recon.h"
+#include "halide_dequant.h"
 #include "static_image.h"
 
 using namespace std;
@@ -87,7 +88,9 @@ void TransformModel::fit() {
 #endif
 
 XImage TransformModel::predict() {
-    recipe->dequantize();
+    if (!use_halide) // Halide schedule alreay includes dequantize
+      recipe->dequantize();
+
     XImage out = reconstruct();
     return out;
 }
@@ -261,6 +264,7 @@ XImage TransformModel::reconstruct() {
           }
       }
       reconstructed = reconstructed + dc ;
+
     } else { // use_halide
       XImage foo_ac(1);
       foo_ac.at(0) = recipe->ac;
@@ -273,14 +277,25 @@ XImage TransformModel::reconstruct() {
       foo_ac.to_Halide(&HL_ac);
       recipe->dc.to_Halide(&HL_dc);
 
+      /* Dequantize */
+      Image<float> mins(3,3), maxs(3,3);
+      for(int y= 0; y < 3; y++){
+        for(int x = 0; x < 3; x++){ 
+          mins(x,y) = recipe->quantize_mins[3*y + x];
+          maxs(x,y) = recipe->quantize_maxs[3*y + x];
+        }}
+      const int nchannels=3;
+      halide_dequant(HL_ac, mins, maxs, nchannels, HL_ac);
+
+      /* Low pass */
       Image<float> HL_ds(width/wSize, height/wSize, 3), 
                    HL_low_pass(width, height, 3),
                    HL_new_dc(width, height, 3);
-
       halide_resize(HL_input, HL_ds.height(), HL_ds.width(), HL_ds);
       halide_resize(HL_ds, HL_low_pass.height(), HL_low_pass.width(), HL_low_pass);
       halide_resize(HL_dc, HL_new_dc.height(), HL_new_dc.width(), HL_new_dc);
 
+      /* Patch-based */
       halide_recon(HL_input, HL_low_pass, HL_ac, HL_new_dc, step, HL_recon); 
       reconstructed.from_Halide(HL_recon);
     }
