@@ -281,7 +281,7 @@ XImage TransformModel::reconstruct() {
       halide_resize(HL_ds, HL_low_pass.height(), HL_low_pass.width(), HL_low_pass);
       halide_resize(HL_dc, HL_new_dc.height(), HL_new_dc.width(), HL_new_dc);
 
-      halide_recon(HL_input, HL_low_pass, HL_ac, HL_new_dc, HL_recon); 
+      halide_recon(HL_input, HL_low_pass, HL_ac, HL_new_dc, step, HL_recon); 
       reconstructed.from_Halide(HL_recon);
     }
     gettimeofday(&t_recon, NULL);

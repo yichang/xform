@@ -8,14 +8,15 @@ int main(int argc, char **argv){
              ac(Float(32), 2), 
              dc_output(Float(32), 3);
 
-  int step = 4; 
-  int wSize = 8;
+  Param<int> step; 
+
+  // Issue #1: if I hardcoded the param below, the results contain artifacts
+  //int step = 4;
 
   Var x("x"), y("y"), c("c"), yi("yi"), yo("yo");
 
   Func hp_input("hp_input");
   hp_input(x, y, c) = input(x, y, c) - lp_input(x, y, c);
-  //hp_input(x, y, c) = input(x, y, c);
 
   Expr ac_width = cast<int>(ac.width()/3);
   Expr ac_height = cast<int>(ac.height()/3);
@@ -32,16 +33,11 @@ int main(int argc, char **argv){
                            2 * ac_height + on_ac_y);
   Func final("final");
   final(x,y,c) = hp_output(x,y,c) + dc_output(x, y, c);
-  //final(x,y,c) = hp_output(x,y,c) + dc_output(x, y, c);
-
-  //Func clamped("clamped");
-  //clamped(x, y, c) = clamp(final(x, y, c), 0.0f, 1.0f);
 
   /* Scheduling */
-  //hp_output.split(y, yo, yi, 16).parallel(yo).vectorize(x,8);
-  //hp_output.compile_to_file("halide_recon", input, ac);
+  // Issue #2: if I hardcoded step (to make issue #1 happen), I can uncomment the below line to make it disappear. 
   final.split(y, yo, yi, 16).parallel(yo).vectorize(x,8);
-  final.compile_to_file("halide_recon", input, lp_input, ac, dc_output);
+  final.compile_to_file("halide_recon", input, lp_input, ac, dc_output, step);
 
   return 0;
 }
