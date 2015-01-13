@@ -1,11 +1,6 @@
 #include "TransformModel.h"
 #include "Warp.h"
 
-// TIMING RELATED
-#include <sys/time.h>
-#include <iostream>
-
-
 // HALIDE
 #include "halide_resize.h"
 #include "halide_recon.h"
@@ -127,11 +122,11 @@ void TransformModel::fit_recipe() {
       Warp warp;
       warp.imresize(*input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
       warp.imresize(*output, height/wSize, width/wSize,Warp::BICUBIC, &lp_output);
-      printf("lp size %dx%d\n", lp_input.rows(),lp_input.cols());
+      //printf("lp size %dx%d\n", lp_input.rows(),lp_input.cols());
 
       warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input);
       warp.imresize(lp_output, height,width,Warp::BICUBIC, &hp_output);
-    }else{ //use_halide
+    } else { //use_halide
       Image<float> HL_lp_input(width/wSize, height/wSize, input->channels()),
                    HL_lp_output(width/wSize, height/wSize, input->channels()),
                    HL_hp_input(width, height, input->channels()),
@@ -199,23 +194,45 @@ void TransformModel::fit_recipe() {
         MatType coef = lhs.ldlt().solve(rhs);
         recipe->set_coefficients(mdl_i, mdl_j, coef); 
 
-        printf("\r      - Fitting: %.2f%%",  ((100.0*progress)/(mdl_h*mdl_w)));
+        //printf("\r      - Fitting: %.2f%%",  ((100.0*progress)/(mdl_h*mdl_w)));
     }
-    printf("\n");
+    //printf("\n");
 }
 
 
-void TransformModel::reconstruct_by_Halide(const Image<float>& input, 
-                               const Image<float>& ac,
-                               const Image<float>& dc, 
+void TransformModel::reconstruct_by_Halide(const Image<float>& HL_input, 
+                               const Image<float>& HL_ac,
+                               const Image<float>& HL_dc, 
                                const PixelType* meta,
-                               Image<float>* output) const{
+                               Image<float>* HL_output) const{
+
+      /* Usage: TransformModel(); TransformMode(....); */
+      /* Dequantize */
+      Image<float> mins(3,3), maxs(3,3);
+      for(int y= 0; y < 3; y++){
+        for(int x = 0; x < 3; x++){ 
+          mins(x,y) = meta[3*y + x];
+          maxs(x,y) = meta[3*y + x + 9];
+        }}
+      const int nchannels=3;
+      halide_dequant(HL_ac, mins, maxs, nchannels, HL_ac);
+
+      /* Low pass */
+      const int width = HL_input.width();
+      const int height = HL_input.height();
+      Image<float> HL_ds(width/wSize, height/wSize, 3), 
+                   HL_low_pass(width, height, 3),
+                   HL_new_dc(width, height, 3);
+      halide_resize(HL_input, HL_ds.height(), HL_ds.width(), HL_ds);
+      halide_resize(HL_ds, HL_low_pass.height(), HL_low_pass.width(), HL_low_pass);
+      halide_resize(HL_dc, HL_new_dc.height(), HL_new_dc.width(), HL_new_dc);
+
+      /* Patch-based */
+      halide_recon(HL_input, HL_low_pass, HL_ac, HL_new_dc, step, *HL_output); 
 }
 
 XImage TransformModel::reconstruct() {
     // Lowpass
-    timeval t0, t_recon;
-    gettimeofday(&t0, NULL);
     XImage reconstructed(height, width, n_chan_o);
 
     if (!use_halide){
@@ -299,12 +316,9 @@ XImage TransformModel::reconstruct() {
       halide_recon(HL_input, HL_low_pass, HL_ac, HL_new_dc, step, HL_recon); 
       reconstructed.from_Halide(HL_recon);
     }
-    gettimeofday(&t_recon, NULL);
 
-    /* timing */
-    unsigned int t_rec = (t_recon.tv_sec - t0.tv_sec) * 1000000 + (t_recon.tv_usec - t0.tv_usec);
-    std::cout<< "t_recon = " << t_rec << std::endl;
-    return reconstructed;
+  return reconstructed;
+
 }
 
 } // namespace xform

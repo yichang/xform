@@ -31,8 +31,11 @@ int main(int argc, char **argv){
                            1 * ac_height + on_ac_y) + 
     hp_input(x, y, 2) * ac(c * ac_width + on_ac_x, 
                            2 * ac_height + on_ac_y);
+  Func output("output");
+  output(x,y,c) = hp_output(x,y,c) + dc_output(x, y, c);
+
   Func final("final");
-  final(x,y,c) = hp_output(x,y,c) + dc_output(x, y, c);
+  final(x,y,c) = clamp(output(x,y,c), 0.0f, 1.0f);
 
   /* Scheduling */
   // Issue #2: if I hardcoded step (to make issue #1 happen), I can uncomment the below line to make it disappear. 

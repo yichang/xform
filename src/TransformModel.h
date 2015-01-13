@@ -34,6 +34,7 @@ public:
     Recipe *recipe;
 
     int get_step() const;
+    bool use_halide;
 private:
     // Input data
     const XImage *input;
@@ -51,7 +52,6 @@ private:
     int n_chan_i;
     int mdl_h;
     int mdl_w;
-    bool use_halide;
     
     // Pipeline operations
     void fit_recipe();
