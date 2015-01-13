@@ -8,8 +8,8 @@ XImage::XImage(int num_channels){
   nd_array = ImageType_N(num_channels);
 } 
 
-XImage::XImage(int num_rows, int num_cols, int num_channels) 
-  : XImage(num_channels){
+XImage::XImage(int num_rows, int num_cols, int num_channels) {
+   nd_array = ImageType_N(num_channels);
   int n_channels = this->channels();
   for(int i = 0; i < n_channels; i++){ 
     this->at(i) = ImageType_1(num_rows, num_cols);
