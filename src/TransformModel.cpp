@@ -112,17 +112,47 @@ void TransformModel::fit_recipe_by_Halide(const Image<float>& input,
 }
 
 void TransformModel::fit_recipe() {
-    // Lowpass
-    XImage lp_input, lp_output;
-    Warp warp;
-    warp.imresize(*input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
-    warp.imresize(*output, height/wSize, width/wSize,Warp::BICUBIC, &lp_output);
-    printf("lp size %dx%d\n", lp_input.rows(),lp_input.cols());
 
     // Highpass
-    XImage hp_input, hp_output;
-    warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input);
-    warp.imresize(lp_output, height,width,Warp::BICUBIC, &hp_output);
+    XImage hp_input(height, width, 3), 
+           hp_output(height, width, 3),
+           lp_output(height/wSize, width/wSize, 3);
+
+    if (!use_halide){
+    // Lowpass
+      XImage lp_input; 
+      Warp warp;
+      warp.imresize(*input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
+      warp.imresize(*output, height/wSize, width/wSize,Warp::BICUBIC, &lp_output);
+      printf("lp size %dx%d\n", lp_input.rows(),lp_input.cols());
+
+      warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input);
+      warp.imresize(lp_output, height,width,Warp::BICUBIC, &hp_output);
+    }else{ //use_halide
+      Image<float> HL_lp_input(width/wSize, height/wSize, input->channels()),
+                   HL_lp_output(width/wSize, height/wSize, input->channels()),
+                   HL_hp_input(width, height, input->channels()),
+                   HL_hp_output(width, height, input->channels()),
+                   HL_input(width, height, input->channels()),
+                   HL_output(width, height, input->channels());
+
+      assert(width==input->cols());
+      assert(height==input->rows());
+
+      input->to_Halide(&HL_input);
+      output->to_Halide(&HL_output);
+
+      halide_resize(HL_input, HL_lp_input.height(), HL_lp_input.width(), HL_lp_input);
+      halide_resize(HL_output, HL_lp_output.height(), HL_lp_output.width(), HL_lp_output);
+
+      halide_resize(HL_lp_input, HL_hp_input.height(), HL_hp_input.width(), HL_hp_input);
+      halide_resize(HL_lp_output, HL_hp_output.height(), HL_hp_output.width(), HL_hp_output);
+
+      hp_input.from_Halide(HL_hp_input);
+      hp_output.from_Halide(HL_hp_output);
+      lp_output.from_Halide(HL_lp_output);
+    }
+
     hp_input = *(this->input) - hp_input;
     hp_output = *(this->output) - hp_output;
 
@@ -177,40 +207,29 @@ void TransformModel::reconstruct_by_Halide(const Image<float>& input,
                                const Image<float>& dc, 
                                const PixelType* meta,
                                Image<float>* output) const{
-  Image<float> ds(width/wSize, height/wSize, 3);
-  Image<float> new_dc(width, height, 3), low_pass(width, height, 3);
-  halide_resize(input, ds.height(), ds.width(), ds);                           
-  halide_resize(ds, output->height(), output->width(), low_pass);
-
-  halide_resize(dc, output->height(), output->width(), new_dc);
-
 }
 
 XImage TransformModel::reconstruct() {
     // Lowpass
-    timeval t0, t_decompose, t_recon;
+    timeval t0, t_recon;
     gettimeofday(&t0, NULL);
-
-    XImage lp_input;
-    Warp warp;
-    warp.imresize(*input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
-
-    // Highpass
-    XImage hp_input;
-    warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input);
-    hp_input = *(this->input) - hp_input;
-
-    // Result
     XImage reconstructed(height, width, n_chan_o);
-    XImage dc;
-    warp.imresize(recipe->get_dc(), height, width, Warp::BICUBIC, &dc);
-    
-    gettimeofday(&t_decompose, NULL);
-    unsigned int t_dec = (t_decompose.tv_sec - t0.tv_sec) * 1000000 + (t_decompose.tv_usec - t0.tv_usec);
-    std::cout<< "t_dec = " <<  t_dec << std::endl;
+
+    if (!use_halide){
+      XImage lp_input;
+      Warp warp;
+      warp.imresize(*input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
+
+      // Highpass
+      XImage hp_input;
+      warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input);
+      hp_input = *(this->input) - hp_input;
+
+      // Result
+      XImage dc;
+      warp.imresize(recipe->get_dc(), height, width, Warp::BICUBIC, &dc);
 
     // Reconstruct each patch
-    if (use_halide){
       int progress = 0;
       for (int imin = 0; imin < height; imin += step)
       for (int jmin = 0; jmin < width; jmin += step)
@@ -235,32 +254,40 @@ XImage TransformModel::reconstruct() {
           recipe->get_coefficients(mdl_i, mdl_j, coef); 
           MatType p_reconstructed = p_input * coef;
 
-          for(int c = 0; c < n_chan_o ; ++c)
-          {
+          for(int c = 0; c < n_chan_o ; ++c){
               MatType tmp = p_reconstructed.col(c);
               tmp.resize(h,w);
               reconstructed.at(c).block(imin,jmin,h,w) = tmp;
           }
       }
+      reconstructed = reconstructed + dc ;
     } else { // use_halide
       XImage foo_ac(1);
       foo_ac.at(0) = recipe->ac;
-      Image<float> HL_hp_input(hp_input.cols(), hp_input.rows(), hp_input.channels()),
+      Image<float> HL_input(input->cols(), input->rows(), input->channels()),
                    HL_ac(foo_ac.cols(), foo_ac.rows(), foo_ac.channels()),
+                   HL_dc(recipe->dc.cols(), recipe->dc.rows(), recipe->dc.channels()),
                    HL_recon(input->cols(), input->rows(), input->channels());
 
-      hp_input.to_Halide(&HL_hp_input);
+      input->to_Halide(&HL_input);
       foo_ac.to_Halide(&HL_ac);
-      halide_recon(HL_hp_input, HL_ac, HL_recon); 
+      recipe->dc.to_Halide(&HL_dc);
+
+      Image<float> HL_ds(width/wSize, height/wSize, 3), 
+                   HL_low_pass(width, height, 3),
+                   HL_new_dc(width, height, 3);
+
+      halide_resize(HL_input, HL_ds.height(), HL_ds.width(), HL_ds);
+      halide_resize(HL_ds, HL_low_pass.height(), HL_low_pass.width(), HL_low_pass);
+      halide_resize(HL_dc, HL_new_dc.height(), HL_new_dc.width(), HL_new_dc);
+
+      halide_recon(HL_input, HL_low_pass, HL_ac, HL_new_dc, HL_recon); 
       reconstructed.from_Halide(HL_recon);
     }
-
-    reconstructed = reconstructed + dc ;
-
     gettimeofday(&t_recon, NULL);
 
     /* timing */
-    unsigned int t_rec = (t_recon.tv_sec - t_decompose.tv_sec) * 1000000 + (t_recon.tv_usec - t_decompose.tv_usec);
+    unsigned int t_rec = (t_recon.tv_sec - t0.tv_sec) * 1000000 + (t_recon.tv_usec - t0.tv_usec);
     std::cout<< "t_recon = " << t_rec << std::endl;
     return reconstructed;
 }

@@ -8,6 +8,8 @@
 #include "Recipe.h"
 #include "TransformModel.h"
 #include "LocalLaplacian.h"
+#include "static_image.h"
+#include "image_io.h"
 
 TEST(TransformModelTest, reconstruction){
   std::string filename = "../images/yichang.png";
@@ -109,24 +111,29 @@ TEST(TransformModelTest, recon_from_recipe){
   server_model.set_images(my_image, out);
   server_model.fit();
 
-  // Client side
+  /* Client side */
+  std::ifstream in_file ; // Quant data
+  in_file.open("quant.meta");
+  xform::PixelType* meta = new xform::PixelType[2*3*3];
+  for(int i = 0; i < 2*3*3; i++)
+    in_file >> meta[i];
+
   xform::XImage ac, dc, client_image;
   ac.read("recipe_ac.png");
   dc.read("recipe_dc.png");
   client_image.read(filename);
-
-  std::ifstream in_file;
-  in_file.open("quant.meta");
-  xform::PixelType* meta = new xform::PixelType[2*3*3];
-
-  /* Quant metadata */
-  for(int i = 0; i < 2*3*3; i++)
-    in_file >> meta[i];
 
   // Build model and recipe from client side
   xform::TransformModel client_model;
   client_model.set_from_recipe(client_image, ac.at(0), dc, meta);
   xform::XImage reconstructed = client_model.predict();
   reconstructed.write("TransformTest_recon_by_recipe.png");
+
+  /*Image<float> HL_input = load<float>(filename);
+  Image<float> HL_ac = load<float>("recipe_ac.png");
+  Image<float> HL_dc = load<float>("recipe_dc.png");
+  Image<float> HL_output(HL_input.width(), HL_input.height(), 3);
+  client_model.reconstruct_by_Halide(HL_input, HL_ac, HL_dc, meta, &HL_output)*/;
+
 }
  
