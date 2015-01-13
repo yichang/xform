@@ -1,6 +1,9 @@
 #include "gtest/gtest.h"
 #include "XImage.h"
 
+#include "static_image.h"
+#include "image_io.h"
+
 TEST(XImageTest, init_by_nchannels) {
   xform::XImage image(3); 
   ASSERT_TRUE(true);
@@ -48,4 +51,22 @@ TEST(XImageTest, read_and_write) {
   ASSERT_TRUE(image.write(output_filename));
 }
 
+TEST(XImageTest, read_from_Halide) { 
+  string input_filename = "../images/yichang.png";
+  string output_filename = "XImageTest_read_from_Halide.png";
+  Image<float> h_image = load<float>(input_filename);
+  xform::XImage x_image(h_image.height(), h_image.width(), h_image.channels());
+  x_image.from_Halide(h_image);
+  x_image.write(output_filename);
+}
+
+TEST(XImageTest, export_to_Halide) { 
+  string input_filename = "../images/yichang.png";
+  string output_filename = "XImageTest_export_to_Halide.png";
+  xform::XImage x_image;  
+  x_image.read(input_filename);
+  Image<float> h_image(x_image.cols(), x_image.rows(), x_image.channels());
+  ASSERT_TRUE(x_image.to_Halide(&h_image));
+  save(h_image, output_filename); 
+}
 

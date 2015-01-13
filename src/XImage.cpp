@@ -1,5 +1,7 @@
 #include <assert.h>
 #include "XImage.h" 
+#include "static_image.h"
+
 using namespace xform;
 
 XImage::XImage(int num_channels){
@@ -62,6 +64,31 @@ XImage XImage::operator-(const XImage& rhs) const {
         out.at(i)  = this->at(i) - rhs.at(i);
     }
     return out;
+}
+
+
+bool XImage::to_Halide(Image<float>* h_image) const{
+  assert(cols()==h_image->width());
+  assert(rows()==h_image->height());
+  assert(channels()==h_image->channels());
+  
+  for(int c=0 ; c < channels(); c++)
+    for(int i=0; i < rows(); i++)
+      for(int j=0; j < cols(); j++)
+        (*h_image)(j,i,c) = this->at(c)(i,j);
+  return true;
+}
+
+bool XImage::from_Halide(const Image<float>& h_image){
+  assert(cols()==h_image.width());
+  assert(rows()==h_image.height());
+  assert(channels()==h_image.channels());
+
+  for(int c=0 ; c < channels(); c++)
+    for(int i=0; i < rows(); i++)
+      for(int j=0; j < cols(); j++)
+        this->at(c)(i,j) = h_image(j, i, c);
+  return true;
 }
 
 #ifndef __ANDROID__

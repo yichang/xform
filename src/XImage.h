@@ -1,5 +1,6 @@
 #include <string>
 #include "util.h"
+#include "static_image.h"
 
 #ifndef SRC_X_IMAGE
 #define SRC_X_IMAGE
@@ -19,6 +20,9 @@ class XImage{
   bool setZero();
   bool read(const std::string& filename);
   bool write(const std::string& filename);
+
+  bool to_Halide(Image<float>* h_image) const;
+  bool from_Halide(const Image<float>& h_image);
 
   XImage operator+(const XImage& rhs) const;
   XImage operator-(const XImage& rhs) const;
