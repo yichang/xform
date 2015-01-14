@@ -1,4 +1,3 @@
-#include <vector>
 #include "TransformModel.h"
 #include "Warp.h"
 
@@ -35,7 +34,7 @@ void TransformModel::fit_recipe_by_Halide(const Image<float>& input,
   // TODO: to be done
 }
 void TransformModel::fit_recipe(const XImage& input, const XImage& target, 
-  ImageType_1* ac, XImage* dc, vector<PixelType>* meta) const{
+  ImageType_1* ac, XImage* dc, PixelType* meta) const{
 
     assert(input.cols()==target.cols());
     assert(input.rows()==target.rows());
@@ -289,11 +288,10 @@ void TransformModel::get_coefficients(const ImageType_1& ac,
     }
 }
 void TransformModel::quantize(int n_chan_i, int n_chan_o, 
-            ImageType_1* ac, vector<PixelType>* meta) const{
+            ImageType_1* ac, PixelType* meta) const{
 
   const int num_chan = n_chan_i * n_chan_o;
   const int height = ac->rows()/n_chan_i, width = ac->cols()/n_chan_o;
-  *meta = vector<PixelType>(2 * num_chan);  
 
   for(int in_chan = 0; in_chan < n_chan_i; ++in_chan)
     for(int out_chan = 0; out_chan < n_chan_o; ++out_chan)
@@ -303,8 +301,8 @@ void TransformModel::quantize(int n_chan_i, int n_chan_o,
                                                   height, width).minCoeff();
         PixelType maxi = ac->block(in_chan*height, out_chan*width,
                                                   height, width).maxCoeff();
-        meta->at(in_chan*n_chan_o + out_chan) = mini;
-        meta->at(in_chan*n_chan_o + out_chan + num_chan) = maxi;
+        meta[in_chan*n_chan_o + out_chan] = mini;
+        meta[in_chan*n_chan_o + out_chan + num_chan] = maxi;
         PixelType rng = maxi-mini;
         if(rng == 0){
             rng = 1;

@@ -1,4 +1,3 @@
-#include <vector>
 #include "XImage.h"
 
 #include "static_image.h"
@@ -23,7 +22,7 @@ class TransformModel{
                             const Image<float>& target) const;
   // Eigen-implemented
   void fit_recipe(const XImage& input, const XImage& target, 
-  ImageType_1* ac, XImage* dc, vector<PixelType>* meta) const;
+  ImageType_1* ac, XImage* dc, PixelType* meta) const;
 
   XImage reconstruct(const XImage& input, ImageType_1& ac, 
                            XImage& dc, const PixelType* meta) const;
@@ -39,7 +38,7 @@ class TransformModel{
    int n_chan_i, int n_chan_o, ImageType_1* ac) const;
 
   void quantize(int n_chan_i, int n_chan_o, 
-            ImageType_1* ac, vector<PixelType>* meta) const;
+            ImageType_1* ac, PixelType* meta) const;
 
   void get_coefficients(const ImageType_1& ac, 
                               int i, int j, MatType* coef) const;

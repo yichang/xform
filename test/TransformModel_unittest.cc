@@ -40,14 +40,14 @@ TEST(TransformModelTest, fit_recipe){
 
   xform::ImageType_1 ac;
   xform::XImage dc; 
-  vector<xform::PixelType> meta;
-  server_model.fit_recipe(my_image, out, &ac, &dc, &meta);
+  xform::PixelType* meta = new xform::PixelType[2*3*3];
+  server_model.fit_recipe(my_image, out, &ac, &dc, meta);
 
   dc.write("recipe_dc.png");
   xform::imwrite(ac, "recipe_ac.png");
   std::ofstream out_file;                                                   
   out_file.open("quant.meta");                                                
-  for(int i=0; i < meta.size(); i++)                         
+  for(int i=0; i < 2*3*3; i++)                         
     out_file<<meta[i]<<" ";                              
   out_file.close();                                   
 
@@ -82,14 +82,14 @@ TEST(TransformModelTest, fit_recipe){
   xform::TransformModel server_model;
   xform::ImageType_1 ac_server;
   xform::XImage dc_server; 
-  vector<xform::PixelType> meta_server;
-  server_model.fit_recipe(my_image, out, &ac_server, &dc_server, &meta_server);
+  xform::PixelType* meta_server = new xform::PixelType[2*3*3];
+  server_model.fit_recipe(my_image, out, &ac_server, &dc_server, meta_server);
 
   dc_server.write("recipe_dc.png");
   xform::imwrite(ac_server, "recipe_ac.png");
   std::ofstream out_file;                                                   
   out_file.open("quant.meta");                                                
-  for(int i=0; i < meta_server.size(); i++)                         
+  for(int i=0; i < 2*3*3; i++)                         
     out_file<<meta_server[i]<<" ";                              
   out_file.close();                                   
 
@@ -151,13 +151,13 @@ TEST(TransformModelTest, recon_from_recipe){
   server_model.use_halide=false;
   xform::ImageType_1 ac_server;
   xform::XImage dc_server; 
-  vector<xform::PixelType> meta_server;
-  server_model.fit_recipe(my_image, out, &ac_server, &dc_server, &meta_server);
+  xform::PixelType* meta_server = new xform::PixelType[2*3*3];
+  server_model.fit_recipe(my_image, out, &ac_server, &dc_server, meta_server);
   dc_server.write("recipe_dc.png");
   xform::imwrite(ac_server, "recipe_ac.png");
   std::ofstream out_file;                                                   
   out_file.open("quant.meta");                                                
-  for(int i=0; i < meta_server.size(); i++)                         
+  for(int i=0; i < 2*3*3; i++)                         
     out_file<<meta_server[i]<<" ";                              
   out_file.close();                                   
 
