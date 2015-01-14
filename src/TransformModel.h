@@ -1,5 +1,5 @@
-#ifndef TRANSFORM_MODEL_HPP_6HXUVNLU
-#define TRANSFORM_MODEL_HPP_6HXUVNLU
+#ifndef TRANSFORM_MODEL_H
+#define TRANSFORM_MODEL_H
 
 #include "XImage.h"
 #include "Recipe.h"
@@ -8,11 +8,9 @@
 
 namespace xform{
 
-class TransformModel
-{
+class TransformModel{
 public:
     TransformModel();
-    virtual ~TransformModel();
 
    // Halide 
    void reconstruct_by_Halide(const Image<float>& input, 
@@ -62,5 +60,4 @@ private:
 };
 
 } // namespace xform
-
-#endif /* end of include guard: TRANSFORM_MODEL_HPP_6HXUVNLU */
+#endif // TRANSFORM_MODEL_H

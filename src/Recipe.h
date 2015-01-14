@@ -1,17 +1,15 @@
-#ifndef RECIPE_H_STZIT3SX
-#define RECIPE_H_STZIT3SX
-
 #include "util.h"
 #include "XImage.h"
 
+#ifndef RECIPE_H
+#define RECIPE_H
+
 namespace xform{
 
-class Recipe
-{
-public:
+class Recipe{
+ public:
     Recipe(){};
     Recipe(int num_rows, int num_cols, int n_chan_i, int n_chan_o);
-    virtual ~Recipe();
 
     bool read(const std::string& filename);
     bool write(const std::string& filename);
@@ -28,7 +26,6 @@ public:
     void quantize();
     void dequantize();
 
-
     int height,width,n_chan_i,n_chan_o;
     int quantize_levels;
     PixelType* quantize_mins;
@@ -39,7 +36,4 @@ private:
 };
 
 } // namespace xform
-
-
-#endif /* end of include guard: RECIPE_H_STZIT3SX */
-
+#endif // RECIPE_H
