@@ -1,19 +1,19 @@
 
 blur: blur.cpp
-	g++ blur.cpp -o blur -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./blur
+	g++ blur.cpp -o blur.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./blur.out
 
 resize: resize.cpp
-	g++ resize.cpp -o resize -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./resize
+	g++ resize.cpp -o resize.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./resize.out
 
 recon: recon.cpp
-	g++ recon.cpp -o recon -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./recon
+	g++ recon.cpp -o recon.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./recon.out
 
 dequant: dequant.cpp
-	g++ dequant.cpp -o dequant -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./dequant
+	g++ dequant.cpp -o dequant.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./dequant.out
 
 test: test.cpp blur resize
 	g++ test.cpp halide_blur.o halide_resize.o  -o test -I ../third_party/halide/apps/support/ -lpng15

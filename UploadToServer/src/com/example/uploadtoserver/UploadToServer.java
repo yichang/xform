@@ -46,8 +46,8 @@ public class UploadToServer extends Activity {
     String serverRoot = null;
     
     Boolean Sleep_mode = true;
-    int Sleep_time_xform = 4000;
-    int Sleep_time_jpeg =  4000;
+    int Sleep_time_xform = 2000;
+    int Sleep_time_jpeg =  2000;
      
     /**********  File Path *************/
     final String localFileName = "local.jpg";

@@ -8,5 +8,9 @@ make/*.o
 make/*.a
 make/*.png
 make/
+xform_halide/*.o
+xform_halide/*.out
+xform_halide/*.a
 .metadata/
 .DS_Store
+images/*.png
