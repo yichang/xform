@@ -27,10 +27,9 @@ public:
     void set_recipe(Recipe* recipe);
     void set_from_recipe(const XImage& input, ImageType_1& ac, 
                                XImage& dc, const PixelType* meta);
-    //void fit();
-    void fit_recipe();
+    void fit_recipe(const XImage& input, const XImage& target);
 
-    XImage predict();
+    XImage reconstruct();
     Recipe *recipe;
 
     bool use_halide;
@@ -52,7 +51,6 @@ private:
     int mdl_w;
     
     // Pipeline operations
-    XImage reconstruct();
 
 };
 

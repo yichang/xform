@@ -59,24 +59,10 @@ void TransformModel::set_from_recipe(const XImage& input, ImageType_1& ac,
     recipe->quantize_maxs[i] = meta[num_chan+i];
   }
   set_images(input, input); // the second one is dummy
-
 }
 
 #ifndef __ANDROID__
-/*void TransformModel::fit() {
-    fit_recipe();
-    recipe->quantize();
-    recipe->write("recipe");
-}*/
 #endif
-
-XImage TransformModel::predict() {
-    if (!use_halide) // Halide schedule alreay includes dequantize
-      recipe->dequantize();
-
-    XImage out = reconstruct();
-    return out;
-}
 
 void TransformModel::fit_recipe_by_Halide(const Image<float>& input,
                                           const Image<float>& output) const{
@@ -91,8 +77,12 @@ void TransformModel::fit_recipe_by_Halide(const Image<float>& input,
   // TODO: to be done
 }
 
-void TransformModel::fit_recipe() {
+void TransformModel::fit_recipe(const XImage& input, const XImage& target) {
 
+    assert(input.cols()==target.cols());
+    assert(input.rows()==target.rows());
+    const int height = input.rows();
+    const int width = input.cols();
     // Highpass
     XImage hp_input(height, width, 3), 
            hp_output(height, width, 3),
@@ -102,25 +92,24 @@ void TransformModel::fit_recipe() {
     // Lowpass
       XImage lp_input; 
       Warp warp;
-      warp.imresize(*input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
-      warp.imresize(*output, height/wSize, width/wSize,Warp::BICUBIC, &lp_output);
-      //printf("lp size %dx%d\n", lp_input.rows(),lp_input.cols());
+      warp.imresize(input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
+      warp.imresize(target, height/wSize, width/wSize,Warp::BICUBIC, &lp_output);
 
       warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input);
       warp.imresize(lp_output, height,width,Warp::BICUBIC, &hp_output);
     } else { //use_halide
-      Image<float> HL_lp_input(width/wSize, height/wSize, input->channels()),
-                   HL_lp_output(width/wSize, height/wSize, input->channels()),
-                   HL_hp_input(width, height, input->channels()),
-                   HL_hp_output(width, height, input->channels()),
-                   HL_input(width, height, input->channels()),
-                   HL_output(width, height, input->channels());
+      Image<float> HL_lp_input(width/wSize, height/wSize, input.channels()),
+                   HL_lp_output(width/wSize, height/wSize, input.channels()),
+                   HL_hp_input(width, height, input.channels()),
+                   HL_hp_output(width, height, input.channels()),
+                   HL_input(width, height, input.channels()),
+                   HL_output(width, height, input.channels());
 
-      assert(width==input->cols());
-      assert(height==input->rows());
+      assert(width==input.cols());
+      assert(height==input.rows());
 
-      input->to_Halide(&HL_input);
-      output->to_Halide(&HL_output);
+      input.to_Halide(&HL_input);
+      target.to_Halide(&HL_output);
 
       halide_resize(HL_input, HL_lp_input.height(), HL_lp_input.width(), HL_lp_input);
       halide_resize(HL_output, HL_lp_output.height(), HL_lp_output.width(), HL_lp_output);
@@ -133,37 +122,39 @@ void TransformModel::fit_recipe() {
       lp_output.from_Halide(HL_lp_output);
     }
 
-    hp_input = *(this->input) - hp_input;
-    hp_output = *(this->output) - hp_output;
+    hp_input = input - hp_input;
+    hp_output = target - hp_output;
 
     if(recipe) {
         delete recipe;
         recipe = NULL;
     }
-    recipe = new Recipe(mdl_h,mdl_w,n_chan_i,n_chan_o);
+
+    const int mdl_h = ceil(1.0f * height/step);
+    const int mdl_w = ceil(1.0f * width/step);
+
+    recipe = new Recipe(mdl_h,mdl_w,input.channels(),target.channels());
     recipe->set_dc(lp_output);
 
     // Fit affine model per patch
-    int progress = 0;
     for (int imin = 0; imin < height; imin += step)
     for (int jmin = 0; jmin < width; jmin += step)
     {
-        progress   += 1;
         int mdl_i = imin/step;
         int mdl_j = jmin/step;
         int h = min(imin+wSize,height) - imin;
         int w = min(jmin+wSize,width) - jmin;
 
         // Extract patches
-        MatType p_input(h*w, n_chan_i);
-        MatType p_output(h*w, n_chan_o);
-        for(int c = 0; c < n_chan_i ; ++c)
+        MatType p_input(h*w, input.channels());
+        MatType p_output(h*w, target.channels());
+        for(int c = 0; c < input.channels() ; ++c)
         {
             MatType tmp = hp_input.at(c).block(imin,jmin,h,w);
             tmp.resize(h*w,1);
             p_input.col(c) = tmp;
         }
-        for(int c = 0; c < n_chan_o ; ++c)
+        for(int c = 0; c < target.channels() ; ++c)
         {
             MatType tmp = hp_output.at(c).block(imin,jmin,h,w);
             tmp.resize(h*w,1);
@@ -171,14 +162,12 @@ void TransformModel::fit_recipe() {
         }
 
         // Solve linear system
-        MatType lhs = p_input.transpose() * p_input + epsilon*MatType::Identity(n_chan_i, n_chan_i);
+        MatType lhs = p_input.transpose() * p_input 
+          + epsilon*MatType::Identity(input.channels(), input.channels());
         MatType rhs = p_input.transpose() * p_output;
         MatType coef = lhs.ldlt().solve(rhs);
         recipe->set_coefficients(mdl_i, mdl_j, coef); 
-
-        //printf("\r      - Fitting: %.2f%%",  ((100.0*progress)/(mdl_h*mdl_w)));
     }
-    //printf("\n");
     recipe->quantize();
     recipe->write("recipe");
 }
@@ -218,8 +207,9 @@ void TransformModel::reconstruct_by_Halide(const Image<float>& HL_input,
 XImage TransformModel::reconstruct() {
     // Lowpass
     XImage reconstructed(height, width, n_chan_o);
-
     if (!use_halide){
+      recipe->dequantize();
+
       XImage lp_input;
       Warp warp;
       warp.imresize(*input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);

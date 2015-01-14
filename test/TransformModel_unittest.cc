@@ -10,6 +10,33 @@
 #include "static_image.h"
 #include "image_io.h"
 #include <sys/time.h>
+TEST(TransformModelTest, fit_recipe){
+  std::string filename = "../images/yichang.png";
+  xform::XImage my_image, lab, new_lab(3), out; 
+  my_image.read(filename); 
+
+  // Processing by Laplacian filter
+  xform::ColorSpace color_space;
+  color_space.rgb2lab(my_image, &lab);
+  
+  xform::Curve curve;
+  xform::LocalLaplacian local_laplacian;
+  const xform::PixelType sigma = 8;
+  const xform::PixelType alpha = 4;
+  const int num_levels = 7;
+  const float interval = 7.0f;
+  const float l_range = 100.0f;
+  local_laplacian.adjustDetails(lab.at(0), sigma, alpha, num_levels, interval, 
+                                l_range, &(new_lab.at(0)));
+  new_lab.at(1) = lab.at(1);
+  new_lab.at(2) = lab.at(2);
+  color_space.lab2rgb(new_lab, &out);
+
+  xform::TransformModel server_model;
+  server_model.use_halide=false;
+  server_model.fit_recipe(my_image, out);
+}
+
 
 TEST(TransformModelTest, recon_from_recipe){
   std::string filename = "../images/yichang.png";
@@ -40,8 +67,7 @@ TEST(TransformModelTest, recon_from_recipe){
   // Server side
   xform::TransformModel server_model;
   server_model.use_halide=false;
-  server_model.set_images(my_image, out);
-  server_model.fit_recipe();
+  server_model.fit_recipe(my_image, out);
 
   /* Client side */
   std::ifstream in_file ; // Quant data
@@ -63,7 +89,7 @@ TEST(TransformModelTest, recon_from_recipe){
   /* timing */
   timeval t0, t_recon;
   gettimeofday(&t0, NULL);
-  xform::XImage reconstructed = client_model.predict();
+  xform::XImage reconstructed = client_model.reconstruct();
   gettimeofday(&t_recon, NULL);
   unsigned int t_rec = (t_recon.tv_sec - t0.tv_sec) * 1000000 + (t_recon.tv_usec - t0.tv_usec);
   std::cout<< "t_recon = " << t_rec << std::endl;
@@ -99,7 +125,7 @@ TEST(TransformModelTest, recon_from_recipe){
   // Server side
   xform::TransformModel server_model;
   server_model.set_images(my_image, out);
-  server_model.fit_recipe();
+  server_model.fit_recipe(my_image, out);
 
   /* Client side */
   std::ifstream in_file ; // Quant data
