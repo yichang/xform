@@ -84,7 +84,7 @@ TEST(TransformModelTest, recon_from_recipe){
   // Build model and recipe from client side
   xform::TransformModel client_model;
   client_model.use_halide=false;
-  client_model.set_from_recipe(client_image, ac.at(0), dc, meta);
+  //client_model.set_from_recipe(client_image, ac.at(0), dc, meta);
 
   /* timing */
   timeval t0, t_recon;

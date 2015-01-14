@@ -12,30 +12,22 @@ using namespace std;
 namespace xform{
 
 TransformModel::TransformModel(){
-    input  = NULL;
-    output = NULL;
     recipe = NULL;
     use_halide=true;
 
-    // Processing parameters
-    this->wSize   = 8;
-    this->step    = wSize/2;
-    this->epsilon = 1e-2;
-    this->epsilon *= this->epsilon;
+    wSize   = 8;
+    step    = wSize/2;
+    epsilon = 1e-2;
+    epsilon *= epsilon;
 }
-/*void TransformModel::set_recipe(Recipe* saved_recipe){
-  recipe = saved_recipe;
-}*/
 
 #ifndef __ANDROID__
-#endif
-
 void TransformModel::fit_recipe_by_Halide(const Image<float>& input,
                                           const Image<float>& output) const{
 
   // Lowpass
-  Image<float> lp_input(width/wSize, height/wSize, 3),
-               lp_output(width/wSize, height/wSize, 3);
+  Image<float> lp_input(input.width()/wSize, input.height()/wSize, 3),
+               lp_output(input.width()/wSize, input.height()/wSize, 3);
 
   halide_resize(input,  lp_input.height(),  lp_input.width(),  lp_input); 
   halide_resize(output, lp_output.height(), lp_output.width(), lp_output); 
@@ -137,6 +129,7 @@ void TransformModel::fit_recipe(const XImage& input, const XImage& target) {
     recipe->quantize();
     recipe->write("recipe");
 }
+#endif
 void TransformModel::reconstruct_by_Halide(const Image<float>& HL_input, 
                                const Image<float>& HL_ac,
                                const Image<float>& HL_dc, 
@@ -167,24 +160,6 @@ void TransformModel::reconstruct_by_Halide(const Image<float>& HL_input,
       /* Patch-based */
       halide_recon(HL_input, HL_low_pass, HL_ac, HL_new_dc, step, *HL_output); 
 }
-
-void TransformModel::set_from_recipe(const XImage& input, ImageType_1& ac, 
-                                    XImage& dc, const PixelType* meta){
-  
-  const int width = ceil(static_cast<float>(input.cols())/static_cast<float>(step));
-  const int height = ceil(static_cast<float>(input.rows())/static_cast<float>(step));
-  const int n_chan_i = 3; 
-  const int n_chan_o = 3; 
-  recipe = new Recipe(height, width, n_chan_i, n_chan_o);
-  recipe->set_dc(dc);
-  recipe->set_ac(ac);
-
-  const int num_chan = n_chan_i * n_chan_o;
-  for(int i=0; i < num_chan; i++){
-    recipe->quantize_mins[i] = meta[i];
-    recipe->quantize_maxs[i] = meta[num_chan+i];
-  }
-}
 XImage TransformModel::reconstruct(const XImage& input, ImageType_1& ac, 
                                     XImage& dc, const PixelType* meta){
 
@@ -192,6 +167,20 @@ XImage TransformModel::reconstruct(const XImage& input, ImageType_1& ac,
     const int width = input.cols();
     const int n_chan_o = 3;
     const int n_chan_i = 3;
+
+    // Seting recipe
+    recipe = new Recipe(ceil(static_cast<float>(height)/step), 
+                        ceil(static_cast<float>(width)/step), 
+                        n_chan_i, n_chan_o);
+
+    recipe->set_dc(dc);
+    recipe->set_ac(ac);
+
+    const int num_chan = n_chan_i * n_chan_o;
+    for(int i=0; i < num_chan; i++){
+      recipe->quantize_mins[i] = meta[i];
+      recipe->quantize_maxs[i] = meta[num_chan+i];
+    }
 
     // Lowpass
     XImage reconstructed(height, width, n_chan_o);
@@ -241,18 +230,17 @@ XImage TransformModel::reconstruct(const XImage& input, ImageType_1& ac,
           }
       }
       reconstructed = reconstructed + dc ;
-
     } else { // use_halide
       XImage foo_ac(1);
       foo_ac.at(0) = recipe->ac;
       Image<float> HL_input(input.cols(), input.rows(), input.channels()),
                    HL_ac(foo_ac.cols(), foo_ac.rows(), foo_ac.channels()),
-                   HL_dc(recipe->dc.cols(), recipe->dc.rows(), recipe->dc.channels()),
+                   HL_dc(dc.cols(), dc.rows(), dc.channels()),
                    HL_recon(input.cols(), input.rows(), input.channels());
 
       input.to_Halide(&HL_input);
       foo_ac.to_Halide(&HL_ac);
-      recipe->dc.to_Halide(&HL_dc);
+      dc.to_Halide(&HL_dc);
 
       /* Dequantize */
       Image<float> mins(3,3), maxs(3,3);
@@ -278,5 +266,4 @@ XImage TransformModel::reconstruct(const XImage& input, ImageType_1& ac,
     }
   return reconstructed;
 }
-
 } // namespace xform
