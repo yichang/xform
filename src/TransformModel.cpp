@@ -24,18 +24,6 @@ TransformModel::TransformModel(){
     this->epsilon *= this->epsilon;
 }
 
-TransformModel::~TransformModel() {
-    input  = NULL;
-    output = NULL;
-    if(recipe){
-        delete recipe;
-        recipe = NULL;
-    }
-}
-int TransformModel::get_step() const{
-  return step;
-}
-
 void TransformModel::set_images(const XImage &input, const XImage &output) {
     this->input = &input;
     this->output = &output;
@@ -57,8 +45,8 @@ void TransformModel::set_recipe(Recipe* saved_recipe){
 void TransformModel::set_from_recipe(const XImage& input, ImageType_1& ac, 
                                     XImage& dc, const PixelType* meta){
   
-  const int width = ceil(static_cast<float>(input.cols())/static_cast<float>(get_step()));
-  const int height = ceil(static_cast<float>(input.rows())/static_cast<float>(get_step()));
+  const int width = ceil(static_cast<float>(input.cols())/static_cast<float>(step));
+  const int height = ceil(static_cast<float>(input.rows())/static_cast<float>(step));
   const int n_chan_i = 3; 
   const int n_chan_o = 3; 
   recipe = new Recipe(height, width, n_chan_i, n_chan_o);
@@ -89,12 +77,6 @@ XImage TransformModel::predict() {
     XImage out = reconstruct();
     return out;
 }
-
-void TransformModel::check_fit_io(){
-    if(!input || !output){
-        printf("No input/output pair, cannot make recipe\n");
-    }
-};
 
 void TransformModel::fit_recipe_by_Halide(const Image<float>& input,
                                           const Image<float>& output) const{

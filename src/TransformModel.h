@@ -19,7 +19,7 @@ public:
                                const PixelType* meta,
                                Image<float>* output) const;
 
-  void fit_recipe_by_Halide(const Image<float>& input,
+    void fit_recipe_by_Halide(const Image<float>& input,
                               const Image<float>& target) const;
 
     // Eigen implemented
@@ -31,17 +31,15 @@ public:
     XImage predict();
     Recipe *recipe;
 
-    int get_step() const;
     bool use_halide;
+    int step;
 private:
     // Input data
     const XImage *input;
     const XImage *output;
 
-
     // Parameters
     int wSize;
-    int step;
     PixelType epsilon;
 
     int height;
@@ -55,8 +53,6 @@ private:
     void fit_recipe();
     XImage reconstruct();
 
-    // Helpers
-    void check_fit_io();
 };
 
 } // namespace xform

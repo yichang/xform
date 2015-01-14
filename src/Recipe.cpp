@@ -18,17 +18,6 @@ Recipe::Recipe(int num_rows, int num_cols, int n_chan_i, int n_chan_o):
     quantize_levels = 255;
 }
 
-Recipe::~Recipe(){
-    if(quantize_mins){
-        delete quantize_mins;
-        quantize_mins = NULL;
-    }
-    if(quantize_maxs){
-        delete quantize_maxs;
-        quantize_maxs = NULL;
-    }
-}
-
 bool Recipe::read(const std::string& filename) {
     return true;
 }
