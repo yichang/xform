@@ -23,42 +23,8 @@ TransformModel::TransformModel(){
     this->epsilon = 1e-2;
     this->epsilon *= this->epsilon;
 }
-
-void TransformModel::set_images(const XImage &input, const XImage &output) {
-    this->input = &input;
-    this->output = &output;
-
-    height   = input.rows();
-    width    = input.cols();
-    n_chan_o = output.channels();
-    n_chan_i = input.channels();
-    //printf("input size %dx%dx%d\n", height, width,n_chan_i);
-    
-    // Size of the recipe
-    mdl_h = ceil(1.0f*height/step);
-    mdl_w = ceil(1.0f*width/step);
-}
 void TransformModel::set_recipe(Recipe* saved_recipe){
   recipe = saved_recipe;
-}
-
-void TransformModel::set_from_recipe(const XImage& input, ImageType_1& ac, 
-                                    XImage& dc, const PixelType* meta){
-  
-  const int width = ceil(static_cast<float>(input.cols())/static_cast<float>(step));
-  const int height = ceil(static_cast<float>(input.rows())/static_cast<float>(step));
-  const int n_chan_i = 3; 
-  const int n_chan_o = 3; 
-  recipe = new Recipe(height, width, n_chan_i, n_chan_o);
-  recipe->set_dc(dc);
-  recipe->set_ac(ac);
-
-  const int num_chan = n_chan_i * n_chan_o;
-  for(int i=0; i < num_chan; i++){
-    recipe->quantize_mins[i] = meta[i];
-    recipe->quantize_maxs[i] = meta[num_chan+i];
-  }
-  set_images(input, input); // the second one is dummy
 }
 
 #ifndef __ANDROID__
@@ -171,8 +137,6 @@ void TransformModel::fit_recipe(const XImage& input, const XImage& target) {
     recipe->quantize();
     recipe->write("recipe");
 }
-
-
 void TransformModel::reconstruct_by_Halide(const Image<float>& HL_input, 
                                const Image<float>& HL_ac,
                                const Image<float>& HL_dc, 
@@ -204,7 +168,31 @@ void TransformModel::reconstruct_by_Halide(const Image<float>& HL_input,
       halide_recon(HL_input, HL_low_pass, HL_ac, HL_new_dc, step, *HL_output); 
 }
 
-XImage TransformModel::reconstruct() {
+void TransformModel::set_from_recipe(const XImage& input, ImageType_1& ac, 
+                                    XImage& dc, const PixelType* meta){
+  
+  const int width = ceil(static_cast<float>(input.cols())/static_cast<float>(step));
+  const int height = ceil(static_cast<float>(input.rows())/static_cast<float>(step));
+  const int n_chan_i = 3; 
+  const int n_chan_o = 3; 
+  recipe = new Recipe(height, width, n_chan_i, n_chan_o);
+  recipe->set_dc(dc);
+  recipe->set_ac(ac);
+
+  const int num_chan = n_chan_i * n_chan_o;
+  for(int i=0; i < num_chan; i++){
+    recipe->quantize_mins[i] = meta[i];
+    recipe->quantize_maxs[i] = meta[num_chan+i];
+  }
+}
+XImage TransformModel::reconstruct(const XImage& input, ImageType_1& ac, 
+                                    XImage& dc, const PixelType* meta){
+
+    const int height = input.rows();
+    const int width = input.cols();
+    const int n_chan_o = 3;
+    const int n_chan_i = 3;
+
     // Lowpass
     XImage reconstructed(height, width, n_chan_o);
     if (!use_halide){
@@ -212,23 +200,21 @@ XImage TransformModel::reconstruct() {
 
       XImage lp_input;
       Warp warp;
-      warp.imresize(*input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
+      warp.imresize(input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
 
       // Highpass
       XImage hp_input;
       warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input);
-      hp_input = *(this->input) - hp_input;
+      hp_input = input - hp_input;
 
       // Result
       XImage dc;
       warp.imresize(recipe->get_dc(), height, width, Warp::BICUBIC, &dc);
 
     // Reconstruct each patch
-      int progress = 0;
       for (int imin = 0; imin < height; imin += step)
       for (int jmin = 0; jmin < width; jmin += step)
       {
-          progress   += 1;
           int mdl_i = imin/step;
           int mdl_j = jmin/step;
           int h = min(imin+step,height) - imin;
@@ -259,12 +245,12 @@ XImage TransformModel::reconstruct() {
     } else { // use_halide
       XImage foo_ac(1);
       foo_ac.at(0) = recipe->ac;
-      Image<float> HL_input(input->cols(), input->rows(), input->channels()),
+      Image<float> HL_input(input.cols(), input.rows(), input.channels()),
                    HL_ac(foo_ac.cols(), foo_ac.rows(), foo_ac.channels()),
                    HL_dc(recipe->dc.cols(), recipe->dc.rows(), recipe->dc.channels()),
-                   HL_recon(input->cols(), input->rows(), input->channels());
+                   HL_recon(input.cols(), input.rows(), input.channels());
 
-      input->to_Halide(&HL_input);
+      input.to_Halide(&HL_input);
       foo_ac.to_Halide(&HL_ac);
       recipe->dc.to_Halide(&HL_dc);
 
@@ -290,9 +276,7 @@ XImage TransformModel::reconstruct() {
       halide_recon(HL_input, HL_low_pass, HL_ac, HL_new_dc, step, HL_recon); 
       reconstructed.from_Halide(HL_recon);
     }
-
   return reconstructed;
-
 }
 
 } // namespace xform

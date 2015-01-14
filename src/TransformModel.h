@@ -23,13 +23,13 @@ public:
                               const Image<float>& target) const;
 
     // Eigen implemented
-    void set_images(const XImage &input, const XImage &output);
     void set_recipe(Recipe* recipe);
     void set_from_recipe(const XImage& input, ImageType_1& ac, 
                                XImage& dc, const PixelType* meta);
     void fit_recipe(const XImage& input, const XImage& target);
 
-    XImage reconstruct();
+    XImage reconstruct(const XImage& input, ImageType_1& ac, 
+                               XImage& dc, const PixelType* meta);
     Recipe *recipe;
 
     bool use_halide;
@@ -49,9 +49,6 @@ private:
     int n_chan_i;
     int mdl_h;
     int mdl_w;
-    
-    // Pipeline operations
-
 };
 
 } // namespace xform

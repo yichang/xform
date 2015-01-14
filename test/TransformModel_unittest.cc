@@ -89,7 +89,8 @@ TEST(TransformModelTest, recon_from_recipe){
   /* timing */
   timeval t0, t_recon;
   gettimeofday(&t0, NULL);
-  xform::XImage reconstructed = client_model.reconstruct();
+  xform::XImage reconstructed = client_model.
+      reconstruct(client_image, ac.at(0), dc, meta);
   gettimeofday(&t_recon, NULL);
   unsigned int t_rec = (t_recon.tv_sec - t0.tv_sec) * 1000000 + (t_recon.tv_usec - t0.tv_usec);
   std::cout<< "t_recon = " << t_rec << std::endl;
@@ -124,7 +125,7 @@ TEST(TransformModelTest, recon_from_recipe){
 
   // Server side
   xform::TransformModel server_model;
-  server_model.set_images(my_image, out);
+  //server_model.set_images(my_image, out);
   server_model.fit_recipe(my_image, out);
 
   /* Client side */
