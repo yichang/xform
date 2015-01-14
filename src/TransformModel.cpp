@@ -220,7 +220,7 @@ XImage TransformModel::reconstruct(const XImage& input, ImageType_1& ac,
           }
 
           MatType coef(n_chan_i,n_chan_o);
-          recipe->get_coefficients(mdl_i, mdl_j, coef); 
+          get_coefficients(ac, mdl_i, mdl_j, &coef); 
           MatType p_reconstructed = p_input * coef;
 
           for(int c = 0; c < n_chan_o ; ++c){
@@ -265,5 +265,25 @@ XImage TransformModel::reconstruct(const XImage& input, ImageType_1& ac,
       reconstructed.from_Halide(HL_recon);
     }
   return reconstructed;
+}
+
+
+// Helper functions 
+void TransformModel::dequantize(const PixelType* meta, ImageType_1* ac) const{
+
+
+}
+void TransformModel::get_coefficients(const ImageType_1& ac, 
+                        int i, int j, MatType* coef) const{
+
+  const int n_chan_i = coef->rows(), n_chan_o = coef->cols();
+  const int height = ac.rows()/n_chan_i, width = ac.cols()/n_chan_o;
+  for(int in_chan = 0; in_chan < n_chan_i ; ++in_chan)
+    for(int out_chan = 0; out_chan < n_chan_o ; ++out_chan)
+    {
+        int ac_map_i = in_chan*height + i;
+        int ac_map_j = out_chan*width +j;
+        (*coef)(in_chan,out_chan) = ac(ac_map_i, ac_map_j);
+    }
 }
 } // namespace xform

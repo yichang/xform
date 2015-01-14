@@ -33,6 +33,9 @@ class TransformModel{
   int wSize;
   PixelType epsilon;
  private:
+  void dequantize(const PixelType* meta, ImageType_1* ac) const;
+  void get_coefficients(const ImageType_1& ac, 
+                              int i, int j, MatType* coef) const;
 };
 } // namespace xform
 #endif // TRANSFORM_MODEL_H
