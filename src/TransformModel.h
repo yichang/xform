@@ -23,7 +23,6 @@ public:
                               const Image<float>& target) const;
 
     // Eigen implemented
-    void set_recipe(Recipe* recipe);
     void set_from_recipe(const XImage& input, ImageType_1& ac, 
                                XImage& dc, const PixelType* meta);
     void fit_recipe(const XImage& input, const XImage& target);

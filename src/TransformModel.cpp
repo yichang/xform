@@ -23,9 +23,9 @@ TransformModel::TransformModel(){
     this->epsilon = 1e-2;
     this->epsilon *= this->epsilon;
 }
-void TransformModel::set_recipe(Recipe* saved_recipe){
+/*void TransformModel::set_recipe(Recipe* saved_recipe){
   recipe = saved_recipe;
-}
+}*/
 
 #ifndef __ANDROID__
 #endif
