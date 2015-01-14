@@ -63,11 +63,11 @@ void TransformModel::set_from_recipe(const XImage& input, ImageType_1& ac,
 }
 
 #ifndef __ANDROID__
-void TransformModel::fit() {
+/*void TransformModel::fit() {
     fit_recipe();
     recipe->quantize();
     recipe->write("recipe");
-}
+}*/
 #endif
 
 XImage TransformModel::predict() {
@@ -179,6 +179,8 @@ void TransformModel::fit_recipe() {
         //printf("\r      - Fitting: %.2f%%",  ((100.0*progress)/(mdl_h*mdl_w)));
     }
     //printf("\n");
+    recipe->quantize();
+    recipe->write("recipe");
 }
 
 

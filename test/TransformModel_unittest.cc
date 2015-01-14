@@ -41,7 +41,7 @@ TEST(TransformModelTest, recon_from_recipe){
   xform::TransformModel server_model;
   server_model.use_halide=false;
   server_model.set_images(my_image, out);
-  server_model.fit();
+  server_model.fit_recipe();
 
   /* Client side */
   std::ifstream in_file ; // Quant data
@@ -99,7 +99,7 @@ TEST(TransformModelTest, recon_from_recipe){
   // Server side
   xform::TransformModel server_model;
   server_model.set_images(my_image, out);
-  server_model.fit();
+  server_model.fit_recipe();
 
   /* Client side */
   std::ifstream in_file ; // Quant data
