@@ -18,6 +18,7 @@ class XImage{
   int rows() const;
   int channels() const;
   bool setZero();
+  bool setOnes();
   bool read(const std::string& filename);
   bool write(const std::string& filename);
 

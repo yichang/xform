@@ -46,6 +46,11 @@ bool XImage::setZero(){
     this->at(i).setZero();
   return true;
 }
+bool XImage::setOnes(){
+  for(int i=0; i < this->channels(); i++)
+    this->at(i).setOnes();
+  return true;
+}
 
 XImage XImage::operator+(const XImage& rhs) const {
     // TODO: check same size
