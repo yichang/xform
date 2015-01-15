@@ -79,13 +79,17 @@ TEST(TransformModelTest, fit_recipe){
   xform::XImage output; 
 
   // Server side
+  Image<float> HL_input_server(my_image.cols(), my_image.rows(), my_image.channels()),
+               HL_output_server(out.cols(), out.rows(), out.channels()),
+               HL_dc_server;
+  my_image.to_Halide(&HL_input_server);
+  out.to_Halide(&HL_output_server);
   xform::TransformModel server_model;
   xform::ImageType_1 ac_server;
-  xform::XImage dc_server; 
   xform::PixelType* meta_server = new xform::PixelType[2*3*3];
-  server_model.fit_recipe(my_image, out, &ac_server, &dc_server, meta_server);
+  server_model.fit_recipe_by_Halide(HL_input_server, HL_output_server, &ac_server, &HL_dc_server, meta_server);
 
-  dc_server.write("recipe_dc.png");
+  save(HL_dc_server, "recipe_dc.png");
   xform::imwrite(ac_server, "recipe_ac.png");
   std::ofstream out_file;                                                   
   out_file.open("quant.meta");                                                
