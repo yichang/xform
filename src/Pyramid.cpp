@@ -5,14 +5,14 @@
 
 using namespace xform; 
 
-Pyramid::Pyramid(FilterType filter_type):filter_type(filter_type){
+Pyramid::Pyramid(FilterType filter_type, bool stack):filter_type(filter_type), stack(stack){
 }
-Pyramid::Pyramid(const int num_levels, const FilterType filter_type) 
-        :Pyramid(filter_type){
+Pyramid::Pyramid(const int num_levels, const FilterType filter_type, const bool stack) 
+        :Pyramid(filter_type, stack){
   nd_array = ImageType_N(num_levels);
 }
 Pyramid::Pyramid(const ImageType_1& im_in, const int num_levels, 
-                 const FilterType filter_type) : filter_type(filter_type){ 
+const FilterType filter_type, const bool stack) : filter_type(filter_type), stack(stack){ 
   construct(im_in, num_levels);  
 }
 
@@ -22,7 +22,7 @@ void Pyramid::construct(const ImageType_1& im_in, const int num_levels){
 
   Filter filt; 
   Warp warp; 
-  const int b_width = 3; 
+  int b_width = 3; 
   const float scale = 0.5; 
   const int n_iter = 3; 
 
@@ -30,12 +30,21 @@ void Pyramid::construct(const ImageType_1& im_in, const int num_levels){
   for(int i=0; i < num_levels-1; i++){
     ImageType_1 blur, next_, recon;  
     filt.box_iteration(current, b_width, n_iter, &blur);
-    warp.imresize(blur, scale * blur.rows(), 
+    if (!stack) // pyramid
+      warp.imresize(blur, scale * blur.rows(), 
                         scale * blur.cols(), Warp::BILINEAR, &next_); 
+    else{ // stack
+      next_ = blur;
+      b_width /= scale; 
+      b_width += 1;
+    }
 
     if (filter_type == LAPLACIAN) {
       ImageType_1 recon; 
-      warp.imresize(next_, blur.rows(), blur.cols(), Warp::BILINEAR, &recon); 
+      if (!stack)
+        warp.imresize(next_, blur.rows(), blur.cols(), Warp::BILINEAR, &recon); 
+      else
+        recon = next_;
       this->at(i) =  current - recon; 
     } else { // GAUSSIAN
       this->at(i) = current; 

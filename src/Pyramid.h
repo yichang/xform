@@ -14,10 +14,11 @@ class Pyramid{
     GAUSSIAN,
   };
 
-  Pyramid(const FilterType filter_type);
-  Pyramid(const int num_levels, const FilterType filter_type);
+  Pyramid(const FilterType filter_type, const bool stack);
+  Pyramid(const int num_levels, const FilterType filter_type, 
+                                const bool stack);
   Pyramid(const ImageType_1& im_in, const int num_levels, 
-          const FilterType filter_type); 
+          const FilterType filter_type, const bool stack); 
 
   // Modifers
   ImageType_1& at(int level);
@@ -34,6 +35,7 @@ class Pyramid{
   bool write(const std::string& prefix);
  private:
   const FilterType filter_type;
+  const bool stack;
   ImageType_N nd_array; 
 };
 
