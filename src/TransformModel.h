@@ -55,6 +55,8 @@ class TransformModel{
 
   void set_coefficients(const MatType& coef, 
                               int i, int j, ImageType_1* ac) const; 
+  void two_scale_decomposition(const XImage& input, 
+                                    XImage* hp_input, XImage* lp_input) const;
 };
 } // namespace xform
 #endif // TRANSFORM_MODEL_H
