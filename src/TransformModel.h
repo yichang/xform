@@ -30,13 +30,26 @@ class TransformModel{
   XImage reconstruct(const XImage& input, ImageType_1& ac, 
                            XImage& dc, const PixelType* meta) const;
 
+  void fit_separate_recipe(const XImage& input, const XImage& target, 
+          ImageType_1* ac_lumin, ImageType_1* ac_chrom, 
+                            XImage* dc, PixelType* meta) const;
+
+  XImage reconstruct_separate(const XImage& input, 
+                              ImageType_1& ac_lumin, 
+                              ImageType_1& ac_chrom,
+                              XImage& dc, const PixelType* meta) const;
   bool use_halide;
+  int num_scale;
   int step;
   int wSize;
   int quantize_levels;
+  int num_affine;
+  int num_linear;
   PixelType epsilon;
 
  private:
+  void make_chrom_features(const XImage& input, XImage* feat) const;
+  void make_lumin_features(const XImage& input, XImage* feat) const;
 
   void regression_fit(const XImage& input_feat, 
   const XImage& target_feat, ImageType_1* ac) const;

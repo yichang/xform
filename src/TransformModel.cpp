@@ -1,6 +1,7 @@
 #include "TransformModel.h"
-#include "Warp.h"
 #include "ColorSpace.h"
+#include "Pyramid.h"
+#include "Warp.h"
 
 // HALIDE
 #include "halide_resize.h"
@@ -20,6 +21,9 @@ TransformModel::TransformModel(){
     epsilon = 1e-2;
     epsilon *= epsilon;
     quantize_levels = 255; 
+    num_scale = 4;
+    num_affine = 4;
+    num_linear = 3;
 }
 
 #ifndef __ANDROID__
@@ -56,11 +60,47 @@ void TransformModel::fit_recipe_by_Halide(const Image<float>& HL_input,
   hp_output = output - hp_output;
 
   // Regression
-  const int mdl_h = ceil(1.0f * height/step);
-  const int mdl_w = ceil(1.0f * width/step);
-  *ac = ImageType_1(mdl_h * HL_input.channels(), mdl_w * HL_output.channels()); 
   regression_fit(hp_input, hp_output, ac);
   quantize(HL_input.channels(), HL_output.channels(), ac, meta);
+}
+void TransformModel::fit_separate_recipe(const XImage& input, 
+                                         const XImage& target, 
+          ImageType_1* ac_lumin, ImageType_1* ac_chrom, 
+                            XImage* dc, PixelType* meta) const{
+    // Order of meta: lumin_min lumin_max chrom_min chrom_max
+    assert(input.cols()==target.cols());
+    assert(input.rows()==target.rows());
+    assert(!use_halide);
+
+    // RGB2YUV
+    XImage input_yuv, target_yuv;
+    ColorSpace cs; 
+    cs.rgb2yuv(input, &input_yuv);
+    cs.rgb2yuv(target, &target_yuv);
+
+   // Target features
+    XImage hp_target_yuv, lp_target_yuv;
+    two_scale_decomposition(target_yuv, &hp_target_yuv, &lp_target_yuv);
+    cs.yuv2rgb(lp_target_yuv, dc);
+
+   //Input features
+    XImage feat_chrom, feat_lumin;
+    make_chrom_features(input_yuv, &feat_chrom);
+    make_lumin_features(input_yuv, &feat_lumin);
+
+    // Build y and uv target feat
+    XImage hp_target_y(1), hp_target_uv(2);
+    hp_target_y.at(0) = hp_target_yuv.at(0);
+    hp_target_uv.at(0) = hp_target_yuv.at(1);
+    hp_target_uv.at(1) = hp_target_yuv.at(2);
+
+    // Fit lumin and chrom channels
+    regression_fit(feat_lumin, hp_target_y, ac_lumin);
+    regression_fit(feat_chrom, hp_target_uv, ac_chrom);
+    
+    quantize(feat_lumin.channels(), hp_target_y.channels(),  ac_lumin, meta);
+    quantize(feat_chrom.channels(), hp_target_uv.channels(), 
+      ac_chrom, meta + 2 * feat_lumin.channels() * hp_target_y.channels());
 }
 void TransformModel::fit_recipe(const XImage& input, const XImage& target, 
   ImageType_1* ac, XImage* dc, PixelType* meta) const{
@@ -68,28 +108,49 @@ void TransformModel::fit_recipe(const XImage& input, const XImage& target,
     assert(input.cols()==target.cols());
     assert(input.rows()==target.rows());
     assert(!use_halide);
-    const int height = input.rows(), width = input.cols();
 
-   // RGB2YUV
+    // RGB2YUV
     XImage input_yuv, target_yuv;
     ColorSpace cs; 
     cs.rgb2yuv(input, &input_yuv);
     cs.rgb2yuv(target, &target_yuv);
 
-     // Two-scale decomposition
-    XImage hp_input_yuv, lp_input_yuv, hp_target_yuv, lp_target_yuv;
-    
-    two_scale_decomposition(input_yuv, &hp_input_yuv, &lp_input_yuv);
+    // Target features
+    XImage hp_target_yuv, lp_target_yuv;
     two_scale_decomposition(target_yuv, &hp_target_yuv, &lp_target_yuv);
+    cs.yuv2rgb(lp_target_yuv, dc);
+
+    // Input features
+    XImage hp_input_yuv, foo; 
+    two_scale_decomposition(input_yuv, &hp_input_yuv, &foo);
 
     // Fitting
-    const int mdl_h = ceil(1.0f * height/step);
-    const int mdl_w = ceil(1.0f * width/step);
-
-    cs.yuv2rgb(lp_target_yuv, dc);
-    *ac = ImageType_1(mdl_h * input.channels(), mdl_w * target.channels()); 
     regression_fit(hp_input_yuv, hp_target_yuv, ac);
     quantize(input.channels(), target.channels(), ac, meta);
+}
+void TransformModel::make_chrom_features(const XImage& input, 
+                                               XImage* feat) const{
+  *feat = XImage(input.rows(), input.cols(), input.channels()+1);     
+  feat->setOnes();
+  XImage hp_input, foo;
+  two_scale_decomposition(input, &hp_input, &foo);
+  for(int i=0; i < hp_input.channels(); i++)
+    feat->at(i) = hp_input.at(i);
+}
+void TransformModel::make_lumin_features(const XImage& input, 
+                                               XImage* feat) const{
+  *feat = XImage(input.rows(), input.cols(), input.channels() + num_scale);
+  feat->setOnes();
+  XImage hp_input, foo;
+  two_scale_decomposition(input, &hp_input, &foo);
+  for(int i = 0; i < hp_input.channels(); i++)
+    feat->at(i) = hp_input.at(i);
+
+  Pyramid pyramid_y(input.at(0), num_scale, Pyramid::LAPLACIAN, true);
+  for(int i = 0; i < pyramid_y.levels()-1; i++)
+    feat->at(i + num_affine) = pyramid_y.at(i);
+  
+      
 }
 #endif
 void TransformModel::reconstruct_by_Halide(const Image<float>& HL_input, 
@@ -126,7 +187,7 @@ XImage TransformModel::reconstruct(const XImage& input, ImageType_1& ac,
                               XImage& dc, const PixelType* meta) const{
     assert(!use_halide);
     const int height = input.rows(), width = input.cols();
-    const int n_chan_o = 3, n_chan_i = 3;
+    const int n_chan_o = num_linear, n_chan_i = num_linear;
 
     dequantize(meta, n_chan_i, n_chan_o, &ac);
 
@@ -151,6 +212,49 @@ XImage TransformModel::reconstruct(const XImage& input, ImageType_1& ac,
     reconstructed = reconstructed + new_dc ;
     return reconstructed;
 }
+XImage TransformModel::reconstruct_separate(const XImage& input, 
+                              ImageType_1& ac_lumin, 
+                              ImageType_1& ac_chrom,
+                              XImage& dc, const PixelType* meta) const{
+    assert(!use_halide);
+    const int height = input.rows(), width = input.cols();
+    const int n_chan_i_lumin = num_affine + num_scale - 1; //TODO: don't hard code this!
+    const int n_chan_i_chrom = num_affine;
+
+    dequantize(meta,                      n_chan_i_lumin, 1, &ac_lumin);
+    dequantize(meta + 2 * n_chan_i_lumin, n_chan_i_chrom, 2, &ac_chrom);
+
+    // RGB2YUV
+    ColorSpace cs;
+    XImage input_yuv;
+    cs.rgb2yuv(input, &input_yuv);
+
+    // Make features 
+    XImage feat_lumin, feat_chrom; 
+    make_chrom_features(input_yuv, &feat_chrom);
+    make_lumin_features(input_yuv, &feat_lumin);
+
+    // Reconstruction
+    XImage reconstructed_y(height, width,  1), 
+           reconstructed_uv(height, width, 2), 
+           reconstructed_yuv(3),
+           reconstructed;
+    regression_predict(feat_lumin, ac_lumin, n_chan_i_lumin, 1, &reconstructed_y);
+    regression_predict(feat_lumin, ac_chrom, n_chan_i_chrom, 2, &reconstructed_uv);
+    reconstructed_yuv.at(0) = reconstructed_y.at(0);
+    reconstructed_yuv.at(1) = reconstructed_uv.at(0);
+    reconstructed_yuv.at(2) = reconstructed_uv.at(1);
+
+    cs.yuv2rgb(reconstructed_yuv, &reconstructed);
+
+    // Add DC back
+    XImage new_dc;
+    Warp warp;
+    warp.imresize(dc, height, width, Warp::BICUBIC, &new_dc);
+    reconstructed = reconstructed + new_dc ;
+    return reconstructed;
+}
+
 // Helper functions 
 void TransformModel::two_scale_decomposition(const XImage& input, 
                                     XImage* hp_input, XImage* lp_input) const{
@@ -163,7 +267,11 @@ void TransformModel::two_scale_decomposition(const XImage& input,
 }
 void TransformModel::regression_fit(const XImage& input_feat, 
   const XImage& target_feat, ImageType_1* ac) const{
+
   const int height = input_feat.rows(), width = input_feat.cols(); 
+  const int mdl_h = ceil(1.0f * height/step), mdl_w = ceil(1.0f * width/step);
+  *ac = ImageType_1(mdl_h * input_feat.channels(), mdl_w * target_feat.channels()); 
+
    // Fit affine model per patch
     for (int imin = 0; imin < height; imin += step)
     for (int jmin = 0; jmin < width; jmin += step)
@@ -193,7 +301,6 @@ void TransformModel::regression_fit(const XImage& input_feat,
           MatType::Identity(input_feat.channels(), input_feat.channels());
         MatType rhs = p_input.transpose() * p_output;
         MatType coef = lhs.ldlt().solve(rhs);
-        //recipe->set_coefficients(mdl_i, mdl_j, coef); 
         set_coefficients(coef, mdl_i, mdl_j, ac);
     }
 }
