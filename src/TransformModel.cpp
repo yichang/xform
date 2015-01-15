@@ -17,13 +17,14 @@ namespace xform{
 TransformModel::TransformModel(){
     use_halide=true;
     wSize   = 8;
-    step    = wSize/2;
+    step    = wSize;
     epsilon = 1e-2;
     epsilon *= epsilon;
     quantize_levels = 255; 
     num_scale = 4;
     num_affine = 4;
     num_linear = 3;
+    num_bins = 3;
 }
 
 #ifndef __ANDROID__
@@ -128,6 +129,7 @@ void TransformModel::fit_recipe(const XImage& input, const XImage& target,
     regression_fit(hp_input_yuv, hp_target_yuv, ac);
     quantize(input.channels(), target.channels(), ac, meta);
 }
+#endif
 void TransformModel::make_chrom_features(const XImage& input, 
                                                XImage* feat) const{
   *feat = XImage(input.rows(), input.cols(), input.channels()+1);     
@@ -139,7 +141,7 @@ void TransformModel::make_chrom_features(const XImage& input,
 }
 void TransformModel::make_lumin_features(const XImage& input, 
                                                XImage* feat) const{
-  *feat = XImage(input.rows(), input.cols(), input.channels() + num_scale);
+  *feat = XImage(input.rows(), input.cols(), input.channels() + num_scale + num_bins-1);
   feat->setOnes();
   XImage hp_input, foo;
   two_scale_decomposition(input, &hp_input, &foo);
@@ -147,12 +149,30 @@ void TransformModel::make_lumin_features(const XImage& input,
     feat->at(i) = hp_input.at(i);
 
   Pyramid pyramid_y(input.at(0), num_scale, Pyramid::LAPLACIAN, true);
-  for(int i = 0; i < pyramid_y.levels()-1; i++)
+  for(int i = 0; i < pyramid_y.levels()-1; i++) // ignore lowpass
     feat->at(i + num_affine) = pyramid_y.at(i);
-  
-      
+
+  XImage curve_feat;
+  lumin_curve_feature(hp_input.at(0), num_bins, &curve_feat);
+  for(int i = 0; i < curve_feat.channels(); i++)
+    feat->at(i + num_affine + num_scale-1) = curve_feat.at(i);
 }
-#endif
+void TransformModel::lumin_curve_feature(const ImageType_1& input, 
+  const int nbins, XImage* feat) const{
+  PixelType max = input.maxCoeff(), min = input.minCoeff();
+  PixelType range = max = min;
+  *feat = XImage(input.rows(), input.cols(), nbins-1);
+  feat->setZero();
+  for(int c = 0; c < feat->channels(); c++){
+    const float thresh = min + static_cast<float>(c+1) * range/static_cast<float>(nbins);
+    for(int i = 0; i < feat->rows(); i ++){
+      for(int j = 0; j < feat->cols(); j++){
+        if(input(i, j) > thresh)
+          feat->at(c)(i, j) = input(i, j) - thresh;
+      }
+    }
+  }
+}
 void TransformModel::reconstruct_by_Halide(const Image<float>& HL_input, 
                                const Image<float>& HL_ac,
                                const Image<float>& HL_dc, 
@@ -218,7 +238,7 @@ XImage TransformModel::reconstruct_separate(const XImage& input,
                               XImage& dc, const PixelType* meta) const{
     assert(!use_halide);
     const int height = input.rows(), width = input.cols();
-    const int n_chan_i_lumin = num_affine + num_scale - 1; //TODO: don't hard code this!
+    const int n_chan_i_lumin = num_affine + num_bins + num_scale - 2;
     const int n_chan_i_chrom = num_affine;
 
     dequantize(meta,                      n_chan_i_lumin, 1, &ac_lumin);

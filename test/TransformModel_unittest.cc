@@ -14,7 +14,7 @@
 #include "image_io.h"
 
 TEST(TransformModelTest, fit_recipe){
-  std::string filename = "../images/yichang.png";
+  std::string filename = "../images/tiger.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 
@@ -53,7 +53,7 @@ TEST(TransformModelTest, fit_recipe){
 
 }
  TEST(TransformModelTest, recon_from_halide){
-  std::string filename = "../images/yichang.png";
+  std::string filename = "../images/tiger.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 
@@ -125,7 +125,7 @@ TEST(TransformModelTest, fit_recipe){
  
 
 TEST(TransformModelTest, recon_from_recipe){
-  std::string filename = "../images/yichang.png";
+  std::string filename = "../images/tiger.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 
@@ -192,7 +192,7 @@ TEST(TransformModelTest, recon_from_recipe){
   reconstructed.write("TransformTest_recon_by_recipe.png");
 }
 TEST(TransformModelTest, recon_from_seperate_recipes){
-  std::string filename = "../images/yichang.png";
+  std::string filename = "../images/tiger.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 
@@ -219,7 +219,8 @@ TEST(TransformModelTest, recon_from_seperate_recipes){
 
   // Server side
   xform::TransformModel server_model;
-  const int meta_len = 2 * (3 * server_model.num_affine + server_model.num_scale-1);
+  const int meta_len = 2 * (3 * server_model.num_affine + 
+        server_model.num_scale-1 + server_model.num_bins-1);
   server_model.use_halide=false;
   xform::ImageType_1 ac_lumin_server, ac_chrom_server;
   xform::XImage dc_server; 

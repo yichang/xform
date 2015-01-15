@@ -45,11 +45,14 @@ class TransformModel{
   int quantize_levels;
   int num_affine;
   int num_linear;
+  int num_bins;
   PixelType epsilon;
 
  private:
   void make_chrom_features(const XImage& input, XImage* feat) const;
   void make_lumin_features(const XImage& input, XImage* feat) const;
+  void lumin_curve_feature(const ImageType_1& input, 
+  const int nbins, XImage* feat) const;
 
   void regression_fit(const XImage& input_feat, 
   const XImage& target_feat, ImageType_1* ac) const;
