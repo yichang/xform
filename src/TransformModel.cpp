@@ -16,12 +16,12 @@ namespace xform{
 
 TransformModel::TransformModel(){
     use_halide=true;
-    wSize   = 8;
+    wSize   = 32;
     step    = wSize;
     epsilon = 1e-2;
     epsilon *= epsilon;
     quantize_levels = 255; 
-    num_scale = 4;
+    num_scale = 5;
     num_affine = 4;
     num_linear = 3;
     num_bins = 3;
@@ -148,19 +148,23 @@ void TransformModel::make_lumin_features(const XImage& input,
   for(int i = 0; i < hp_input.channels(); i++)
     feat->at(i) = hp_input.at(i);
 
-  Pyramid pyramid_y(input.at(0), num_scale, Pyramid::LAPLACIAN, true);
-  for(int i = 0; i < pyramid_y.levels()-1; i++) // ignore lowpass
-    feat->at(i + num_affine) = pyramid_y.at(i);
+  if (num_scale > 1){
+    Pyramid pyramid_y(input.at(0), num_scale, Pyramid::LAPLACIAN, true);
+    for(int i = 0; i < pyramid_y.levels()-1; i++) // ignore lowpass
+      feat->at(i + num_affine) = pyramid_y.at(i);
+  }
 
-  XImage curve_feat;
-  lumin_curve_feature(hp_input.at(0), num_bins, &curve_feat);
-  for(int i = 0; i < curve_feat.channels(); i++)
-    feat->at(i + num_affine + num_scale-1) = curve_feat.at(i);
+  if (num_bins > 1){
+    XImage curve_feat;
+    lumin_curve_feature(hp_input.at(0), num_bins, &curve_feat);
+    for(int i = 0; i < curve_feat.channels(); i++)
+      feat->at(i + num_affine + num_scale-1) = curve_feat.at(i);
+  }
 }
 void TransformModel::lumin_curve_feature(const ImageType_1& input, 
   const int nbins, XImage* feat) const{
   PixelType max = input.maxCoeff(), min = input.minCoeff();
-  PixelType range = max = min;
+  PixelType range = max - min;
   *feat = XImage(input.rows(), input.cols(), nbins-1);
   feat->setZero();
   for(int c = 0; c < feat->channels(); c++){
