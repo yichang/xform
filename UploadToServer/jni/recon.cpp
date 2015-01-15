@@ -1,6 +1,7 @@
 #include <jni.h>
 #include <string.h>
 #include <stdio.h>
+#include <sys/time.h>
 #include <android/log.h>
 #include <android/bitmap.h>
 //#include "XImage.h"
@@ -40,9 +41,7 @@ void copy_to_HImage(JNIEnv * env, const jobject& bitmap, Image<float>* input, in
 	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "HEIGHT: [%d]",info.height);
 	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "WIDTH: [%d]", info.width);
 
-	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "To create");
 	*input = Image<float>(info.width, info.height, nchannel);
-	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "Done Creating");
 	/* Parse */
 	for (int x = info.width - 1; x >= 0; --x){
 	    for (int y = 0; y < info.height; ++y)
@@ -57,10 +56,9 @@ void copy_to_HImage(JNIEnv * env, const jobject& bitmap, Image<float>* input, in
                   (*input)(x,y,1) = g;
                   (*input)(x,y,2) = b;
 	    	}
-	    	//__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK:LC: [%d]", (int)(r*255));
 	      }
 	}
-	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "IMAGE is READ");
+	//__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "IMAGE is READ");
 }
 
 void copy_to_jBuffer(JNIEnv * env, const Image<float>& output, jobject& bitmap){
@@ -80,6 +78,7 @@ void copy_to_jBuffer(JNIEnv * env, const Image<float>& output, jobject& bitmap){
 	uint32_t* src = (uint32_t*) bitmapPixels;
 	int stride = info.stride;
 	int pixelsCount = info.height * info.width;
+
 	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "HEIGHT: [%d]",info.height);
 	__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "WIDTH: [%d]", info.width);
 
@@ -93,18 +92,17 @@ void copy_to_jBuffer(JNIEnv * env, const Image<float>& output, jobject& bitmap){
 	}
 }
 
-void Java_com_example_uploadtoserver_UploadToServer_recon(JNIEnv * env, jobject obj, jobject input_bp, jobject ac_bp, jobject dc_bp, jfloatArray meta)
+void Java_com_example_uploadtoserver_UploadToServer_recon
+  (JNIEnv * env, jobject obj, jobject input_bp, jobject ac_bp, 
+                            jobject dc_bp, jfloatArray meta)
 {
+        timeval t0, t_copy_recipe, t_copy_output, t_recon;
+        gettimeofday(&t0, NULL);
 
 	xform::PixelType* my_meta = new xform::PixelType[18];
-
 	jfloat* flt1 = env->GetFloatArrayElements(meta,0);
-
-	for(int i=0; i < 18; i++){
-		__android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "META: [%f]", flt1[i]);
-		my_meta[i] = static_cast<xform::PixelType>(flt1[i]);
-	}
-
+	for(int i=0; i < 18; i++)
+          my_meta[i] = static_cast<xform::PixelType>(flt1[i]);
 
 	/*xform::XImage input,ac, dc;
 	copy_to_XImage(env, input_bp, &input);
@@ -123,10 +121,7 @@ void Java_com_example_uploadtoserver_UploadToServer_recon(JNIEnv * env, jobject 
 				if (output.at(k)(i,j) > 1.0)
 					output.at(k)(i,j)=1;
 				if (output.at(k)(i,j) < 0.0)
-					output.at(k)(i,j)=0;
-			}
-		}
-	}
+					output.at(k)(i,j)=0;}}}
 	write_to_bitmap(env, output, input_bp);*/
 
         /* Recon by Halide */
@@ -135,21 +130,32 @@ void Java_com_example_uploadtoserver_UploadToServer_recon(JNIEnv * env, jobject 
         copy_to_HImage(env, ac_bp, &HL_ac, 1);
         copy_to_HImage(env, dc_bp, &HL_dc, 3);
 
-        xform::TransformModel client_model_halide;
+
         Image<float> HL_output(HL_input.width(), HL_input.height(), HL_input.channels());
-        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "START HALIDE");
+        xform::TransformModel client_model_halide;
+
+        gettimeofday(&t_copy_recipe, NULL);
+
         client_model_halide.reconstruct_by_Halide(HL_input, HL_ac, HL_dc, my_meta, &HL_output);
+
+        gettimeofday(&t_recon, NULL);
+
         copy_to_jBuffer(env, HL_output, input_bp);
-        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "DONE HALIDE");
+
+        gettimeofday(&t_copy_output, NULL);
 
 	AndroidBitmap_unlockPixels(env, input_bp);
 	AndroidBitmap_unlockPixels(env, ac_bp);
 	AndroidBitmap_unlockPixels(env, dc_bp);
+
+        unsigned int t1 = (t_copy_recipe.tv_sec - t0.tv_sec) * 1000000 + (t_copy_recipe.tv_usec - t0.tv_usec);
+        unsigned int t2 = (t_recon.tv_sec - t_copy_recipe.tv_sec) * 1000000 + (t_recon.tv_usec - t_copy_recipe.tv_usec);
+        unsigned int t3 = (t_copy_output.tv_sec - t_recon.tv_sec) * 1000000 + (t_copy_output.tv_usec - t_recon.tv_usec);
+
+        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "T_COPY_RECIPE [%d]", t1);
+        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "T_RECON [%d]", t2);
+        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "T_COPY_OUTPUT [%d]", t3);
 }
-
-
-
-
 void copy_to_XImage(JNIEnv * env, const jobject& bitmap, xform::XImage* input){
 
 	AndroidBitmapInfo  info;

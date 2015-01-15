@@ -1,4 +1,5 @@
 #include <jni.h>
+#include <sys/time.h>
 #include <string.h>
 #include <stdio.h>
 #include <android/log.h>
@@ -86,7 +87,8 @@ void copy_to_jBuffer(JNIEnv * env, const Image<uint16_t>& output, jobject& bitma
 
 void Java_com_example_plasma_Plasma_localLaplacian(JNIEnv * env, jobject obj, jobject bitmap)
 {
-    __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK:LC: [%s]", "Into LocalLaplacian");
+    timeval t0, t_copy_input, t_copy_output, t_proc;
+    gettimeofday(&t0, NULL);
 
     AndroidBitmapInfo  info;
     uint32_t          *pixels;
@@ -105,8 +107,12 @@ void Java_com_example_plasma_Plasma_localLaplacian(JNIEnv * env, jobject obj, jo
     int levels = 8;
     float alpha =1;
     float beta = 1;
+
+    gettimeofday(&t_copy_input, NULL);
+
     local_laplacian(levels, alpha/(float(levels-1)), beta, input, output);
 
+    gettimeofday(&t_proc, NULL);
     // Clamp to 0-255
     /*for(int z=0; z < input.channels(); z++){
       for(int x=0; x < input.width(); x++){
@@ -119,6 +125,17 @@ void Java_com_example_plasma_Plasma_localLaplacian(JNIEnv * env, jobject obj, jo
       }
     }*/
     copy_to_jBuffer(env, output, bitmap);
+
+    gettimeofday(&t_copy_output, NULL);
+
+        unsigned int t1 = (t_copy_input.tv_sec - t0.tv_sec) * 1000000 + (t_copy_input.tv_usec - t0.tv_usec);
+        unsigned int t2 = (t_proc.tv_sec - t_copy_input.tv_sec) * 1000000 + (t_proc.tv_usec - t_copy_input.tv_usec);
+        unsigned int t3 = (t_copy_output.tv_sec - t_proc.tv_sec) * 1000000 + (t_copy_output.tv_usec - t_proc.tv_usec);
+
+        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "T_COPY_INPUT [%d]", t1);
+        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "T_PROC [%d]", t2);
+        __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "T_COPY_OUTPUT [%d]", t3);
+
 }
 
 #ifdef __cplusplus

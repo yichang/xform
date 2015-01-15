@@ -175,16 +175,15 @@ public class UploadToServer extends Activity {
                                 for(int i=0; i < ar.length; i++)
                                	 myFloats[i] = Float.valueOf(ar[i]);
                                 
-                                for (float f: myFloats){
+                                /*for (float f: myFloats){
                                	 System.out.println(f);
-                                }								
+                                }*/								
                            	 
                                 recon(input, ac, dc, myFloats );
                                 
                                 FileOutputStream out = new FileOutputStream(new File(getFilesDir(), localFileName));
                                 input.compress(Bitmap.CompressFormat.JPEG, 100, out); 
-                                out.close();
-                                
+                                out.close();                               
 							}  catch (FileNotFoundException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();

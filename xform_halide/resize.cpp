@@ -56,7 +56,7 @@ int main(int argc, char **argv){
   ImageParam input(Float(32), 3);
   Param<float>  output_height, output_width; 
   //InterpolationType interpolationType = LINEAR;
-  InterpolationType interpolationType = CUBIC;
+  InterpolationType interpolationType = BOX;
   Var x("x"), yo("yo"), y("y"), c("c"), k("k"), yi("yi"), xi("xi");
   
   /* Algorithm */
