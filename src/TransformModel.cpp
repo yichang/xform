@@ -70,37 +70,36 @@ void TransformModel::fit_recipe(const XImage& input, const XImage& target,
     assert(!use_halide);
     const int height = input.rows(), width = input.cols();
 
-    // RGB2YUV
+   // RGB2YUV
     XImage input_yuv, target_yuv;
     ColorSpace cs; 
     cs.rgb2yuv(input, &input_yuv);
     cs.rgb2yuv(target, &target_yuv);
-    input_yuv = input;
-    target_yuv = target;
 
-    // Two-scale decomposition
-    XImage hp_input(height, width, 3), 
-           hp_output(height, width, 3),
-           lp_output(height/wSize, width/wSize, 3);
+     // Two-scale decomposition
+    XImage hp_input_yuv(height, width, 3), 
+           hp_target_yuv(height, width, 3),
+           lp_target_yuv(height/wSize, width/wSize, 3);
     
-    XImage lp_input; 
+    XImage lp_input_yuv; 
     Warp warp;
-    warp.imresize(input_yuv, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
-    warp.imresize(target_yuv, height/wSize, width/wSize,Warp::BICUBIC, &lp_output);
+    warp.imresize(input_yuv, height/wSize, width/wSize,Warp::BICUBIC, &lp_input_yuv);
+    warp.imresize(lp_input_yuv, height,width,Warp::BICUBIC, &hp_input_yuv);
 
-    warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input);
-    warp.imresize(lp_output, height,width,Warp::BICUBIC, &hp_output);
+    warp.imresize(target_yuv, height/wSize, width/wSize,Warp::BICUBIC, &lp_target_yuv);
+    warp.imresize(lp_target_yuv, height,width,Warp::BICUBIC, &hp_target_yuv);
 
-    hp_input = input_yuv - hp_input;
-    hp_output = target_yuv - hp_output;
+    hp_input_yuv = input_yuv - hp_input_yuv;
+    hp_target_yuv = target_yuv - hp_target_yuv;
 
     // Fitting
     const int mdl_h = ceil(1.0f * height/step);
     const int mdl_w = ceil(1.0f * width/step);
 
-    *dc = lp_output;
-    *ac = ImageType_1(mdl_h * input_yuv.channels(), mdl_w * target.channels()); 
-    regression_fit(hp_input, hp_output, ac);
+    //*dc = lp_output;
+    cs.yuv2rgb(lp_target_yuv, dc);
+    *ac = ImageType_1(mdl_h * input.channels(), mdl_w * target.channels()); 
+    regression_fit(hp_input_yuv, hp_target_yuv, ac);
     quantize(input.channels(), target.channels(), ac, meta);
 }
 #endif
@@ -142,26 +141,26 @@ XImage TransformModel::reconstruct(const XImage& input, ImageType_1& ac,
 
     dequantize(meta, n_chan_i, n_chan_o, &ac);
 
+    // RGB2YUV
+    ColorSpace cs;
+    XImage input_yuv;
+    cs.rgb2yuv(input, &input_yuv);
+
     // Two-scale decomposition
-    XImage lp_input, hp_input, new_dc;
+    XImage lp_input, hp_input_yuv, new_dc;
     Warp warp;
-    warp.imresize(input, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
-    warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input);
-    hp_input = input - hp_input;
+    warp.imresize(input_yuv, height/wSize, width/wSize,Warp::BICUBIC, &lp_input);
+    warp.imresize(lp_input, height,width,Warp::BICUBIC, &hp_input_yuv);
+    hp_input_yuv = input_yuv - hp_input_yuv;
 
     // Reconstruction
-    XImage reconstructed(height, width, n_chan_o), reconstructed_yuv;
-    regression_predict(hp_input, ac, n_chan_i, n_chan_o, &reconstructed);
+    XImage reconstructed_yuv(height, width, n_chan_o), reconstructed;
+    regression_predict(hp_input_yuv, ac, n_chan_i, n_chan_o, &reconstructed_yuv);
+    cs.yuv2rgb(reconstructed_yuv, &reconstructed);
 
     warp.imresize(dc, height, width, Warp::BICUBIC, &new_dc);
     reconstructed = reconstructed + new_dc ;
-
-    // YUV2RGB
-    ColorSpace cs;
-    cs.yuv2rgb(reconstructed, &reconstructed_yuv);
-    reconstructed_yuv = reconstructed; 
-
-    return reconstructed_yuv;
+    return reconstructed;
 }
 // Helper functions 
 void TransformModel::regression_fit(const XImage& input_feat, 
