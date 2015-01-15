@@ -17,7 +17,7 @@ void LocalLaplacian::adjustDetails(const ImageType_1& im_in,
 
 
   // Build Gaussian pyramid
-  Pyramid gaussian_pyr(im_in, num_levels, Pyramid::GAUSSIAN); 
+  Pyramid gaussian_pyr(im_in, num_levels, Pyramid::GAUSSIAN, false); 
 
   // Build Laplacian Pyramids
   const int num_samples = static_cast<int>(full_range/interval) + 1;
@@ -27,12 +27,12 @@ void LocalLaplacian::adjustDetails(const ImageType_1& im_in,
     PixelType g0 = interval * i;
     ImageType_1 cur;
     curve.sShape(im_in, sigma, g0, alpha, &cur);
-    Pyramid cur_lap_pyr(cur, num_levels, Pyramid::LAPLACIAN);
+    Pyramid cur_lap_pyr(cur, num_levels, Pyramid::LAPLACIAN, false);
     laplacian_pyrs.push_back(cur_lap_pyr);
   }
 
   // Construct the output pyramid
-  Pyramid out_pyr(num_levels, Pyramid::LAPLACIAN);
+  Pyramid out_pyr(num_levels, Pyramid::LAPLACIAN, false);
   for(int k = 0; k < out_pyr.levels(); k++){ 
     const int cur_height = gaussian_pyr.at(k).rows();
     const int cur_width = gaussian_pyr.at(k).cols();
