@@ -35,6 +35,7 @@ void ColorSpace::yuv2rgb(const XImage& im_in, XImage* im_out) const{
   linearMap(im_in, yuv_2_rgb, im_out);
 }
 
+#ifndef __ANDROID__
 void ColorSpace::rgb2xyz(const XImage& im_in, XImage* im_out) const{
   linearMap(im_in, rgb_2_xyz , im_out);
 }
@@ -132,6 +133,7 @@ double ColorSpace::abMap(PixelType in_val) const{
   else
     return (in_val - 16.0/116.0) / 7.787; 
 }
+#endif
 
 void ColorSpace::linearMap(const XImage& im_in, 
   const ColorMatType& colorMat, XImage* im_out) const{
@@ -150,4 +152,3 @@ void ColorSpace::linearMap(const XImage& im_in,
     im_out->at(i) = buf;
   }
 }
-

@@ -6,9 +6,10 @@
 // HALIDE
 #include "halide_resize.h"
 #include "halide_recon.h"
+#include "halide_recon_separate.h"
 #include "halide_dequant.h"
 #include "static_image.h"
-#include "image_io.h"
+//#include "image_io.h"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ namespace xform{
 
 TransformModel::TransformModel(){
     use_halide=true;
-    wSize   = 32;
+    wSize   = 16;
     step    = wSize;
     epsilon = 1e-2;
     epsilon *= epsilon;
@@ -24,7 +25,7 @@ TransformModel::TransformModel(){
     num_scale = 5;
     num_affine = 4;
     num_linear = 3;
-    num_bins = 3;
+    num_bins = 4;
 }
 
 #ifndef __ANDROID__
