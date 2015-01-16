@@ -15,7 +15,9 @@ LOCAL_SRC_FILES := recon.cpp\
 		   $(ROOT)src/Warp.cpp\
 		   $(ROOT)src/Recipe.cpp\
 		   $(ROOT)src/TransformModel.cpp\
+		   $(ROOT)src/ColorSpace.cpp\
 		   $(ROOT)src/XImage.cpp\
+		   $(ROOT)src/Pyramid.cpp\
 
 LOCAL_CFLAGS += -std=c++11 
 LOCAL_CFLAGS += -Ofast
