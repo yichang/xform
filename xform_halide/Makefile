@@ -15,6 +15,15 @@ recon_separate: recon_separate.cpp
 	g++ recon_separate.cpp -o recon_separate.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
 	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./recon_separate.out
 
+compute_features: compute_features.cpp
+	g++ compute_features.cpp -o compute_features.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_features.out
+
+
+compute_cfeatures: compute_cfeatures.cpp
+	g++ compute_cfeatures.cpp -o compute_cfeatures.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_cfeatures.out
+
 dequant: dequant.cpp
 	g++ dequant.cpp -o dequant.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
 	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./dequant.out
@@ -39,6 +48,16 @@ test_recon_separate: test_recon_separate.cpp recon_separate
 	g++ test_recon_separate.cpp halide_recon_separate.o  -o test_recon_separate -I ../third_party/halide/apps/support/ -lpng15 
 	./test_recon_separate ./../images/yichang.png  ./../make/recipe_ac_lumin.png ./../make/recipe_ac_chrom.png ./../make/recipe_dc.png ./../make/quant.meta ./recon_separate_out.png
 
+test_compute_features: test_compute_features.cpp compute_features
+	g++ test_compute_features.cpp halide_compute_features.o  -o test_compute_features -I ../third_party/halide/apps/support/ -lpng15 
+	./test_compute_features ./../images/yichang.png
+	
+test_compute_cfeatures: test_compute_cfeatures.cpp compute_cfeatures
+	g++ test_compute_cfeatures.cpp halide_compute_cfeatures.o  -o test_compute_cfeatures -I ../third_party/halide/apps/support/ -lpng15 
+	./test_compute_cfeatures ./../images/yichang.png
+
+
+
 test_downsample: test_downsample.cpp downsample
 	g++ test_downsample.cpp halide_downsample.o  -o test_downsample -I ../third_party/halide/apps/support/ -lpng15 
 	./test_downsample ./../images/yichang.png  ./downsample_out.png
@@ -53,4 +72,4 @@ test_dequant: test_dequant.cpp dequant
 
 
 clean: 
-	rm -rf blur resize test recon test_recon dequant test_dequant recon_separate test_recon_separate downsample test_downsample
+	rm -rf blur resize test recon test_recon dequant test_dequant recon_separate test_recon_separate downsample test_downsample test_compute_features compute_features
