@@ -12,6 +12,12 @@ class TransformModel{
   TransformModel();
 
   // Halide-implemented 
+  void reconstruct_separate_by_Halide(const Image<float>& input, 
+                               const Image<float>& ac_lumin_raw,
+                               const Image<float>& ac_chrom_raw,
+                               const Image<float>& dc, 
+                               const PixelType* meta,
+                               Image<float>* output) const;
   void reconstruct_by_Halide(const Image<float>& input, 
                              const Image<float>& ac,
                              const Image<float>& dc, 
