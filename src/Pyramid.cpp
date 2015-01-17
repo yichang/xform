@@ -8,7 +8,7 @@ using namespace xform;
 Pyramid::Pyramid(FilterType filter_type, bool stack):filter_type(filter_type), stack(stack){
 }
 Pyramid::Pyramid(const int num_levels, const FilterType filter_type, const bool stack) 
-        :Pyramid(filter_type, stack){
+        :filter_type(filter_type), stack(stack){
   nd_array = ImageType_N(num_levels);
 }
 Pyramid::Pyramid(const ImageType_1& im_in, const int num_levels, 
