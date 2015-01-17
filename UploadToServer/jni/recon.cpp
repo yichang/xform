@@ -93,51 +93,32 @@ void copy_to_jBuffer(JNIEnv * env, const Image<float>& output, jobject& bitmap){
 }
 
 void Java_com_example_uploadtoserver_UploadToServer_recon
-  (JNIEnv * env, jobject obj, jobject input_bp, jobject ac_bp, 
+  (JNIEnv * env, jobject obj, jobject input_bp, jobject ac_lumin_bp, jobject ac_chrom_bp, 
                             jobject dc_bp, jfloatArray meta)
 {
         timeval t0, t_copy_recipe, t_copy_output, t_recon;
         gettimeofday(&t0, NULL);
 
-	xform::PixelType* my_meta = new xform::PixelType[18];
+        xform::TransformModel client_model;
+        const int meta_len = 2 * (3 * client_model.num_affine + 
+              client_model.num_scale-1 + client_model.num_bins-1);
+	xform::PixelType* my_meta = new xform::PixelType[meta_len];
 	jfloat* flt1 = env->GetFloatArrayElements(meta,0);
-	for(int i=0; i < 18; i++)
+	for(int i=0; i < meta_len; i++)
           my_meta[i] = static_cast<xform::PixelType>(flt1[i]);
 
-	/*xform::XImage input,ac, dc;
-	copy_to_XImage(env, input_bp, &input);
-	copy_to_XImage(env, ac_bp, &ac);
-	copy_to_XImage(env, dc_bp, &dc);
-
-	// Recon
-	xform::TransformModel client_model;
-	client_model.set_from_recipe(input, ac.at(0), dc, my_meta);
-	xform::XImage output  = client_model.predict();
-
-	// Clamping
-	for(int k=0; k < 3; k++){
-		for(int i = 0 ; i < output.rows(); i++){
-			for(int j = 0; j < output.cols(); j++){
-				if (output.at(k)(i,j) > 1.0)
-					output.at(k)(i,j)=1;
-				if (output.at(k)(i,j) < 0.0)
-					output.at(k)(i,j)=0;}}}
-	write_to_bitmap(env, output, input_bp);*/
-
         /* Recon by Halide */
-        Image<float> HL_input, HL_ac, HL_dc;
+        Image<float> HL_input, HL_ac_lumin, HL_ac_chrom, HL_dc;
         copy_to_HImage(env, input_bp, &HL_input, 3);
-        copy_to_HImage(env, ac_bp, &HL_ac, 1);
+        copy_to_HImage(env, ac_lumin_bp, &HL_ac_lumin, 1);
+        copy_to_HImage(env, ac_chrom_bp, &HL_ac_chrom, 1);
         copy_to_HImage(env, dc_bp, &HL_dc, 3);
 
-
         Image<float> HL_output(HL_input.width(), HL_input.height(), HL_input.channels());
-        xform::TransformModel client_model_halide;
 
         gettimeofday(&t_copy_recipe, NULL);
-
-        client_model_halide.reconstruct_by_Halide(HL_input, HL_ac, HL_dc, my_meta, &HL_output);
-
+        //client_model_halide.reconstruct_by_Halide(HL_input, HL_ac, HL_dc, my_meta, &HL_output);
+        client_model.reconstruct_separate_by_Halide(HL_input, HL_ac_lumin, HL_ac_chrom, HL_dc, my_meta, &HL_output);
         gettimeofday(&t_recon, NULL);
 
         copy_to_jBuffer(env, HL_output, input_bp);
@@ -145,7 +126,8 @@ void Java_com_example_uploadtoserver_UploadToServer_recon
         gettimeofday(&t_copy_output, NULL);
 
 	AndroidBitmap_unlockPixels(env, input_bp);
-	AndroidBitmap_unlockPixels(env, ac_bp);
+	AndroidBitmap_unlockPixels(env, ac_lumin_bp);
+	AndroidBitmap_unlockPixels(env, ac_chrom_bp);
 	AndroidBitmap_unlockPixels(env, dc_bp);
 
         unsigned int t1 = (t_copy_recipe.tv_sec - t0.tv_sec) * 1000000 + (t_copy_recipe.tv_usec - t0.tv_usec);
@@ -234,6 +216,27 @@ void write_to_bitmap(JNIEnv * env, const xform::XImage& output, jobject& bitmap)
 	      }
 	}
 }
+	/*xform::XImage input,ac, dc;
+	copy_to_XImage(env, input_bp, &input);
+	copy_to_XImage(env, ac_bp, &ac);
+	copy_to_XImage(env, dc_bp, &dc);
+
+	// Recon
+	xform::TransformModel client_model;
+	client_model.set_from_recipe(input, ac.at(0), dc, my_meta);
+	xform::XImage output  = client_model.predict();
+
+	// Clamping
+	for(int k=0; k < 3; k++){
+		for(int i = 0 ; i < output.rows(); i++){
+			for(int j = 0; j < output.cols(); j++){
+				if (output.at(k)(i,j) > 1.0)
+					output.at(k)(i,j)=1;
+				if (output.at(k)(i,j) < 0.0)
+					output.at(k)(i,j)=0;}}}
+	write_to_bitmap(env, output, input_bp);*/
+
+
 #ifdef __cplusplus
 }
 #endif

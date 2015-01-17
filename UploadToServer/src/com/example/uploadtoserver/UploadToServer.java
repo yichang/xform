@@ -57,7 +57,7 @@ public class UploadToServer extends Activity {
     static {
     	System.loadLibrary("xformRecon");
     } 
-    private native void recon(Bitmap input, Bitmap ac, Bitmap dc, float[] bitmap);
+    private native void recon(Bitmap input, Bitmap ac_lumin, Bitmap ac_chrom, Bitmap dc, float[] bitmap);
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -152,7 +152,8 @@ public class UploadToServer extends Activity {
                         		 messageText.setText("Download mode started.... \n\n");
                         	 }});   
                              
-                             downloadFile(serverRoot + "recipe_ac.png", "recipe_ac.png"); 
+                             downloadFile(serverRoot + "recipe_ac_lumin.png", "recipe_ac_lumin.png"); 
+                             downloadFile(serverRoot + "recipe_ac_chrom.png", "recipe_ac_chrom.png"); 
                              downloadFile(serverRoot + "recipe_dc.png", "recipe_dc.png"); 
                              downloadFile(serverRoot + "quant.meta", "quant.meta"); 
 
@@ -163,8 +164,9 @@ public class UploadToServer extends Activity {
                              try {
                             	final Bitmap input = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), localFileName)));
 								final Bitmap dc = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_dc.png")));
-								final Bitmap ac = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_ac.png")));
-	                             
+								final Bitmap ac_lumin = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_ac_lumin.png")));
+								final Bitmap ac_chrom = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_ac_chrom.png")));
+ 
 								// meta data
 	                            File file = new File(getFilesDir(), "quant.meta");
 	                            StringBuilder text = new StringBuilder();
@@ -174,12 +176,8 @@ public class UploadToServer extends Activity {
                                 float[] myFloats = new float[ar.length];
                                 for(int i=0; i < ar.length; i++)
                                	 myFloats[i] = Float.valueOf(ar[i]);
-                                
-                                /*for (float f: myFloats){
-                               	 System.out.println(f);
-                                }*/								
-                           	 
-                                recon(input, ac, dc, myFloats );
+                             
+                                recon(input, ac_lumin, ac_chrom, dc, myFloats );
                                 
                                 FileOutputStream out = new FileOutputStream(new File(getFilesDir(), localFileName));
                                 input.compress(Bitmap.CompressFormat.JPEG, 100, out); 
