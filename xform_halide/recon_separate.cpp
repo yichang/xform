@@ -71,6 +71,19 @@ Func rgb2yuv(Func rgb_){
 
   return yuv_;
 }
+Func box_blur(Func f, const int b_width){
+  
+  Func offset_x("offset_x");
+  //RDom u(-b_width, b_width + 1);
+  RDom u(-b_width, b_width + 1);
+  offset_x(y,c) = sum(f(u, y, c));
+
+  Func blur_x ("blur_x");
+  blur_x(x, y, c) = (-1 * f(x - b_width, y, c) + f(x + b_width, y, c) + offset_x(y, c))/(2*b_width+1);
+
+
+  return blur_x;
+}
 int main(int argc, char **argv){
 
   const int J = 5;
@@ -187,10 +200,10 @@ int main(int argc, char **argv){
                                           ac_chrom(x/step + offset_x * 1, y/step + offset_y * 3);  
   // Combine Y and UV
   Func yuv_out("yuv_out");
-  yuv_out(x, y, c) = my_yuv(x, y, c);
-  yuv_out(x, y, 0) = lumin_out(x, y);
-  yuv_out(x, y, 1) = 0*chrom_out(x, y, 0);
-  yuv_out(x, y, 2) = 0*chrom_out(x, y, 1);
+  Expr yy = lumin_out(x, y);
+  Expr uu = chrom_out(x, y, 0);
+  Expr vv = chrom_out(x, y, 1);
+  yuv_out(x,y,c) = select(c == 0, yy, c == 1, uu,  vv);
 
   // YUV2RGB
   Func rgb_out("rgb_out");
@@ -207,7 +220,9 @@ int main(int argc, char **argv){
   final(x, y, c) = clamp(new_dc(x, y, c)  + rgb_out(x, y, c), 0.0f, 1.0f);
 
   /* Scheduling */
-  final.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
+  final.tile(x, y, xo, yo, xi, yi, 256, 64).parallel(yo).vectorize(xi, 8);
+  //new_dc.compute_at(final, yo);
+  //yuv_out.compute_at(final, yo);
   maxi.compute_root();
   mini.compute_root();
   range.compute_root();
