@@ -203,10 +203,12 @@ int main(int argc, char **argv){
   final(x, y, c) = clamp(new_dc(x, y, c)  + rgb_out(x, y, c), 0.0f, 1.0f);
 
   /* Scheduling */
-  //final.tile(x, y, xo, xi, yo, yi, 16, 32).parallel(yo).vectorize(xi,8);
+  final.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   maxi.compute_root();
   mini.compute_root();
   range.compute_root();
+  hp.compute_root();
+  hp.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   
   std::vector<Argument> args(9);
   args[0] = input;

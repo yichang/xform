@@ -46,11 +46,18 @@ int main(int argc, char** argv){
   const int level = 3;
   Image<float> output(input.width(), input.height(),3);
 
+  timeval t1, t2;
+  gettimeofday(&t1, NULL);
   halide_recon_separate(input, level, 
             ac_lumin_raw, ac_lumin_mins, ac_lumin_maxs,
             ac_chrom_raw, ac_chrom_mins, ac_chrom_maxs,
             dc ,
             output);
+
+  gettimeofday(&t2, NULL);
+
+  unsigned int t = (t2.tv_sec - t1.tv_sec) * 1000000 + (t2.tv_usec - t1.tv_usec);
+  printf("%u\n", t);
 
   save(output, argv[6]);
 }

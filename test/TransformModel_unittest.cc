@@ -256,7 +256,7 @@ TEST(TransformModelTest, recon_from_recipe){
 
   reconstructed.write("TransformTest_recon_by_recipe.png");
 }
-
+*/
 TEST(TransformModelTest, recon_from_seperate_recipes){
   std::string filename = "../images/yichang.png";
   xform::XImage my_image, lab, new_lab(3), out; 
@@ -327,5 +327,5 @@ TEST(TransformModelTest, recon_from_seperate_recipes){
   std::cout<< "t_recon = " << t_rec << std::endl;
 
   reconstructed.write("TransformTest_recon_by_separate_recipe.png");
-}*/
+}
 
