@@ -44,7 +44,7 @@ int main(int argc, char** argv){
     }}
 
   const int level = 3;
-  Image<float> output(input.width(), input.height(),input.channels());
+  Image<float> output(input.width(), input.height(),3);
 
   halide_recon_separate(input, level, 
             ac_lumin_raw, ac_lumin_mins, ac_lumin_maxs,

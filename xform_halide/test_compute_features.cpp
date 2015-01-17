@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sys/time.h>
 using namespace std;
+// Compute luminance features
 
 int main(int argc, char** argv){
   

@@ -96,8 +96,11 @@ int main(int argc, char **argv){
   Func ds("ds");
   ds(x,y,c) = downsample_n(my_yuv, J)(x,y,c);
 
+  Func us_ds("us_ds");
+  us_ds(x, y, c) = upsample_n(ds, J)(x, y, c);
+
   Func hp("hp");
-  hp(x, y, c) = my_yuv(x, y, c) - upsample_n(ds, J)(x, y, c);
+  hp(x, y, c) = my_yuv(x, y, c) - us_ds(x, y, c);
 
   // Laplacian features 
   Func lumin("lumin");
@@ -132,14 +135,14 @@ int main(int argc, char **argv){
   ac_lumin_range(no, ni) = ac_lumin_maxs(no, ni) - ac_lumin_mins(no, ni);
   Func ac_lumin("ac_lumin");
   const int n_chan_o_lumin = 1, n_chan_i_lumin = 4 + nbins - 1 + J - 1;
-  ac_lumin(x, y) = ac_lumin_raw(x, y) +  
+  ac_lumin(x, y) = ac_lumin_raw(x, y) *  
     ac_lumin_range((x*n_chan_o_lumin)/ac_lumin_raw.width(), (y*n_chan_i_lumin)/ac_lumin_raw.height()) + 
       ac_lumin_mins((x*n_chan_o_lumin)/ac_lumin_raw.width(), (y*n_chan_i_lumin)/ac_lumin_raw.height());
 
   Func ac_chrom_range("ac_chrom_range");
   ac_chrom_range(no, ni) = ac_chrom_maxs(no, ni) - ac_chrom_mins(no, ni);
   Func ac_chrom("ac_chrom");
-  const int n_chan_o_chrom = 1, n_chan_i_chrom = 4;
+  const int n_chan_o_chrom = 2, n_chan_i_chrom = 4;
   ac_chrom(x, y) = ac_chrom_raw(x, y) * 
     ac_chrom_range((x*n_chan_o_chrom)/ac_chrom_raw.width(), (y*n_chan_i_chrom)/ac_chrom_raw.height()) + 
     ac_chrom_mins((x*n_chan_o_chrom)/ac_chrom_raw.width(), (y*n_chan_i_chrom)/ac_chrom_raw.height());
@@ -173,14 +176,17 @@ int main(int argc, char **argv){
                                        reduced_curve_feat[nbins-2](x, y); 
   // Now for chrominance channel
   Func chrom_out("chrom_out");
-  chrom_out(x, y, c) =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * c, y/step + offset_y * z)) + 
-                                          ac_chrom(x/step + offset_x * c, y/step + offset_y * 3);  
+  chrom_out(x, y, c) = my_yuv(x, y, c);
+  chrom_out(x, y, 0) =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 0, y/step + offset_y * z)) + 
+                                          ac_chrom(x/step + offset_x * 0, y/step + offset_y * 3);  
+  chrom_out(x, y, 1) =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 1, y/step + offset_y * z)) + 
+                                          ac_chrom(x/step + offset_x * 1, y/step + offset_y * 3);  
   // Combine Y and UV
   Func yuv_out("yuv_out");
   yuv_out(x, y, c) = my_yuv(x, y, c);
   yuv_out(x, y, 0) = lumin_out(x, y);
-  yuv_out(x, y, 1) = chrom_out(x, y, 0);
-  yuv_out(x, y, 2) = chrom_out(x, y, 1);
+  yuv_out(x, y, 1) = 0*chrom_out(x, y, 0);
+  yuv_out(x, y, 2) = 0*chrom_out(x, y, 1);
 
   // YUV2RGB
   Func rgb_out("rgb_out");

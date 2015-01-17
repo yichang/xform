@@ -29,6 +29,11 @@ class TransformModel{
                             ImageType_1* ac, 
                             Image<float>* HL_lp_output, PixelType* meta) const;
 
+  void fit_separate_recipe_by_Halide(const Image<float>& HL_input,
+                                          const Image<float>& HL_output,
+                              ImageType_1* ac_lumin, ImageType_1* ac_chrom, 
+                        Image<float>* HL_lp_output, PixelType* meta) const;
+
   // Eigen-implemented
   void fit_recipe(const XImage& input, const XImage& target, 
   ImageType_1* ac, XImage* dc, PixelType* meta) const;

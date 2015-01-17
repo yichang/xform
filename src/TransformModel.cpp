@@ -9,7 +9,14 @@
 #include "halide_recon_separate.h"
 #include "halide_dequant.h"
 #include "static_image.h"
-//#include "image_io.h"
+#include "halide_downsample.h"
+#include "halide_highpass.h"
+#include "halide_compute_features.h"
+#include "halide_compute_cfeatures.h"
+
+#ifndef __ANDROID__
+#include "image_io.h"
+#endif
 
 using namespace std;
 
@@ -27,18 +34,50 @@ TransformModel::TransformModel(){
     num_linear = 3;
     num_bins = 4;
 }
-
 #ifndef __ANDROID__
 void TransformModel::fit_separate_recipe_by_Halide(const Image<float>& HL_input,
                                           const Image<float>& HL_output,
-          ImageType_1* ac, Image<float>* HL_lp_output, PixelType* meta) const{
-
+                              ImageType_1* ac_lumin, ImageType_1* ac_chrom, 
+                        Image<float>* HL_lp_output, PixelType* meta) const{
+  const int lp_width = HL_lp_output->width(), 
+            lp_height= HL_lp_output->height(),
+            width = HL_input.width(),
+            height = HL_input.height(),
+            num_lumin_feat = num_affine + num_bins + num_scale - 2,
+            num_chrom_feat = num_affine;
+  Image<float> HL_lp_input(lp_width, lp_height, 3),
+               HL_hp_output(width, height, 3);
   assert(use_halide);
-  // TODOL: 
 
+  // Compute target features (HL_hp_output);
+  halide_downsample(HL_output, *HL_lp_output);
+  halide_highpass(HL_output, *HL_lp_output, HL_hp_output);
+  // Lumin and chrom featues
+  Image<float> HL_feat_lumin(width, height, num_lumin_feat),
+               HL_feat_chrom(width, height, num_chrom_feat);
+  halide_compute_features(HL_input, HL_feat_lumin);
+  halide_compute_cfeatures(HL_input, HL_feat_chrom);
+  // Fitting
+  XImage feat_lumin(height, width, num_lumin_feat), 
+         feat_chrom(height, width, num_chrom_feat),
+         hp_output(height, width, 3), 
+         hp_target_y(height, width, 1),
+         hp_target_uv(height, width, 2);
+  feat_lumin.from_Halide(HL_feat_lumin);
+  feat_chrom.from_Halide(HL_feat_chrom);
+  hp_output.from_Halide(HL_hp_output);
+  
+  hp_target_y.at(0)  = hp_output.at(0);
+  hp_target_uv.at(0) = hp_output.at(1);
+  hp_target_uv.at(1) = hp_output.at(2);
+  
+  regression_fit(feat_lumin, hp_target_y, ac_lumin);
+  regression_fit(feat_chrom, hp_target_uv, ac_chrom);
+  
+  quantize(feat_lumin.channels(), hp_target_y.channels(),  ac_lumin, meta);
+  quantize(feat_chrom.channels(), hp_target_uv.channels(), 
+    ac_chrom, meta + 2 * feat_lumin.channels() * hp_target_y.channels());
 }
-
-
 void TransformModel::fit_recipe_by_Halide(const Image<float>& HL_input,
                                           const Image<float>& HL_output,
           ImageType_1* ac, Image<float>* HL_lp_output, PixelType* meta) const{
@@ -465,6 +504,8 @@ void TransformModel::quantize(int n_chan_i, int n_chan_o,
                                                   height, width).maxCoeff();
         meta[in_chan*n_chan_o + out_chan] = mini;
         meta[in_chan*n_chan_o + out_chan + num_chan] = maxi;
+        //std::cout<<"min " << out_chan << "," << in_chan << "=" << mini <<endl;
+        //std::cout<<"max " << out_chan << "," << in_chan << "=" << maxi <<endl;
         PixelType rng = maxi-mini;
         if(rng == 0){
             rng = 1;
