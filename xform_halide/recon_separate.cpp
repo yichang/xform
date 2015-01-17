@@ -51,20 +51,24 @@ Func gaussian_stack(Func f, const int j){
   us(x, y, _) = upsample_n(ds, j)(x, y, _);
   return us;
 }
-Func yuv2rgb(Func yuv){
+Func yuv2rgb(Func yuv_){
   Func rgb("rgb");
-  rgb(x, y, c) = yuv(x, y, c);
-  rgb(x, y, 0) = yuv(x, y, 0)                            + 1.140 * yuv(x, y, 2);
-  rgb(x, y, 1) = yuv(x, y, 0) - 0.395 * yuv(x, y, 1) - 0.581 * yuv(x, y, 2); 
-  rgb(x, y, 2) = yuv(x, y, 0) + 2.032 * yuv(x, y, 1); 
+
+  Expr r =   yuv_(x, y, 0) +                       + 1.14 * yuv_(x, y, 2); 
+  Expr g =   yuv_(x, y, 0) - 0.395 * yuv_(x, y, 1) - 0.581 * yuv_(x, y, 2); 
+  Expr b =   yuv_(x, y, 0) + 2.032 * yuv_(x, y, 1); 
+
+  rgb(x,y,c) = select(c == 0, r, c == 1, g,  b);
   return rgb;
 }
 Func rgb2yuv(Func rgb_){
   Func yuv_("yuv_");
-  yuv_(x, y, c) = rgb_(x, y, c);
-  yuv_(x, y, 0) =  cast<float>(0.299) * rgb_(x, y, 0) + 0.587 * rgb_(x, y, 1) + 0.144 * rgb_(x, y, 2); 
-  yuv_(x, y, 1) = cast<float>(-0.147) * rgb_(x, y, 0) - 0.289 * rgb_(x, y, 1) + 0.436 * rgb_(x, y, 2); 
-  yuv_(x, y, 2) =  cast<float>(0.615) * rgb_(x, y, 0) - 0.515 * rgb_(x, y, 1) - 0.100 * rgb_(x, y, 2); 
+
+  Expr yy =  cast<float>(0.299) * rgb_(x, y, 0) + 0.587 * rgb_(x, y, 1) + 0.144 * rgb_(x, y, 2); 
+  Expr u = cast<float>(-0.147) * rgb_(x, y, 0) - 0.289 * rgb_(x, y, 1) + 0.436 * rgb_(x, y, 2); 
+  Expr v =  cast<float>(0.615) * rgb_(x, y, 0) - 0.515 * rgb_(x, y, 1) - 0.100 * rgb_(x, y, 2); 
+  yuv_(x,y,c) = select(c == 0, yy, c == 1, u,  v);
+
   return yuv_;
 }
 int main(int argc, char **argv){
