@@ -36,6 +36,6 @@ LOCAL_C_INCLUDES += $(NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ARCH)/includ
 #LOCAL_MODULE    := ndk1
 #LOCAL_SRC_FILES := naive.c
 
-LOCAL_LDLIBS    := -lm -llog -ljnigraphics  halide_generated_$(TARGET_ARCH_ABI)/halide_recon.o halide_generated_$(TARGET_ARCH_ABI)/halide_dequant.o halide_generated_$(TARGET_ARCH_ABI)/halide_resize.o # -lOpenCL -lllvm-a3xx
+LOCAL_LDLIBS    := -lm -llog -ljnigraphics  halide_generated_$(TARGET_ARCH_ABI)/halide_recon.o halide_generated_$(TARGET_ARCH_ABI)/halide_dequant.o halide_generated_$(TARGET_ARCH_ABI)/halide_resize.o  halide_generated_$(TARGET_ARCH_ABI)/halide_downsample.o  halide_generated_$(TARGET_ARCH_ABI)/halide_highpass.o  halide_generated_$(TARGET_ARCH_ABI)/halide_compute_features.o  halide_generated_$(TARGET_ARCH_ABI)/halide_compute_cfeatures.o  halide_generated_$(TARGET_ARCH_ABI)/halide_recon_separate.o# -lOpenCL -lllvm-a3xx
 
 include $(BUILD_SHARED_LIBRARY)

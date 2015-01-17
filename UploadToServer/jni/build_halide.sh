@@ -10,6 +10,10 @@ for archs in arm-32-android,armeabi arm-32-android-armv7s,armeabi-v7a, x86-32-an
     HL_TARGET=$hl_target DYLD_LIBRARY_PATH=../../../third_party/halide/bin LD_LIBRARY_PATH=../../../third_party/halide/bin  ./../../../xform_halide/recon_separate.out
     HL_TARGET=$hl_target DYLD_LIBRARY_PATH=../../../third_party/halide/bin LD_LIBRARY_PATH=../../../third_party/halide/bin  ./../../../xform_halide/resize.out
     HL_TARGET=$hl_target DYLD_LIBRARY_PATH=../../../third_party/halide/bin LD_LIBRARY_PATH=../../../third_party/halide/bin  ./../../../xform_halide/dequant.out
+    HL_TARGET=$hl_target DYLD_LIBRARY_PATH=../../../third_party/halide/bin LD_LIBRARY_PATH=../../../third_party/halide/bin  ./../../../xform_halide/downsample.out
+    HL_TARGET=$hl_target DYLD_LIBRARY_PATH=../../../third_party/halide/bin LD_LIBRARY_PATH=../../../third_party/halide/bin  ./../../../xform_halide/highpass.out
+    HL_TARGET=$hl_target DYLD_LIBRARY_PATH=../../../third_party/halide/bin LD_LIBRARY_PATH=../../../third_party/halide/bin  ./../../../xform_halide/compute_features.out
+    HL_TARGET=$hl_target DYLD_LIBRARY_PATH=../../../third_party/halide/bin LD_LIBRARY_PATH=../../../third_party/halide/bin  ./../../../xform_halide/compute_cfeatures.out
     cd ..
     unset IFS
 done
