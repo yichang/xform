@@ -6,10 +6,10 @@ HL_OBJ =  ../../xform_halide/
 CPPFLAGS += -I./../../src/\
 	    -I./../../third_party/$(EIGEN_LIB)/\
 	    -I./../../third_party/$(PNG_LIB)/\
-	    -I./../../third_party/Halide/apps/support/\
+	    -I./../../third_party/halide/apps/support/\
 	    -I./../../xform_halide/ -lpng15 -ljpeg
 
-CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
+CXXFLAGS += -g -Wall -Wextra -pthread -std=gnu++0x -Ofast -msse2
 
 TARGETS=extract_recipe
 
