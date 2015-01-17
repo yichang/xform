@@ -1,7 +1,7 @@
 #include <Halide.h>
 using namespace Halide;
 
-Var x, y, yi, yo, c;
+Var x, y, xi, xo, yi, yo, c;
 // Downsample with a 1 3 3 1 filter
 Func downsample(Func f) {
     Func downx, downy;
@@ -28,7 +28,7 @@ Func downsample_n(Func f, const int J){
   }
   for(int i = 0; i < J; i++){
     gdPyramid[i].compute_root();
-    gdPyramid[i].split(y, yo, yi, 16).parallel(yo).vectorize(x, 8);
+    gdPyramid[i].tile(x, y, xo, yo, xi, yi, 32, 32).parallel(yo).vectorize(xi, 8);
   }
   return gdPyramid[J-1];
 }
@@ -44,7 +44,7 @@ Func upsample_n(Func f, const int J){
   }
   return guPyramid[0];
 }
-Func gaussian_stack(Func f, const int j){
+Func gaussian_blur(Func f, const int j){
   Func ds;
   ds(x, y, _) = downsample_n(f, j)(x, y, _);
   Func us;
@@ -123,9 +123,17 @@ int main(int argc, char **argv){
   Func lumin("lumin");
   lumin(x, y) = my_yuv(x, y, 0);
 
+  // Gaussian stack
   Func gaussian[J];
-  for(int i = 0; i < J; i++)
-    gaussian[i](x, y) = gaussian_stack(lumin, i+1)(x, y);
+
+  Func* gdPyramid = new Func[J];
+  gdPyramid[0](x, y) = lumin(x, y);
+  for (int j = 1; j < J; j++) {
+      gdPyramid[j](x, y) = downsample(gdPyramid[j-1])(x, y);
+  }
+  for(int i = 0; i < J; i++){
+    gaussian[i](x, y) = upsample_n(gdPyramid[i], i+1)(x, y); 
+  }
 
   Func laplacian[J-1];
   for(int i = 0; i < J-1; i++)
@@ -191,18 +199,13 @@ int main(int argc, char **argv){
                                        ac_lumin(x/step, y/step + offset_y * 3) +
                                        reduced_laplacian[J-2](x, y) + 
                                        reduced_curve_feat[nbins-2](x, y); 
-  // Now for chrominance channel
-  Func chrom_out("chrom_out");
-  chrom_out(x, y, c) = my_yuv(x, y, c);
-  chrom_out(x, y, 0) =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 0, y/step + offset_y * z)) + 
-                                          ac_chrom(x/step + offset_x * 0, y/step + offset_y * 3);  
-  chrom_out(x, y, 1) =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 1, y/step + offset_y * z)) + 
-                                          ac_chrom(x/step + offset_x * 1, y/step + offset_y * 3);  
-  // Combine Y and UV
   Func yuv_out("yuv_out");
   Expr yy = lumin_out(x, y);
-  Expr uu = chrom_out(x, y, 0);
-  Expr vv = chrom_out(x, y, 1);
+  Expr uu  =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 0, y/step + offset_y * z)) + 
+                            ac_chrom(x/step + offset_x * 0, y/step + offset_y * 3);  
+  Expr vv =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 1, y/step + offset_y * z)) + 
+                            ac_chrom(x/step + offset_x * 1, y/step + offset_y * 3);  
+
   yuv_out(x,y,c) = select(c == 0, yy, c == 1, uu,  vv);
 
   // YUV2RGB
@@ -218,16 +221,27 @@ int main(int argc, char **argv){
 
   Func final("final");
   final(x, y, c) = clamp(new_dc(x, y, c)  + rgb_out(x, y, c), 0.0f, 1.0f);
+  //final(x, y, c) = hp(x, y, c);
 
   /* Scheduling */
-  final.tile(x, y, xo, yo, xi, yi, 256, 64).parallel(yo).vectorize(xi, 8);
+  //final.tile(x, y, xo, yo, xi, yi, 256, 64).parallel(yo).vectorize(xi, 8);
+  final.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   //new_dc.compute_at(final, yo);
   //yuv_out.compute_at(final, yo);
+  //my_yuv.compute_root();
+  //us_ds.compute_at(final, yo);
   maxi.compute_root();
   mini.compute_root();
-  range.compute_root();
-  hp.compute_root();
-  hp.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
+  ac_chrom.compute_at(final, yo);
+  ac_lumin.compute_at(final, yo);
+  new_dc.compute_at(final, yo);
+  //hp.compute_at(final, yo);
+  //hp.compute_at();
+  //hp.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
+  for(int i = 0; i < J; i++){
+    gdPyramid[i].compute_root();
+    gdPyramid[i].split(y, yo, yi, 16).parallel(yo).vectorize(x, 8);
+  }
   
   std::vector<Argument> args(9);
   args[0] = input;
