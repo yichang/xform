@@ -14,7 +14,7 @@
 #include "image_io.h"
 
 TEST(TransformModelTest, recon_from_seperate_recipes_Halide){
-  std::string filename = "../images/yichang.png";
+  std::string filename = "../images/bigboy.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
   // Processing by Laplacian filter
@@ -75,16 +75,23 @@ TEST(TransformModelTest, recon_from_seperate_recipes_Halide){
   xform::TransformModel client_model;
   client_model.use_halide=true;
   timeval t0, t_recon;
+  unsigned int t_best;
+  for(int i=0; i < 5; i++){
   gettimeofday(&t0, NULL);
   client_model.reconstruct_separate_by_Halide(
     client_image, ac_lumin, ac_chrom, dc, meta, &recon);
   gettimeofday(&t_recon, NULL);
   unsigned int t_rec = (t_recon.tv_sec - t0.tv_sec) * 1000000 + (t_recon.tv_usec - t0.tv_usec);
-  std::cout<< "t_recon = " << t_rec << std::endl;
+  if (i==1)
+    t_best = t_rec;
+  else if (t_best > t_rec)
+    t_best = t_rec;
+  }
+  std::cout<< "t_recon = " << t_best << std::endl;
   save(recon, "TransformTest_recon_by_separate_recipe_halide.png");
 }
 /*TEST(TransformModelTest, fit_recipe){
-  std::string filename = "../images/yichang.png";
+  std::string filename = "../images/bigboy.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 
@@ -123,7 +130,7 @@ TEST(TransformModelTest, recon_from_seperate_recipes_Halide){
 
 }
  TEST(TransformModelTest, recon_from_halide){
-  std::string filename = "../images/yichang.png";
+  std::string filename = "../images/bigboy.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 
@@ -191,7 +198,7 @@ TEST(TransformModelTest, recon_from_seperate_recipes_Halide){
   save(HL_output, "TransformTest_recon_by_halide.png");
 }
 TEST(TransformModelTest, recon_from_recipe){
-  std::string filename = "../images/yichang.png";
+  std::string filename = "../images/bigboy.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 
@@ -258,7 +265,7 @@ TEST(TransformModelTest, recon_from_recipe){
 }
 */
 TEST(TransformModelTest, recon_from_seperate_recipes){
-  std::string filename = "../images/yichang.png";
+  std::string filename = "../images/bigboy.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 

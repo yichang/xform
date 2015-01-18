@@ -120,7 +120,7 @@ Func downsample_n(Func f, const int J){
   }
   for(int i = 0; i < J; i++){
     gdPyramid[i].compute_root();
-    gdPyramid[i].tile(x, y, xo, yo, xi, yi, 32, 32).parallel(yo).vectorize(xi, 8);
+    gdPyramid[i].parallel(y, 4).vectorize(x, 8);
   }
   return gdPyramid[J-1];
 }
@@ -166,13 +166,11 @@ Func rgb2yuv(Func rgb_){
 Func box_blur(Func f, const int b_width){
   
   Func offset_x("offset_x");
-  //RDom u(-b_width, b_width + 1);
   RDom u(-b_width, b_width + 1);
   offset_x(y,c) = sum(f(u, y, c));
 
   Func blur_x ("blur_x");
   blur_x(x, y, c) = (-1 * f(x - b_width, y, c) + f(x + b_width, y, c) + offset_x(y, c))/(2*b_width+1);
-
 
   return blur_x;
 }
@@ -182,7 +180,7 @@ int main(int argc, char **argv){
   const int nbins = 4;
   const int step = 16;
   const float scaleFactor = float(std::pow(2, J-1));
-
+  bool stack = false;
 
   ImageParam input(Float(32), 3),
              ac_lumin_raw(Float(32), 2),
@@ -207,9 +205,6 @@ int main(int argc, char **argv){
   ds_x(x, y, c) = resize_x(my_yuv, 1.0/scaleFactor)(x, y, c);
   ds(x, y, c) = resize_y(ds_x, 1.0/scaleFactor)(x, y, c);
   //ds(x,y,c) = downsample_n(my_yuv, J)(x,y,c);
-  ds.compute_root();
-  ds.split(y, yo, yi, 4).parallel(yo); 
-  ds_x.store_at(ds, yo).compute_at(ds, yi).vectorize(x, 8);
 
   Func us_ds("us_ds");
   Func us_ds_x("us_ds_x");
@@ -225,21 +220,27 @@ int main(int argc, char **argv){
   lumin(x, y) = my_yuv(x, y, 0);
 
   // Gaussian stack
-  Func gaussian[J];
 
-  Func* gdPyramid = new Func[J];
+  Func gdPyramid [J];
   gdPyramid[0](x, y) = lumin(x, y);
   for (int j = 1; j < J; j++) {
       gdPyramid[j](x, y) = downsample(gdPyramid[j-1])(x, y);
   }
-  for(int i = 0; i < J; i++){
-    //gaussian[i](x, y) = upsample_n(gdPyramid[i], i+1)(x, y); 
-    gaussian[i](x, y) = upsample_n(gdPyramid[i], i+1)(x, y); 
-  }
 
   Func laplacian[J-1];
-  for(int i = 0; i < J-1; i++)
-    laplacian[i](x, y) = gaussian[i](x, y) - gaussian[i+1](x, y);
+  Func gaussian[J];
+  Func lPyramid[J-1];
+  if (stack){
+    for(int i = 0; i < J; i++){
+      gaussian[i](x, y) = upsample_n(gdPyramid[i], i+1)(x, y); 
+    }
+    for(int i = 0; i < J-1; i++)
+      laplacian[i](x, y) = gaussian[i](x, y) - gaussian[i+1](x, y);
+  }else{
+    for (int j = J-2; j >= 0; j--) {
+        lPyramid[j](x, y) = gdPyramid[j](x,y) - upsample(gdPyramid[j+1])(x, y);
+    }
+  }
 
   // Lumin curve features
   Func lumin_hp("lumin_hp");
@@ -280,11 +281,23 @@ int main(int argc, char **argv){
   
   // Reduce Laplacian coefficients
   Func reduced_laplacian[J-1]; 
-  for(int i = 0; i < J - 1; i++)
-    reduced_laplacian[i](x, y) = laplacian[i](x, y) * ac_lumin(x/step, y/step + offset_y * (4 + i));
+  if (stack){ 
+    for(int i = 0; i < J - 1; i++)
+      reduced_laplacian[i](x, y) = laplacian[i](x, y) * ac_lumin(x/step, y/step + offset_y * (4 + i));
 
-  for(int i = 1; i < J - 1; i++)
-    reduced_laplacian[i](x, y) = reduced_laplacian[i](x, y) + reduced_laplacian[i-1](x,y);
+    for(int i = 1; i < J - 1; i++)
+      reduced_laplacian[i](x, y) = reduced_laplacian[i](x, y) + reduced_laplacian[i-1](x,y);
+  }else{ // Pyramid 
+
+    reduced_laplacian[J-2](x, y) = lPyramid[J-2](x, y) * 
+      ac_lumin(clamp(x, 0, offset_x-1), clamp(y + offset_y*(4+J-2), offset_y*(4+J-2), offset_y*(4+J-1)-1));
+    for(int i = J-3; i >= 0; i--){
+      int scale = std::pow(2, J-1-i);
+      reduced_laplacian[i](x, y) = upsample(reduced_laplacian[i+1])(x, y) + 
+            lPyramid[i](x, y) * 
+            ac_lumin(clamp(x/scale, 0, offset_x-1), clamp(y/scale + offset_y * (4+i), offset_y*(4+i), offset_y*(4+i+1)-1)); 
+    }
+  }
 
   // Reduce Histogram Coefficients
   Func reduced_curve_feat[nbins-1]; 
@@ -297,10 +310,12 @@ int main(int argc, char **argv){
   // Put together
   Func lumin_out("lumin_out");
   RDom z(0, 3);
-  lumin_out(x, y) = sum(hp(x, y, z) *  ac_lumin(x/step, y/step + offset_y * z)) + 
-                                       ac_lumin(x/step, y/step + offset_y * 3) +
-                                       reduced_laplacian[J-2](x, y) + 
-                                       reduced_curve_feat[nbins-2](x, y); 
+  lumin_out(x, y) =   hp(x, y, 0 ) * ac_lumin(x/step, y/step + offset_y * 0) + 
+                      hp(x, y, 1 ) * ac_lumin(x/step, y/step + offset_y * 1) + 
+                      hp(x, y, 2 ) * ac_lumin(x/step, y/step + offset_y * 2) + 
+                                     ac_lumin(x/step, y/step + offset_y * 3) +
+                                     reduced_laplacian[0](x, y) + 
+                                     reduced_curve_feat[nbins-2](x, y); 
   Func yuv_out("yuv_out");
   Expr yy = lumin_out(x, y);
   Expr uu  =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 0, y/step + offset_y * z)) + 
@@ -327,16 +342,26 @@ int main(int argc, char **argv){
 
   Func final("final");
   final(x, y, c) = clamp(new_dc(x, y, c)  + rgb_out(x, y, c), 0.0f, 1.0f);
+  //final(x, y, c) = reduced_laplacian[0](x, y);
+  //final(x, y, c) = hp(x, y, c);
+  //final(x, y, c) = my_yuv(x, y, c);
   //final(x, y, c) = new_dc(x, y, c);
+  //final(x, y, c) = reduced_curve_feat[0](x, y);
 
   /* Scheduling */
   final.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   new_dc_x.store_at(final, yo).compute_at(new_dc, y).vectorize(x, 8);
 
   //Highpass
+  //us_ds.compute_root();
+  //us_ds.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
+  //us_ds_x.store_at(us_ds, yo).compute_at(us_ds, yi).vectorize(x, 8);
   hp.compute_root();
   hp.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   us_ds_x.store_at(hp, yo).compute_at(hp, yi).vectorize(x, 8);
+  ds.compute_root();
+  ds.split(y, yo, yi, 16).parallel(yo).vectorize(x, 4); 
+  ds_x.store_at(ds, yo).compute_at(ds, yi).vectorize(x, 4);
 
   // Laplacian Coeffificents
 
@@ -346,16 +371,26 @@ int main(int argc, char **argv){
   maxi.compute_at(final, yo);
   mini.compute_at(final, yo);
   ac_chrom.compute_at(final, yo);
-  ac_lumin.compute_at(final, yo);
+  //ac_lumin.compute_at(final, yo);
+  ac_lumin.compute_root();
   new_dc.compute_at(final, yo);
   //hp.compute_at(final, yo);
   //hp.compute_at();
   //hp.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   for(int i = 0; i < J; i++){
     gdPyramid[i].compute_root();
-    gdPyramid[i].split(y, yo, yi, 16).parallel(yo).vectorize(x, 8);
+    gdPyramid[i].parallel(y, 8).vectorize(x, 8);
   }
-  
+  if (!stack){
+    for(int i = 0; i < J-1; i++){
+      reduced_laplacian[i].compute_root();
+      reduced_laplacian[i].parallel(y, 8).vectorize(x, 8);
+    }
+    for(int i = 0; i < J-1; i++){
+      lPyramid[i].compute_root();
+      lPyramid[i].parallel(y, 8).vectorize(x, 8);
+    }
+  }
   std::vector<Argument> args(9);
   args[0] = input;
   args[1] = level;
