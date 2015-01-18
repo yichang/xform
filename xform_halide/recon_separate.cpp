@@ -71,6 +71,7 @@ Func resize_x(Func f, float scaleFactor){
   Func resized_x("resized_x");
   
   kernelx.compute_root();
+  
   resized_x(x, y, c) = sum(kernelx(x, domx) * cast<float>(f(domx + beginx, y, c)));
   return resized_x;
 }
@@ -219,7 +220,6 @@ int main(int argc, char **argv){
   Func lumin("lumin");
   lumin(x, y) = my_yuv(x, y, 0);
 
-  // Gaussian stack
 
   Func gdPyramid [J];
   gdPyramid[0](x, y) = lumin(x, y);
@@ -231,6 +231,7 @@ int main(int argc, char **argv){
   Func gaussian[J];
   Func lPyramid[J-1];
   if (stack){
+    // Gaussian stack
     for(int i = 0; i < J; i++){
       gaussian[i](x, y) = upsample_n(gdPyramid[i], i+1)(x, y); 
     }
