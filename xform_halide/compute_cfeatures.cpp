@@ -1,7 +1,104 @@
 #include <Halide.h>
 using namespace Halide;
 
-Var x, y, yi, yo, c;
+
+Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
+    k("k"), ni("ni"), no("no");
+
+enum InterpolationType {
+    BOX, LINEAR, CUBIC, LANCZOS
+};
+
+Expr kernel_box(Expr x) {
+    Expr xx = abs(x);
+    return select(xx <= 0.5f, 1.0f, 0.0f);
+}
+
+Expr kernel_linear(Expr x) {
+    Expr xx = abs(x);
+    return select(xx < 1.0f, 1.0f - xx, 0.0f);
+}
+
+Expr kernel_cubic(Expr x) {
+    Expr xx = abs(x);
+    Expr xx2 = xx * xx;
+    Expr xx3 = xx2 * xx;
+    float a = -0.5f;
+
+    return select(xx < 1.0f, (a + 2.0f) * xx3 - (a + 3.0f) * xx2 + 1,
+                  select (xx < 2.0f, a * xx3 - 5 * a * xx2 + 8 * a * xx - 4.0f * a,
+                          0.0f));
+}
+
+Expr sinc(Expr x) {
+    return sin(float(M_PI) * x) / x;
+}
+
+Expr kernel_lanczos(Expr x) {
+    Expr value = sinc(x) * sinc(x/3);
+    value = select(x == 0.0f, 1.0f, value); // Take care of singularity at zero
+    value = select(x > 3 || x < -3, 0.0f, value); // Clamp to zero out of bounds
+    return value;
+}
+
+struct KernelInfo {
+    const char *name;
+    float size;
+    Expr (*kernel)(Expr);
+};
+
+static KernelInfo kernelInfo[] = {
+    { "box", 0.5f, kernel_box },
+    { "linear", 1.0f, kernel_linear },
+    { "cubic", 2.0f, kernel_cubic },
+    { "lanczos", 3.0f, kernel_lanczos }
+};
+InterpolationType interpolationType = LINEAR;
+
+Func resize_x(Func f, float scaleFactor){
+
+  float kernelScaling = std::min(scaleFactor, 1.0f);
+  float kernelSize = kernelInfo[interpolationType].size / kernelScaling;
+  Expr sourcex = (x + 0.5f) / scaleFactor;
+  Func kernelx("kernelx"); 
+  Expr beginx = cast<int>(sourcex - kernelSize + 0.5f);
+  RDom domx(0, static_cast<int>(2.0f * kernelSize) + 1, "domx");
+  {
+        const KernelInfo &info = kernelInfo[interpolationType];
+        Func kx; 
+        kx(x, k) = info.kernel((k + beginx - sourcex) * kernelScaling);
+        kernelx(x, k) = kx(x, k) / sum(kx(x, domx));
+  }
+  Func resized_x("resized_x");
+  
+  kernelx.compute_root();
+  resized_x(x, y, c) = sum(kernelx(x, domx) * cast<float>(f(domx + beginx, y, c)));
+  return resized_x;
+}
+Func resize_y(Func f, float scaleFactor){
+
+    float kernelScaling = std::min(scaleFactor, 1.0f);
+    float kernelSize = kernelInfo[interpolationType].size / kernelScaling;
+    Expr sourcey = (y + 0.5f) / scaleFactor;
+    Func kernely("kernely");
+    Expr beginy = cast<int>(sourcey - kernelSize + 0.5f);
+    RDom domy(0, static_cast<int>(2.0f * kernelSize) + 1, "domy");
+    {
+        const KernelInfo &info = kernelInfo[interpolationType];
+        Func ky;
+        ky(y, k) = info.kernel((k + beginy - sourcey) * kernelScaling);
+        kernely(y, k) = ky(y, k) / sum(ky(y, domy));
+    }
+    Func resized_y("resized_y");
+    resized_y(x, y, c) = sum(kernely(y, domy) * f(x, domy + beginy, c));
+
+    kernely.compute_root();
+    return resized_y;
+}
+
+
+
+
 // Downsample with a 1 3 3 1 filter
 Func downsample(Func f) {
     Func downx, downy;
@@ -72,8 +169,8 @@ int main(int argc, char **argv){
   const int J = 5;
   const int nbins = 4;
   const int step = 16;
+  const float scaleFactor = float(std::pow(2, J-1));
 
-  Var x, y, c, yi, yo, xi, xo, ni, no;
 
   ImageParam input(Float(32), 3);
 
@@ -87,10 +184,24 @@ int main(int argc, char **argv){
 
   // High-pass features
   Func ds("ds");
+  Func ds_x("ds_x");
+  ds_x(x, y, c) = resize_x(my_yuv, 1.0/scaleFactor)(x, y, c);
+  ds(x, y, c) = resize_y(ds_x, 1.0/scaleFactor)(x, y, c);
+
+  Func us_ds("us_ds");
+  Func us_ds_x("us_ds_x");
+  us_ds_x(x, y, c) = resize_x(ds, scaleFactor)(x, y, c);
+  us_ds(x, y, c) = resize_y(us_ds_x, scaleFactor)(x, y, c);
+
+  Func hp("hp");
+  hp(x, y, c) = my_yuv(x, y, c) - us_ds(x, y, c);
+
+
+  /*Func ds("ds");
   ds(x,y,c) = downsample_n(my_yuv, J)(x,y,c);
 
   Func hp("hp");
-  hp(x, y, c) = my_yuv(x, y, c) - upsample_n(ds, J)(x, y, c);
+  hp(x, y, c) = my_yuv(x, y, c) - upsample_n(ds, J)(x, y, c);*/
 
   Func final("final");
   final(x, y, c) = clamped(x, y, c);
@@ -101,7 +212,13 @@ int main(int argc, char **argv){
 
 
   /* Scheduling */
-  //final.tile(x, y, xo, xi, yo, yi, 16, 32).parallel(yo).vectorize(xi,8);
+  final.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
+  hp.compute_root();
+  hp.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
+  us_ds_x.store_at(hp, yo).compute_at(hp, yi);
+  ds.compute_root();
+  ds.split(y, yo, yi, 4).parallel(yo); 
+  //ds_x.store_at(ds, yo).compute_at(ds, yo).vectorize(x, 8);
   
   std::vector<Argument> args(1);
   args[0] = input;
