@@ -1,3 +1,5 @@
+all: resize recon recon_separate compute_features compute_cfeatures dequant downsample highpass 
+
 
 blur: blur.cpp
 	g++ blur.cpp -o blur.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
