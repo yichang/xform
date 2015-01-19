@@ -182,6 +182,7 @@ int main(int argc, char **argv){
   const int step = 16;
   const float scaleFactor = float(std::pow(2, J-1));
   bool stack = false;
+  
 
   ImageParam input(Float(32), 3),
              ac_lumin_raw(Float(32), 2),
@@ -364,11 +365,17 @@ int main(int argc, char **argv){
   /* Scheduling */
   final.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   new_dc_x.store_at(final, yo).compute_at(new_dc, y).vectorize(x, 8);
+  new_dc.compute_at(final, yo);
+
+  // Lumin features
+  yuv_out.compute_root();
+  yuv_out.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
+  maxi.compute_at(yuv_out, yo);
+  mini.compute_at(yuv_out, yo);
+  ac_chrom.compute_root();
+  ac_lumin.compute_root();
 
   //Highpass
-  //us_ds.compute_root();
-  //us_ds.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
-  //us_ds_x.store_at(us_ds, yo).compute_at(us_ds, yi).vectorize(x, 8);
   hp.compute_root();
   hp.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   us_ds_x.store_at(hp, yo).compute_at(hp, yi).vectorize(x, 8);
@@ -377,19 +384,6 @@ int main(int argc, char **argv){
   ds_x.store_at(ds, yo).compute_at(ds, yi).vectorize(x, 4);
 
   // Laplacian Coeffificents
-
-  //yuv_out.compute_at(final, yo);
-  //my_yuv.compute_root();
-  //us_ds.compute_at(final, yo);
-  maxi.compute_at(final, yo);
-  mini.compute_at(final, yo);
-  ac_chrom.compute_at(final, yo);
-  //ac_lumin.compute_at(final, yo);
-  ac_lumin.compute_root();
-  new_dc.compute_at(final, yo);
-  //hp.compute_at(final, yo);
-  //hp.compute_at();
-  //hp.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   for(int i = 0; i < J; i++){
     gdPyramid[i].compute_root();
     gdPyramid[i].parallel(y, 8).vectorize(x, 8);
