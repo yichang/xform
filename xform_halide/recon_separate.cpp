@@ -199,6 +199,7 @@ int main(int argc, char **argv){
 
   Func my_yuv("yuv");
   my_yuv(x, y, c) = rgb2yuv(clamped)(x, y, c);
+  //my_yuv(x, y, c) = clamped(x, y, c); //profiling
 
   // High-pass features
   Func ds("ds");
@@ -317,18 +318,24 @@ int main(int argc, char **argv){
                                      ac_lumin(x/step, y/step + offset_y * 3) +
                                      reduced_laplacian[0](x, y) + 
                                      reduced_curve_feat[nbins-2](x, y); 
-  Func yuv_out("yuv_out");
-  Expr yy = lumin_out(x, y);
-  Expr uu  =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 0, y/step + offset_y * z)) + 
+  Func u_out("u_out");
+  u_out(x, y)  =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 0, y/step + offset_y * z)) + 
                             ac_chrom(x/step + offset_x * 0, y/step + offset_y * 3);  
-  Expr vv =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 1, y/step + offset_y * z)) + 
-                            ac_chrom(x/step + offset_x * 1, y/step + offset_y * 3);  
 
+  Func v_out("v_out");
+  v_out(x, y) =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 1, y/step + offset_y * z)) + 
+                            ac_chrom(x/step + offset_x * 1, y/step + offset_y * 3);  
+  Expr yy = lumin_out(x, y);
+  Expr uu = u_out(x, y);
+  Expr vv = v_out(x, y);
+
+  Func yuv_out("yuv_out");
   yuv_out(x,y,c) = select(c == 0, yy, c == 1, uu,  vv);
 
   // YUV2RGB
   Func rgb_out("rgb_out");
   rgb_out(x, y, c) = yuv2rgb(yuv_out)(x, y, c);
+  //rgb_out(x, y, c) = yuv2rgb(clamped)(x, y, c); for profiling
 
   // Put the upsampled DC back to predicted highpass
   Func clamped_dc("clamped_dc");
@@ -343,11 +350,16 @@ int main(int argc, char **argv){
 
   Func final("final");
   final(x, y, c) = clamp(new_dc(x, y, c)  + rgb_out(x, y, c), 0.0f, 1.0f);
-  //final(x, y, c) = reduced_laplacian[0](x, y);
-  //final(x, y, c) = hp(x, y, c);
   //final(x, y, c) = my_yuv(x, y, c);
-  //final(x, y, c) = new_dc(x, y, c);
+  //final(x, y, c) = hp(x, y, c);
+  //final(x, y, c) = reduced_laplacian[0](x, y);
   //final(x, y, c) = reduced_curve_feat[0](x, y);
+  //final(x, y, c) = lumin_out(x, y);
+  //final(x, y, c) = u_out(x, y);
+  //final(x, y, c) = v_out(x, y);
+  //final(x, y, c) = yuv_out(x, y, c);
+  //final(x, y, c) = rgb_out(x, y, c);
+  //final(x, y, c) = new_dc(x, y, c);
 
   /* Scheduling */
   final.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);

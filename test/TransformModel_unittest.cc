@@ -12,9 +12,75 @@
 #include "LocalLaplacian.h"
 #include "static_image.h"
 #include "image_io.h"
+TEST(TransformModelTest, perf_test){
+  vector<std::string> fnames;
+  fnames.push_back("../images/1MP.png");
+  fnames.push_back("../images/2MP.png");
+  fnames.push_back("../images/4MP.png");
+  fnames.push_back("../images/8MP.png");
+  fnames.push_back("../images/16MP.png");
+  for(int i = 0; i < fnames.size(); i++){
+    std::string filename = fnames[i];
+      // Server side :: will make here 
+    xform::TransformModel server_model;
+    const int meta_len = 2 * (3 * server_model.num_affine + 
+          server_model.num_scale-1 + server_model.num_bins-1);
+    server_model.use_halide=true;
+    xform::ImageType_1 ac_lumin_server, ac_chrom_server;
+    xform::XImage dc_server; 
+    xform::PixelType* meta_server = new xform::PixelType[meta_len];
+
+    Image<float> HL_input_server = load<float>(filename),
+                 HL_output_server  = load<float>(filename);
+    const int height = HL_input_server.height(), width = HL_input_server.width();
+    const int dc_height = height/std::pow(2,server_model.num_scale-1),
+              dc_width = width/std::pow(2,server_model.num_scale-1);
+                 Image<float> HL_dc_server(dc_width, dc_height, 3);
+    server_model.fit_separate_recipe_by_Halide(HL_input_server, HL_output_server, 
+      &ac_lumin_server, &ac_chrom_server, &HL_dc_server, meta_server);
+    save(HL_dc_server, "recipe_dc.png");
+    xform::imwrite(ac_lumin_server, "recipe_ac_lumin.png");
+    xform::imwrite(ac_chrom_server, "recipe_ac_chrom.png");
+    std::ofstream out_file;                                                   
+    out_file.open("quant.meta");                                                
+    for(int i=0; i < meta_len; i++) // TODO: don't hard code this! 
+      out_file<<meta_server[i]<<" ";                              
+    out_file.close();                                   
+
+    // Client side
+    std::ifstream in_file ; // Quant data
+    in_file.open("quant.meta");
+    xform::PixelType* meta = new xform::PixelType[meta_len];
+    for(int i = 0; i < meta_len; i++)
+      in_file >> meta[i];
+
+    Image<float> ac_lumin =load<float>("recipe_ac_lumin.png"), 
+                 ac_chrom =load<float>("recipe_ac_chrom.png"),
+                 dc = load<float>("recipe_dc.png"),
+                 client_image = load<float>(filename),
+                 recon(client_image.width(), client_image.height(), client_image.channels());
+    xform::TransformModel client_model;
+    client_model.use_halide=true;
+    timeval t0, t_recon;
+    unsigned int t_best;
+    for(int i=0; i < 5; i++){
+    gettimeofday(&t0, NULL);
+    client_model.reconstruct_separate_by_Halide(
+      client_image, ac_lumin, ac_chrom, dc, meta, &recon);
+    gettimeofday(&t_recon, NULL);
+    unsigned int t_rec = (t_recon.tv_sec - t0.tv_sec) * 1000000 + (t_recon.tv_usec - t0.tv_usec);
+    if (i==1)
+      t_best = t_rec;
+    else if (t_best > t_rec)
+      t_best = t_rec;
+    }
+    std::cout<< "t_recon = " << t_best << std::endl;
+  }
+}
+
 
 TEST(TransformModelTest, recon_from_seperate_recipes_Halide){
-  std::string filename = "../images/bigboy.png";
+  std::string filename = "../images/tiger.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
   // Processing by Laplacian filter
@@ -91,7 +157,7 @@ TEST(TransformModelTest, recon_from_seperate_recipes_Halide){
   save(recon, "TransformTest_recon_by_separate_recipe_halide.png");
 }
 /*TEST(TransformModelTest, fit_recipe){
-  std::string filename = "../images/bigboy.png";
+  std::string filename = "../images/tiger.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 
@@ -130,7 +196,7 @@ TEST(TransformModelTest, recon_from_seperate_recipes_Halide){
 
 }
  TEST(TransformModelTest, recon_from_halide){
-  std::string filename = "../images/bigboy.png";
+  std::string filename = "../images/tiger.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 
@@ -198,7 +264,7 @@ TEST(TransformModelTest, recon_from_seperate_recipes_Halide){
   save(HL_output, "TransformTest_recon_by_halide.png");
 }
 TEST(TransformModelTest, recon_from_recipe){
-  std::string filename = "../images/bigboy.png";
+  std::string filename = "../images/tiger.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 
@@ -265,7 +331,7 @@ TEST(TransformModelTest, recon_from_recipe){
 }
 */
 TEST(TransformModelTest, recon_from_seperate_recipes){
-  std::string filename = "../images/bigboy.png";
+  std::string filename = "../images/tiger.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
 
