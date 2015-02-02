@@ -64,7 +64,7 @@ Func resize_x(Func f, float scaleFactor){
   
   kernelx.compute_root();
   
-  resized_x(x, y, c) = sum(kernelx(x, domx) * cast<float>(f(domx + beginx, y, c)));
+  resized_x(x, y, _) = sum(kernelx(x, domx) * cast<float>(f(domx + beginx, y, _)));
   return resized_x;
 }
 Func resize_y(Func f, float scaleFactor){
@@ -83,7 +83,7 @@ Func resize_y(Func f, float scaleFactor){
         kernely(y, k) = ky(y, k) / sum(ky(y, domy));
     }
     Func resized_y("resized_y");
-    resized_y(x, y, c) = sum(kernely(y, domy) * f(x, domy + beginy, c));
+    resized_y(x, y, _) = sum(kernely(y, domy) * f(x, domy + beginy, _));
     kernely.compute_root();
     return resized_y;
 }

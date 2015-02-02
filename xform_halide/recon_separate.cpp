@@ -16,6 +16,7 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
 
   const float scaleFactor = float(std::pow(2, J-1));
   bool stack = true;
+  bool interp = false;
 
   ImageParam input(Float(32), 3),
              ac_lumin_raw(Float(32), 2),
@@ -107,11 +108,11 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
   ac_chrom(x, y) = ac_chrom_raw(x, y) * 
     ac_chrom_range((x*n_chan_o_chrom)/ac_chrom_raw.width(), (y*n_chan_i_chrom)/ac_chrom_raw.height()) + 
     ac_chrom_mins((x*n_chan_o_chrom)/ac_chrom_raw.width(), (y*n_chan_i_chrom)/ac_chrom_raw.height());
-  
+
   // Reconstruct each patch (luminance channel)
   Expr offset_y = ac_lumin_raw.height()/(n_chan_i_lumin);
   Expr offset_x = ac_lumin_raw.width();
-  
+
   // Reduce Laplacian coefficients
   Func* reduced_laplacian = new Func[J-1]; 
   if (stack){ 
@@ -143,12 +144,33 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
   // Put together
   Func lumin_out("lumin_out");
   RDom z(0, 3);
-  lumin_out(x, y) =   hp(x, y, 0 ) * ac_lumin(x/step, y/step + offset_y * 0) + 
-                      hp(x, y, 1 ) * ac_lumin(x/step, y/step + offset_y * 1) + 
-                      hp(x, y, 2 ) * ac_lumin(x/step, y/step + offset_y * 2) + 
-                                     ac_lumin(x/step, y/step + offset_y * 3) +
-                                     reduced_laplacian[0](x, y) + 
-                                     reduced_curve_feat[nbins-2](x, y); 
+
+  if (interp){ // Interpolate the luminance channel
+
+    Func clamped_ac_lumin("clamed_ac_lumin");
+    clamped_ac_lumin(x, y) = ac_lumin(clamp(x, 0, ac_lumin_raw.width()-1), clamp(y, 0, ac_lumin_raw.height()-1));
+    Func ac_lumin_interp("ac_lumin_interp");
+    Func ac_lumin_interp_x("ac_lumin_interp_x");
+    ac_lumin_interp_x(x, y) = resize_x(clamped_ac_lumin, scaleFactor)(x, y);
+    ac_lumin_interp(x, y) = resize_y(ac_lumin_interp_x, scaleFactor)(x, y);
+    ac_lumin_interp_x.compute_root();
+    ac_lumin_interp.compute_root();
+
+    lumin_out(x, y) =   hp(x, y, 0 ) * ac_lumin_interp(x, y + cast<int>(scaleFactor * offset_y * 0)) +
+                        hp(x, y, 1 ) * ac_lumin_interp(x, y + cast<int>(scaleFactor * offset_y * 1)) +
+                        hp(x, y, 2 ) * ac_lumin_interp(x, y + cast<int>(scaleFactor * offset_y * 2)) +
+                                       ac_lumin_interp(x, y + cast<int>(scaleFactor * offset_y * 3)) +
+                                       reduced_laplacian[0](x, y) + 
+                                       reduced_curve_feat[nbins-2](x, y); 
+  } else {
+    lumin_out(x, y) =   hp(x, y, 0 ) * ac_lumin(x/step, y/step + offset_y * 0) +
+                        hp(x, y, 1 ) * ac_lumin(x/step, y/step + offset_y * 1) +
+                        hp(x, y, 2 ) * ac_lumin(x/step, y/step + offset_y * 2) +
+                                       ac_lumin(x/step, y/step + offset_y * 3) +
+                                       reduced_laplacian[0](x, y) + 
+                                       reduced_curve_feat[nbins-2](x, y); 
+  }
+ 
   Func u_out("u_out");
   u_out(x, y)  =  sum(hp(x, y, z) * ac_chrom(x/step + offset_x * 0, y/step + offset_y * z)) + 
                             ac_chrom(x/step + offset_x * 0, y/step + offset_y * 3);  

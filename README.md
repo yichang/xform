@@ -9,6 +9,5 @@ Pre-requisite:
 - Eigen
 
 TODO:
-1. Overlap/configurable parameters
 2. XImage to Halide via buffer 
 3. XImage read from JPEG

@@ -24,8 +24,8 @@ namespace xform{
 
 TransformModel::TransformModel(){
     use_halide=true;
-    wSize   = 16;
-    step    = wSize;
+    step   = 16;
+    wSize = 2 * step;
     epsilon = 1e-2;
     epsilon *= epsilon;
     quantize_levels = 255; 
