@@ -18,19 +18,19 @@ recon_separate: recon_separate.cpp
 
 compute_features: compute_features.cpp
 	g++ compute_features.cpp -o compute_features.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_features.out
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_features.out 5 4 16
 
 compute_cfeatures: compute_cfeatures.cpp
 	g++ compute_cfeatures.cpp -o compute_cfeatures.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_cfeatures.out
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_cfeatures.out 5 16
 
 downsample: downsample.cpp
 	g++ downsample.cpp -o downsample.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./downsample.out
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./downsample.out 5 16
 
 highpass: highpass.cpp
 	g++ highpass.cpp -o highpass.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./highpass.out
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./highpass.out 5 16
 
 test_resize: test_resize.cpp resize
 	g++ test_resize.cpp halide_resize.o -o test_resize -I ../third_party/halide/apps/support/ -lpng15

@@ -9,15 +9,12 @@ int main(int argc, char **argv){
 
 Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
     k("k"), ni("ni"), no("no");
-  const int J = 5;
-  const int nbins = 4;
-  const int step = 16;
+
+  const int J = std::atoi(argv[1]); //num_levels
+  const int step = std::atoi(argv[2]); // step size
   const float scaleFactor = float(std::pow(2, J-1));
 
-
   ImageParam input(Float(32), 3);
-
-  Param<int>  level;
 
   Func clamped("clamped");
   clamped(x, y, c) = input(clamp(x, 0, input.width()-1), clamp(y, 0, input.height()-1), clamp(c, 0 , input.channels()-1));
@@ -38,13 +35,6 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
 
   Func hp("hp");
   hp(x, y, c) = my_yuv(x, y, c) - us_ds(x, y, c);
-
-
-  /*Func ds("ds");
-  ds(x,y,c) = downsample_n(my_yuv, J)(x,y,c);
-
-  Func hp("hp");
-  hp(x, y, c) = my_yuv(x, y, c) - upsample_n(ds, J)(x, y, c);*/
 
   Func final("final");
   final(x, y, c) = clamped(x, y, c);
