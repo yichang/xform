@@ -1,7 +1,7 @@
 #include <Halide.h>
-#include "resize.h"
-#include "color_transform.h"
-#include "resample.h"
+#include "tools/resize.h"
+#include "tools/color_transform.h"
+#include "tools/resample.h"
 
 using namespace Halide;
 
