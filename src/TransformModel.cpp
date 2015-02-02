@@ -63,10 +63,13 @@ void TransformModel::fit_separate_recipe_by_Halide(const Image<float>& HL_input,
          hp_output(height, width, 3), 
          hp_target_y(height, width, 1),
          hp_target_uv(height, width, 2);
+
+  //TODO: use Map to avoid copying
   feat_lumin.from_Halide(HL_feat_lumin);
   feat_chrom.from_Halide(HL_feat_chrom);
   hp_output.from_Halide(HL_hp_output);
   
+  //TODO: avoid copying
   hp_target_y.at(0)  = hp_output.at(0);
   hp_target_uv.at(0) = hp_output.at(1);
   hp_target_uv.at(1) = hp_output.at(2);
@@ -382,7 +385,7 @@ void TransformModel::regression_fit(const XImage& input_feat,
   const int mdl_h = ceil(1.0f * height/step), mdl_w = ceil(1.0f * width/step);
   *ac = ImageType_1(mdl_h * input_feat.channels(), mdl_w * target_feat.channels()); 
 
-   // Fit affine model per patch
+   // TODO: OpenMP for parallelziation
     for (int imin = 0; imin < height; imin += step)
     for (int jmin = 0; jmin < width; jmin += step)
     {
@@ -396,6 +399,7 @@ void TransformModel::regression_fit(const XImage& input_feat,
         MatType p_output(h*w, target_feat.channels());
         for(int c = 0; c < input_feat.channels() ; ++c)
         {
+            //TODO: use Map to avoid copying
             MatType tmp = input_feat.at(c).block(imin,jmin,h,w);
             tmp.resize(h*w,1);
             p_input.col(c) = tmp;
