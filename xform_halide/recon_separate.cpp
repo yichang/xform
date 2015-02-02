@@ -10,9 +10,10 @@ int main(int argc, char **argv){
 Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
     k("k"), ni("ni"), no("no");
 
-  const int J = 5;
-  const int nbins = 4;
-  const int step = 16;
+  const int J = std::atoi(argv[1]); //num_levels
+  const int nbins = std::atoi(argv[2]); //num_bins
+  const int step = std::atoi(argv[3]); // step size
+
   const float scaleFactor = float(std::pow(2, J-1));
   bool stack = true;
 
@@ -54,16 +55,15 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
   Func lumin("lumin");
   lumin(x, y) = my_yuv(x, y, 0);
 
-
-  Func gdPyramid [J];
+  Func* gdPyramid = new Func[J];
   gdPyramid[0](x, y) = lumin(x, y);
   for (int j = 1; j < J; j++) {
       gdPyramid[j](x, y) = downsample(gdPyramid[j-1])(x, y);
   }
 
-  Func laplacian[J-1];
-  Func gaussian[J];
-  Func lPyramid[J-1];
+  Func* laplacian = new Func[J-1];
+  Func* gaussian = new Func[J];
+  Func* lPyramid = new Func[J-1];
   if (stack){
     // Gaussian stack
     for(int i = 0; i < J; i++){
@@ -80,7 +80,7 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
   // Lumin curve features
   Func lumin_hp("lumin_hp");
   lumin_hp(x, y) = hp(x, y, 0);
-  Func curve_feat[nbins-1];
+  Func*  curve_feat = new Func[nbins-1];
   RDom r(0, step, 0, step);
   Func maxi("maxi"), mini("mini");
   maxi(x, y) = maximum(lumin_hp(step * x + r.x, step * y + r.y));
@@ -115,7 +115,7 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
   Expr offset_x = ac_lumin_raw.width();
   
   // Reduce Laplacian coefficients
-  Func reduced_laplacian[J-1]; 
+  Func* reduced_laplacian = new Func[J-1]; 
   if (stack){ 
     for(int i = 0; i < J - 1; i++)
       reduced_laplacian[i](x, y) = laplacian[i](x, y) * ac_lumin(x/step, y/step + offset_y * (4 + i));
@@ -135,7 +135,7 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
   }
 
   // Reduce Histogram Coefficients
-  Func reduced_curve_feat[nbins-1]; 
+  Func* reduced_curve_feat = new Func[nbins-1]; 
   for(int i = 0; i < nbins - 1; i++)
     reduced_curve_feat[i](x, y) = curve_feat[i](x, y) * ac_lumin(x/step, y/step + offset_y * (4 + J - 1 + i));
 
