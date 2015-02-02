@@ -1,10 +1,5 @@
 all: resize recon recon_separate compute_features compute_cfeatures dequant downsample highpass 
 
-
-blur: blur.cpp
-	g++ blur.cpp -o blur.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./blur.out
-
 resize: resize.cpp
 	g++ resize.cpp -o resize.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
 	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./resize.out
@@ -21,7 +16,6 @@ compute_features: compute_features.cpp
 	g++ compute_features.cpp -o compute_features.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
 	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_features.out
 
-
 compute_cfeatures: compute_cfeatures.cpp
 	g++ compute_cfeatures.cpp -o compute_cfeatures.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
 	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_cfeatures.out
@@ -34,19 +28,13 @@ downsample: downsample.cpp
 	g++ downsample.cpp -o downsample.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
 	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./downsample.out
 
-local_laplacian: local_laplacian.cpp
-	g++ local_laplacian.cpp -o local_laplacian.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./local_laplacian.out
-
-
-
 highpass: highpass.cpp
 	g++ highpass.cpp -o highpass.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
 	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./highpass.out
 
-test: test.cpp blur resize
-	g++ test.cpp halide_blur.o halide_resize.o  -o test -I ../third_party/halide/apps/support/ -lpng15
-	./test ../images/tiger.png ./out.png
+test_resize: test_resize.cpp resize
+	g++ test_resize.cpp halide_resize.o -o test_resize -I ../third_party/halide/apps/support/ -lpng15
+	./test_resize ../images/tiger.png ./out.png
 
 test_recon: test_recon.cpp recon resize
 	g++ test_recon.cpp halide_recon.o halide_resize.o -o test_recon -I ../third_party/halide/apps/support/ -lpng15
@@ -64,17 +52,9 @@ test_compute_cfeatures: test_compute_cfeatures.cpp compute_cfeatures
 	g++ test_compute_cfeatures.cpp halide_compute_cfeatures.o  -o test_compute_cfeatures -I ../third_party/halide/apps/support/ -lpng15 
 	./test_compute_cfeatures ./../images/tiger.png
 
-
-
 test_downsample: test_downsample.cpp downsample
 	g++ test_downsample.cpp halide_downsample.o  -o test_downsample -I ../third_party/halide/apps/support/ -lpng15 
 	./test_downsample ./../images/tiger.png  ./downsample_out.png
-
-process: process.cpp local_laplacian
-	g++ process.cpp local_laplacian.o  -o process -I ../third_party/halide/apps/support/ -lpng15 
-	./process ./../images/tiger.png  8 1 1 ./out.png
-
-
 
 test_highpass: test_highpass.cpp highpass downsample
 	g++ test_highpass.cpp halide_highpass.o halide_downsample.o -o test_highpass -I ../third_party/halide/apps/support/ -lpng15 
@@ -84,6 +64,5 @@ test_dequant: test_dequant.cpp dequant
 	g++ test_dequant.cpp halide_dequant.o  -o test_dequant -I ../third_party/halide/apps/support/ -lpng15
 	./test_dequant ../make/recipe_ac.png
 
-
 clean: 
-	rm -rf blur resize test recon test_recon dequant test_dequant recon_separate test_recon_separate downsample test_downsample test_compute_features compute_features
+	rm -rf resize.out test_resize recon.out test_recon dequant.out test_dequant recon_separate.out test_recon_separate downsample.out test_downsample test_compute_features compute_features.out test_compute_cfeatures compute_cfeatures.out highpass.out test_highpass *.png
