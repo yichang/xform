@@ -12,7 +12,7 @@ namespace xform{
 typedef float PixelType;
 typedef Eigen::Matrix<PixelType,Eigen::Dynamic, Eigen::Dynamic> MatType;
 typedef Eigen::Matrix<PixelType,Eigen::Dynamic, 1> VecType;
-typedef Eigen::Matrix<PixelType, Eigen::Dynamic, Eigen::Dynamic> ImageType_1;
+typedef Eigen::Matrix<PixelType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> ImageType_1;
 typedef Eigen::Matrix<ImageType_1, 3, 1> ImageType_3; 
 typedef Eigen::Matrix<ImageType_1, Eigen::Dynamic, 1> ImageType_N; 
 typedef Eigen::Matrix<PixelType, 3, 3> ColorMatType;  

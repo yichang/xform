@@ -96,6 +96,10 @@ bool XImage::from_Halide(const Image<float>& h_image){
   return true;
 }
 
+/*void XImage::steal_from_Halide(Image<float>& h_image){
+  
+}*/
+
 #ifndef __ANDROID__
 bool XImage::read(const std::string& filename){
   //TODO: change this
