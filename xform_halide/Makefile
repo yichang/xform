@@ -1,5 +1,9 @@
 all: resize recon recon_separate compute_features compute_cfeatures dequant downsample highpass 
 
+num_levels=5
+num_bins=4
+step_size=16
+
 resize: resize.cpp
 	g++ resize.cpp -o resize.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
 	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./resize.out
@@ -14,23 +18,23 @@ dequant: dequant.cpp
 
 recon_separate: recon_separate.cpp
 	g++ recon_separate.cpp -o recon_separate.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./recon_separate.out 5 4 16
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./recon_separate.out $(num_levels) $(num_bins) $(step_size)
 
 compute_features: compute_features.cpp
 	g++ compute_features.cpp -o compute_features.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_features.out 5 4 16
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_features.out $(num_levels) $(num_bins) $(step_size)
 
 compute_cfeatures: compute_cfeatures.cpp
 	g++ compute_cfeatures.cpp -o compute_cfeatures.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_cfeatures.out 5 16
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_cfeatures.out $(num_levels) $(step_size)
 
 downsample: downsample.cpp
 	g++ downsample.cpp -o downsample.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./downsample.out 5 16
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./downsample.out $(num_levels) $(step_size)
 
 highpass: highpass.cpp
 	g++ highpass.cpp -o highpass.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./highpass.out 5 16
+	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./highpass.out $(num_levels) $(step_size)
 
 test_resize: test_resize.cpp resize
 	g++ test_resize.cpp halide_resize.o -o test_resize -I ../third_party/halide/apps/support/ -lpng15
@@ -63,7 +67,6 @@ test_downsample: test_downsample.cpp downsample
 test_highpass: test_highpass.cpp highpass downsample
 	g++ test_highpass.cpp halide_highpass.o halide_downsample.o -o test_highpass -I ../third_party/halide/apps/support/ -lpng15 
 	./test_highpass ./../images/tiger.png ./highpass_out.png
-
 
 clean: 
 	rm -rf resize.out test_resize recon.out test_recon dequant.out test_dequant recon_separate.out test_recon_separate downsample.out test_downsample test_compute_features compute_features.out test_compute_cfeatures compute_cfeatures.out highpass.out test_highpass *.png
