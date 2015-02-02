@@ -34,8 +34,7 @@ CPPFLAGS += -isystem $(GTEST_DIR)/include\
 	    -I./../third_party/$(EIGEN_LIB)/\
 	    -I./../third_party/$(PNG_LIB)/\
 	    -I./../third_party/halide/apps/support/\
-	    -lpng15\
-	    -ljpeg
+	    -lpng15 -ljpeg
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2

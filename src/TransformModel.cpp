@@ -386,6 +386,7 @@ void TransformModel::regression_fit(const XImage& input_feat,
   *ac = ImageType_1(mdl_h * input_feat.channels(), mdl_w * target_feat.channels()); 
 
    // TODO: OpenMP for parallelziation
+  #pragma omp parallel for //Seems to be very sensitive to platform
     for (int imin = 0; imin < height; imin += step)
     for (int jmin = 0; jmin < width; jmin += step)
     {
