@@ -1,69 +1,20 @@
 #include <Halide.h>
 #include "resize.h"
 #include "color_transform.h"
+#include "resample.h"
 
 using namespace Halide;
 
+int main(int argc, char **argv){
+
 Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
     k("k"), ni("ni"), no("no");
-
-// Downsample with a 1 3 3 1 filter
-Func downsample(Func f) {
-    Func downx, downy;
-
-    downx(x, y, _) = (f(2*x-1, y, _) + 3.0f * (f(2*x, y, _) + f(2*x+1, y, _)) + f(2*x+2, y, _)) / 8.0f;
-    downy(x, y, _) = (downx(x, 2*y-1, _) + 3.0f * (downx(x, 2*y, _) + downx(x, 2*y+1, _)) + downx(x, 2*y+2, _)) / 8.0f;
-
-    return downy;
-}
-// Upsample using bilinear interpolation
-Func upsample(Func f) {
-    Func upx, upy;
-
-    upx(x, y, _) = 0.25f * f((x/2) - 1 + 2*(x % 2), y, _) + 0.75f * f(x/2, y, _);
-    upy(x, y, _) = 0.25f * upx(x, (y/2) - 1 + 2*(y % 2), _) + 0.75f * upx(x, y/2, _);
-
-    return upy;
-}
-Func downsample_n(Func f, const int J){
-  Func* gdPyramid = new Func[J];
-  gdPyramid[0](x, y, _) = f(x, y, _);
-  for (int j = 1; j < J; j++) {
-      gdPyramid[j](x, y, _) = downsample(gdPyramid[j-1])(x, y, _);
-  }
-  for(int i = 0; i < J; i++){
-    gdPyramid[i].compute_root();
-    gdPyramid[i].parallel(y, 4).vectorize(x, 8);
-  }
-  return gdPyramid[J-1];
-}
-Func upsample_n(Func f, const int J){
-  Func* guPyramid = new Func[J];
-  guPyramid[J-1](x, y, _) = f(x, y, _);
-  for (int j = J-1; j > 0; j--) {
-      guPyramid[j-1](x, y, _) = upsample(guPyramid[j])(x, y, _);
-  }
-  for(int i = 0; i < J; i++){
-    guPyramid[i].compute_root();
-    guPyramid[i].split(y, yo, yi, 16).parallel(yo).vectorize(x, 8);
-  }
-  return guPyramid[0];
-}
-Func gaussian_blur(Func f, const int j){
-  Func ds;
-  ds(x, y, _) = downsample_n(f, j)(x, y, _);
-  Func us;
-  us(x, y, _) = upsample_n(ds, j)(x, y, _);
-  return us;
-}
-int main(int argc, char **argv){
 
   const int J = 5;
   const int nbins = 4;
   const int step = 16;
   const float scaleFactor = float(std::pow(2, J-1));
   bool stack = true;
-  
 
   ImageParam input(Float(32), 3),
              ac_lumin_raw(Float(32), 2),

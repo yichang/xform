@@ -12,7 +12,7 @@
 #include "LocalLaplacian.h"
 #include "static_image.h"
 #include "image_io.h"
-TEST(TransformModelTest, perf_test){
+/*TEST(TransformModelTest, perf_test){
   vector<std::string> fnames;
   fnames.push_back("../images/1MP.png");
   fnames.push_back("../images/2MP.png");
@@ -76,7 +76,7 @@ TEST(TransformModelTest, perf_test){
     }
     std::cout<< "t_recon = " << t_best << std::endl;
   }
-}
+}*/
 
 
 TEST(TransformModelTest, recon_from_seperate_recipes_Halide){
@@ -330,7 +330,7 @@ TEST(TransformModelTest, recon_from_recipe){
   reconstructed.write("TransformTest_recon_by_recipe.png");
 }
 */
-TEST(TransformModelTest, recon_from_seperate_recipes){
+/*TEST(TransformModelTest, recon_from_seperate_recipes){
   std::string filename = "../images/tiger.png";
   xform::XImage my_image, lab, new_lab(3), out; 
   my_image.read(filename); 
@@ -400,5 +400,5 @@ TEST(TransformModelTest, recon_from_seperate_recipes){
   std::cout<< "t_recon = " << t_rec << std::endl;
 
   reconstructed.write("TransformTest_recon_by_separate_recipe.png");
-}
+}*/
 
