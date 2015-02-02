@@ -104,7 +104,7 @@ void Java_com_example_plasma_Plasma_localLaplacian(JNIEnv * env, jobject obj, jo
     copy_to_HImage(env, bitmap, &input);
 
     Image<uint16_t> output(input.width(), input.height(), input.channels());
-    int levels = 8;
+    int levels = 50;
     float alpha =1;
     float beta = 1;
 

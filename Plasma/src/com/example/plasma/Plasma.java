@@ -116,7 +116,7 @@ public class Plasma extends Activity
     
     // Buttons 
     public void blur(View view) {
-        // Do something in response to button
+        // Do something in respons	e to button
     	System.out.println("theButtonIsPressed");
     	//gradient();
     	//renderPlasma(output, System.currentTimeMillis() - mStartTime);

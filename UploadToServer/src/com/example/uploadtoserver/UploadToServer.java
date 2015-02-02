@@ -46,8 +46,8 @@ public class UploadToServer extends Activity {
     String serverRoot = null;
     
     Boolean Sleep_mode = true;
-    int Sleep_time_xform = 2000;
-    int Sleep_time_jpeg =  2000;
+    int Sleep_time_xform = 500;
+    int Sleep_time_jpeg =  500;
      
     /**********  File Path *************/
     final String localFileName = "local.jpg";
@@ -139,7 +139,11 @@ public class UploadToServer extends Activity {
                                     }
                                 });                      
                            
+                             long upload_startTime = System.currentTimeMillis();
                              uploadFile(localFileName, recipeServerUri);
+                             long upload_difference = System.currentTimeMillis() - upload_startTime;
+                             
+                             System.out.println("UPLOAD=" +  upload_difference + "ms");
                              
                              if (Sleep_mode){
 
@@ -152,10 +156,14 @@ public class UploadToServer extends Activity {
                         		 messageText.setText("Download mode started.... \n\n");
                         	 }});   
                              
+                        	 
+                             long download_startTime = System.currentTimeMillis();                           
                              downloadFile(serverRoot + "recipe_ac_lumin.png", "recipe_ac_lumin.png"); 
                              downloadFile(serverRoot + "recipe_ac_chrom.png", "recipe_ac_chrom.png"); 
                              downloadFile(serverRoot + "recipe_dc.png", "recipe_dc.png"); 
                              downloadFile(serverRoot + "quant.meta", "quant.meta"); 
+                             long download_difference = System.currentTimeMillis() - download_startTime;
+                             System.out.println("DOWNLOAD=" +  download_difference + "ms");
 
                              runOnUiThread(new Runnable() {public void run() {                       
                            	 		messageText.setText("Reconstucting from recipe.... \n\n");
