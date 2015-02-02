@@ -26,8 +26,6 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
              ac_chrom_maxs(Float(32), 2),
              dc(Float(32), 3);
 
-  Param<int>  level;
-
   Func clamped("clamped");
   clamped(x, y, c) = input(clamp(x, 0, input.width()-1), clamp(y, 0, input.height()-1), c);
 
@@ -230,16 +228,15 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
       lPyramid[i].parallel(y, 8).vectorize(x, 8);
     }
   }
-  std::vector<Argument> args(9);
+  std::vector<Argument> args(8);
   args[0] = input;
-  args[1] = level;
-  args[2] = ac_lumin_raw;
-  args[3] = ac_lumin_mins;
-  args[4] = ac_lumin_maxs;
-  args[5] = ac_chrom_raw;
-  args[6] = ac_chrom_mins;
-  args[7] = ac_chrom_maxs;
-  args[8] = dc;
+  args[1] = ac_lumin_raw;
+  args[2] = ac_lumin_mins;
+  args[3] = ac_lumin_maxs;
+  args[4] = ac_chrom_raw;
+  args[5] = ac_chrom_mins;
+  args[6] = ac_chrom_maxs;
+  args[7] = dc;
   final.compile_to_file("halide_recon_separate", args);
 
   return 0;

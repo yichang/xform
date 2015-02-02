@@ -257,8 +257,7 @@ void TransformModel::reconstruct_separate_by_Halide(const Image<float>& input,
     }}
   //Image<float> output(input.width(), input.height(),input.channels());
 
-  int level = 3; //legacy, to remove
-  halide_recon_separate(input, level, 
+  halide_recon_separate(input, 
             ac_lumin_raw, ac_lumin_mins, ac_lumin_maxs,
             ac_chrom_raw, ac_chrom_mins, ac_chrom_maxs,
             dc ,

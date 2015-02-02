@@ -43,12 +43,11 @@ int main(int argc, char** argv){
       //cout << "max "<<x<<","<<y<<"="<<ac_chrom_maxs(x,y)<<endl;
     }}
 
-  const int level = 3;
   Image<float> output(input.width(), input.height(),3);
 
   timeval t1, t2;
   gettimeofday(&t1, NULL);
-  halide_recon_separate(input, level, 
+  halide_recon_separate(input, 
             ac_lumin_raw, ac_lumin_mins, ac_lumin_maxs,
             ac_chrom_raw, ac_chrom_mins, ac_chrom_maxs,
             dc ,
