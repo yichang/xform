@@ -26,7 +26,7 @@ There are some test_*.cpp if you're interested.
 To test the code under src/, go to make/ and do  
 make TransformModel_unittest; ./TransformModel_unittest
 
-Go to test/TreansformModel_unittest to see what's going on.
+Go to test/TreansformModel_unittest to see how to use this package.
 
 Test results are under make/
 
