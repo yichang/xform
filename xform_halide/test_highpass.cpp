@@ -19,7 +19,13 @@ int main(int argc, char** argv){
 
   // Highpass
   Image<float> output(input.width(), input.height(), input.channels());
+
+  timeval t1, t2;
+  gettimeofday(&t1, NULL);
   halide_highpass(input, ds, output);
+  gettimeofday(&t2, NULL);
+  unsigned int t = (t2.tv_sec - t1.tv_sec) * 1000000 + (t2.tv_usec - t1.tv_usec);
+  printf("%u\n", t);
 
   save(output, argv[2]);
 }

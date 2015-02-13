@@ -38,26 +38,29 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
   Func hp("hp");
   hp(x, y, c) = my_yuv(x, y, c) - us_ds(x, y, c);
 
-  /*Func ds("ds");
-  ds(x,y,c) = downsample_n(my_yuv, J)(x,y,c);
-
-  Func hp("hp");
-  hp(x, y, c) = my_yuv(x, y, c) - upsample_n(ds, J)(x, y, c);*/
-
   // Laplacian features 
   Func lumin("lumin");
   lumin(x, y) = my_yuv(x, y, 0);
 
+  Func* gdPyramid = new Func[J];
+  gdPyramid[0](x, y) = lumin(x, y);
+  for (int j = 1; j < J; j++) {
+      gdPyramid[j](x, y) = downsample(gdPyramid[j-1])(x, y);
+  }
+
   Func* gaussian = new Func[J];
-  for(int i = 0; i < J; i++)
-    gaussian[i](x, y) = gaussian_stack(lumin, i+1)(x, y);
+  for(int i = 0; i < J; i++){
+    gaussian[i](x, y) = upsample_n(gdPyramid[i], i+1)(x, y); 
+  }
 
   Func* laplacian = new Func[J-1];
   for(int i = 0; i < J-1; i++)
     laplacian[i](x, y) = gaussian[i](x, y) - gaussian[i+1](x, y);
 
   // Lumin curve features
+  Func final("final");
   Func lumin_hp("lumin_hp");
+
   lumin_hp(x, y) = hp(x, y, 0);
   Func* curve_feat = new Func[nbins-1];
   RDom r(0, step, 0, step);
@@ -70,32 +73,33 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
     Func thresh("thresh"); 
     thresh(x, y) = static_cast<float>(i+1) * range(x, y) / static_cast<float>(nbins) + mini(x, y);
     curve_feat[i](x, y) = max(lumin_hp(x, y) - thresh(x/step, y/step), 0); 
+    thresh.compute_at(final, yo);
   }
 
-  Func final("final");
-  final(x, y, c) = clamped(x, y, c);
-  final(x, y, 0) = hp(x, y, 0);  
-  final(x, y, 1) = hp(x, y, 1);  
-  final(x, y, 2) = hp(x, y, 2);  
-  final(x, y, 3) = hp(x, y, 0)*0 + 1;  
-  final(x, y, 4) = laplacian[0](x, y);  
-  final(x, y, 5) = laplacian[1](x, y);  
-  final(x, y, 6) = laplacian[2](x, y);  
-  final(x, y, 7) = laplacian[3](x, y);  
-  final(x, y, 8) = curve_feat[0](x, y);  
-  final(x, y, 9) = curve_feat[1](x, y);  
-  final(x, y, 10) = curve_feat[2](x, y);  
+  final(x, y, c) = select(c==0, hp(x, y, 0),
+                          c==1, hp(x, y, 1),
+                          c==2, hp(x, y, 2),
+                          c==3, 1,
+                          c==4, laplacian[0](x, y),
+                          c==5, laplacian[1](x, y),
+                          c==6, laplacian[2](x, y),
+                          c==7, laplacian[3](x, y),
+                          c==8, curve_feat[0](x, y),
+                          c==9, curve_feat[1](x, y),
+                          curve_feat[2](x, y));
 
   /* Scheduling */
-  final.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
-  us_ds.compute_root();
-  us_ds.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
-  us_ds_x.store_at(us_ds, yo).compute_at(us_ds, yi);
-  maxi.compute_at(final, y);
-  mini.compute_at(final, y);
-  ds.compute_root();
-  //ds.split(y, yo, yi, 8).parallel(yo); 
-  //ds_x.store_at(ds, yo).compute_at(ds, yi).vectorize(x, 8);
+  final.split(y, yo, yi, 32).parallel(c).vectorize(x, 8);
+  us_ds.compute_root().split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
+  us_ds_x.store_at(us_ds, yo).compute_at(us_ds, yi).vectorize(x, 8);
+  maxi.compute_at(final, yo);
+  mini.compute_at(final, yo);
+  ds.compute_root().split(y, yo, yi, 16).parallel(yo);
+  ds_x.store_at(ds, yo).compute_at(ds, yi).vectorize(x, 8);
+
+  for(int i = 0; i < J; i++){
+    gdPyramid[i].compute_root().parallel(y, 8).vectorize(x, 8);
+  }
 
   std::vector<Argument> args(1);
   args[0] = input;

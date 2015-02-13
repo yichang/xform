@@ -39,7 +39,7 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
 
   /* Scheduling */
   hp.split(y, yo, yi, 16).parallel(yo).vectorize(x, 8);
-  us_ds_x.store_at(hp, yo).compute_at(hp, yi);
+  us_ds_x.store_at(hp, yo).compute_at(hp, yi).vectorize(x, 8);
   
   std::vector<Argument> args(2);
   args[0] = input;

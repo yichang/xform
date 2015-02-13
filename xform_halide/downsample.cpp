@@ -35,8 +35,10 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
   final(x, y, c) = clamp(rgb_out(x, y, c), 0.0f, 1.0f);
 
   /* Scheduling */
-  final.split(y, yo, yi, 4).parallel(yo); 
-  ds_x.store_at(final, yo).compute_at(final, yi);
+  final.split(y, yo, yi, 16).parallel(yo).vectorize(x, 8); 
+  ds.compute_root();
+  ds.split(y, yo, yi, 16).parallel(yo).vectorize(x, 8);
+  ds_x.store_at(ds, yo).compute_at(ds, yi).vectorize(x, 8);
   
   std::vector<Argument> args(1);
   args[0] = input;
