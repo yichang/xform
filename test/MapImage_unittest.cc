@@ -29,5 +29,10 @@ TEST_F(MapImageTest, channel_0) {
   int i = 150, j = 400, c = 0;
   ASSERT_EQ(h_image(j, i, c), map_image.at(c)(i, j));
 }
+TEST_F(MapImageTest, partial_channels) {
+  xform::MapImage map_image(h_image, 1 , 3); 
+  int i = 150, j = 400, c = 0;
+  ASSERT_EQ(h_image(j, i, c+1), map_image.at(c)(i, j));
+}
 
 

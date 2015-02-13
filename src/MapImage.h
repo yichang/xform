@@ -2,8 +2,8 @@
 #include "util.h"
 #include "static_image.h"
 
-#ifndef SRC_MAP_IMAGE
-#define SRC_MAP_IMAGE
+#ifndef SRC_MAP_IMAGE_H
+#define SRC_MAP_IMAGE_H
 
 namespace xform{
 
@@ -13,6 +13,7 @@ class MapImage{
 
   MapImage(){};
   MapImage(const Image<float>& h_image);
+  MapImage(const Image<float>& h_image, int start, int end);
 
   int cols() const; 
   int rows() const;

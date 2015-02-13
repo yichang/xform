@@ -11,6 +11,16 @@ MapImage::MapImage(const Image<float>& h_image){
     nd_array.push_back(mapper);
   }
 }
+MapImage::MapImage(const Image<float>& h_image, int start, int end){
+  assert(start >= 0);
+  assert(end <= h_image.channels());
+
+  for(int i = start; i < end; i++){
+    int offset = i * h_image.height() * h_image.width();
+    MapImageType_1 mapper(h_image.data() + offset, h_image.height(), h_image.width());
+    nd_array.push_back(mapper);
+  }
+}
 const MapImageType_1& MapImage::at(int channel) const{
   return nd_array[channel];
 }
