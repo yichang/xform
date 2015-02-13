@@ -42,7 +42,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS =  util_unittest XImage_unittest ColorSpace_unittest\
+TESTS =  util_unittest XImage_unittest ColorSpace_unittest MapImage_unittest\
 	 Filter_unittest Warp_unittest Pyramid_unittest SparseGrid_unittest\
 	 Curve_unittest LocalLaplacian_unittest TransformModel_unittest
 
@@ -98,6 +98,10 @@ XImage.o : ../src/XImage.cpp \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/XImage.cpp
 
+MapImage.o : ../src/MapImage.cpp \
+        $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/MapImage.cpp
+
 ColorSpace.o : ../src/ColorSpace.cpp \
         $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c ../src/ColorSpace.cpp
@@ -146,10 +150,17 @@ XImage_unittest.o : $(USER_DIR)/XImage_unittest.cc \
                 $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/XImage_unittest.cc
 
-# halide_resize.o shouldn't be here! 
+MapImage_unittest.o : $(USER_DIR)/MapImage_unittest.cc \
+                $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/MapImage_unittest.cc
+
+# halide_resize.o shouldn't be here (XImage and MapImage)! 
 # I do this because for now I'm testing Image<float>, which is compiled along with halide object
 # In the future I should either disable Image<float> or compile it into something like halide_image.o
 XImage_unittest : XImage_unittest.o XImage.o util.o $(HALIDE_OBJ_PATH)halide_resize.o  gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+MapImage_unittest : MapImage_unittest.o MapImage.o util.o $(HALIDE_OBJ_PATH)halide_resize.o  gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
 ColorSpace_unittest.o : $(USER_DIR)/ColorSpace_unittest.cc \
@@ -205,7 +216,7 @@ TransformModel_unittest.o : $(USER_DIR)/TransformModel_unittest.cc \
                 $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/TransformModel_unittest.cc
 
-TransformModel_unittest : TransformModel_unittest.o Recipe.o TransformModel.o $(HALIDE_OBJ_PATH)halide_resize.o $(HALIDE_OBJ_PATH)halide_recon.o $(HALIDE_OBJ_PATH)halide_dequant.o $(HALIDE_OBJ_PATH)halide_recon_separate.o $(HALIDE_OBJ_PATH)halide_downsample.o $(HALIDE_OBJ_PATH)halide_highpass.o $(HALIDE_OBJ_PATH)halide_compute_features.o $(HALIDE_OBJ_PATH)halide_compute_cfeatures.o LocalLaplacian.o Warp.o Pyramid.o Filter.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
+TransformModel_unittest : TransformModel_unittest.o Recipe.o TransformModel.o MapImage.o $(HALIDE_OBJ_PATH)halide_resize.o $(HALIDE_OBJ_PATH)halide_recon.o $(HALIDE_OBJ_PATH)halide_dequant.o $(HALIDE_OBJ_PATH)halide_recon_separate.o $(HALIDE_OBJ_PATH)halide_downsample.o $(HALIDE_OBJ_PATH)halide_highpass.o $(HALIDE_OBJ_PATH)halide_compute_features.o $(HALIDE_OBJ_PATH)halide_compute_cfeatures.o LocalLaplacian.o Warp.o Pyramid.o Filter.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
 

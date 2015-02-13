@@ -2,6 +2,7 @@
 #include "ColorSpace.h"
 #include "Pyramid.h"
 #include "Warp.h"
+#include "MapImage.h"
 
 // HALIDE
 #include "halide_resize.h"
@@ -55,28 +56,18 @@ void TransformModel::fit_separate_recipe_by_Halide(const Image<float>& HL_input,
   // Lumin and chrom featues
   Image<float> HL_feat_lumin(width, height, num_lumin_feat),
                HL_feat_chrom(width, height, num_chrom_feat);
-  halide_compute_features(HL_input, HL_feat_lumin);
   halide_compute_cfeatures(HL_input, HL_feat_chrom);
-  // Fitting
-  XImage feat_lumin(height, width, num_lumin_feat), 
-         feat_chrom(height, width, num_chrom_feat),
-         hp_output(height, width, 3), 
-         hp_target_y(height, width, 1),
-         hp_target_uv(height, width, 2);
+  halide_compute_features(HL_input, HL_feat_lumin);
 
-  //TODO: use Map to avoid copying
-  feat_lumin.from_Halide(HL_feat_lumin);
-  feat_chrom.from_Halide(HL_feat_chrom);
-  hp_output.from_Halide(HL_hp_output);
-  
-  //TODO: avoid copying
-  hp_target_y.at(0)  = hp_output.at(0);
-  hp_target_uv.at(0) = hp_output.at(1);
-  hp_target_uv.at(1) = hp_output.at(2);
-  
-  regression_fit(feat_lumin, hp_target_y, ac_lumin);
-  regression_fit(feat_chrom, hp_target_uv, ac_chrom);
-  
+  // Fitting
+  MapImage feat_lumin(HL_feat_lumin),
+           feat_chrom(HL_feat_chrom),
+           hp_target_y(HL_hp_output, 0, 1),
+           hp_target_uv(HL_hp_output, 1, 3);
+
+  regression_fit_buf(feat_lumin, hp_target_y, ac_lumin);
+  regression_fit_buf(feat_chrom, hp_target_uv, ac_chrom);
+
   quantize(feat_lumin.channels(), hp_target_y.channels(),  ac_lumin, meta);
   quantize(feat_chrom.channels(), hp_target_uv.channels(), 
     ac_chrom, meta + 2 * feat_lumin.channels() * hp_target_y.channels());
@@ -378,6 +369,49 @@ void TransformModel::two_scale_decomposition(const XImage& input,
     warp.imresize(*lp_input, height, width,Warp::BICUBIC, hp_input);
     *hp_input = input - *hp_input;
 }
+void TransformModel::regression_fit_buf(const MapImage& input_feat, 
+  const MapImage& target_feat, ImageType_1* ac) const{
+
+  const int height = input_feat.rows(), width = input_feat.cols(); 
+  const int mdl_h = ceil(1.0f * height/step), mdl_w = ceil(1.0f * width/step);
+  *ac = ImageType_1(mdl_h * input_feat.channels(), mdl_w * target_feat.channels()); 
+
+   // TODO: OpenMP for parallelziation
+  #pragma omp parallel for //Seems to be very sensitive to platform
+    for (int imin = 0; imin < height; imin += step)
+    for (int jmin = 0; jmin < width; jmin += step)
+    {
+        int mdl_i = imin/step;
+        int mdl_j = jmin/step;
+        int h = min(imin+wSize,height) - imin;
+        int w = min(jmin+wSize,width) - jmin;
+
+        // Extract patches
+        MatType p_input(h*w, input_feat.channels());
+        MatType p_output(h*w, target_feat.channels());
+        for(int c = 0; c < input_feat.channels() ; ++c)
+        {
+            //TODO: use Map to avoid copying
+            MatType tmp = input_feat.at(c).block(imin,jmin,h,w);
+            tmp.resize(h*w,1);
+            p_input.col(c) = tmp;
+        }
+        for(int c = 0; c < target_feat.channels() ; ++c)
+        {
+            MatType tmp = target_feat.at(c).block(imin,jmin,h,w);
+            tmp.resize(h*w,1);
+            p_output.col(c) = tmp;
+        }
+        // Solve linear system
+        MatType lhs = p_input.transpose() * p_input + epsilon*
+          MatType::Identity(input_feat.channels(), input_feat.channels());
+        MatType rhs = p_input.transpose() * p_output;
+        MatType coef = lhs.ldlt().solve(rhs);
+        set_coefficients(coef, mdl_i, mdl_j, ac);
+    }
+}
+
+
 void TransformModel::regression_fit(const XImage& input_feat, 
   const XImage& target_feat, ImageType_1* ac) const{
 

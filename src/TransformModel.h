@@ -1,4 +1,5 @@
 #include "XImage.h"
+#include "MapImage.h"
 
 #include "static_image.h"
 
@@ -68,6 +69,9 @@ class TransformModel{
   void regression_fit(const XImage& input_feat, 
   const XImage& target_feat, ImageType_1* ac) const;
 
+  void regression_fit_buf(const MapImage& input_feat, 
+  const MapImage& target_feat, ImageType_1* ac) const;
+
   void regression_predict(const XImage& input_feat, 
   const ImageType_1& ac, const int n_chan_i, const int n_chan_o,  
                                       XImage* reconstructed) const;
@@ -87,3 +91,4 @@ class TransformModel{
 };
 } // namespace xform
 #endif // TRANSFORM_MODEL_H
+

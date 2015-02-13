@@ -59,8 +59,15 @@ TEST_F(TransformModelTest, recon_from_separate_recipes_Halide){
                HL_dc_server(dc_width, dc_height, 3);
   my_image.to_Halide(&HL_input_server);
   out.to_Halide(&HL_output_server);
+
+  timeval t1, t_fit;
+  gettimeofday(&t1, NULL);
   server_model.fit_separate_recipe_by_Halide(HL_input_server, HL_output_server, 
-    &ac_lumin_server, &ac_chrom_server, &HL_dc_server, meta_server);
+                &ac_lumin_server, &ac_chrom_server, &HL_dc_server, meta_server);
+  gettimeofday(&t_fit, NULL);
+  unsigned int t_fitting = (t_fit.tv_sec - t1.tv_sec) * 1000000 + (t_fit.tv_usec - t1.tv_usec);
+  std::cout<< "t_fitting = " << t_fitting << std::endl;
+
   save(HL_dc_server, "recipe_dc.png");
   xform::imwrite(ac_lumin_server, "recipe_ac_lumin.png");
   xform::imwrite(ac_chrom_server, "recipe_ac_chrom.png");
@@ -87,21 +94,15 @@ TEST_F(TransformModelTest, recon_from_separate_recipes_Halide){
 
   timeval t0, t_recon;
   unsigned int t_best;
-  for(int i=0; i < 5; i++){
   gettimeofday(&t0, NULL);
   client_model.reconstruct_separate_by_Halide(
     client_image, ac_lumin, ac_chrom, dc, meta, &recon);
   gettimeofday(&t_recon, NULL);
   unsigned int t_rec = (t_recon.tv_sec - t0.tv_sec) * 1000000 + (t_recon.tv_usec - t0.tv_usec);
-  if (i==1)
-    t_best = t_rec;
-  else if (t_best > t_rec)
-    t_best = t_rec;
-  }
-  std::cout<< "t_recon = " << t_best << std::endl;
+  std::cout<< "t_recon = " << t_rec << std::endl;
   save(recon, "TransformTest_recon_by_separate_recipe_halide.png");
 }
-TEST_F(TransformModelTest, fit_recipe){
+/*TEST_F(TransformModelTest, fit_recipe){
   xform::TransformModel server_model;
   server_model.use_halide=false;
 
@@ -249,7 +250,7 @@ TEST_F(TransformModelTest, recon_from_seperate_recipes){
   std::cout<< "t_recon = " << t_rec << std::endl;
 
   reconstructed.write("TransformTest_recon_by_separate_recipe.png");
-}
+}*/
 /*TEST(TransformModelTest, perf_test){
   vector<std::string> fnames;
   fnames.push_back("../images/1MP.png");
