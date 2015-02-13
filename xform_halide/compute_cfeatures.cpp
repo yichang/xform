@@ -47,7 +47,7 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
   final.split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   hp.compute_root().split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   us_ds_x.store_at(hp, yo).compute_at(hp, yi).vectorize(x, 8);
-  ds.compute_root().split(y, yo, yi, 4).parallel(yo); 
+  ds.compute_root().split(y, yo, yi, 8).parallel(yo); 
   ds_x.store_at(ds, yo).compute_at(ds, yi).vectorize(x, 8);
   
   std::vector<Argument> args(1);

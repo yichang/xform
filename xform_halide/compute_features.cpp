@@ -63,6 +63,8 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
 
   lumin_hp(x, y) = hp(x, y, 0);
   Func* curve_feat = new Func[nbins-1];
+  Func* thresh = new Func[nbins-1];
+
   RDom r(0, step, 0, step);
   Func maxi("maxi"), mini("mini");
   maxi(x, y) = maximum(lumin_hp(step * x + r.x, step * y + r.y));
@@ -70,10 +72,8 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
   Func range("range"); 
   range(x, y) = maxi(x, y) - mini(x, y);
   for(int i = 0; i < nbins - 1; i++){
-    Func thresh("thresh"); 
-    thresh(x, y) = static_cast<float>(i+1) * range(x, y) / static_cast<float>(nbins) + mini(x, y);
-    curve_feat[i](x, y) = max(lumin_hp(x, y) - thresh(x/step, y/step), 0); 
-    thresh.compute_at(final, yo);
+    thresh[i](x, y) = static_cast<float>(i+1) * range(x, y) / static_cast<float>(nbins) + mini(x, y);
+    curve_feat[i](x, y) = max(lumin_hp(x, y) - thresh[i](x/step, y/step), 0); 
   }
 
   final(x, y, c) = select(c==0, hp(x, y, 0),
@@ -90,15 +90,33 @@ Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
 
   /* Scheduling */
   final.split(y, yo, yi, 32).parallel(c).vectorize(x, 8);
+
+  // Hp
+  hp.compute_root().split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   us_ds.compute_root().split(y, yo, yi, 32).parallel(yo).vectorize(x, 8);
   us_ds_x.store_at(us_ds, yo).compute_at(us_ds, yi).vectorize(x, 8);
-  maxi.compute_at(final, yo);
-  mini.compute_at(final, yo);
   ds.compute_root().split(y, yo, yi, 16).parallel(yo);
   ds_x.store_at(ds, yo).compute_at(ds, yi).vectorize(x, 8);
 
+  // curve_feat
+  for(int i = 0 ; i < nbins - 1; i++){
+    curve_feat[i].compute_root().split(y, yo, yi, 8).parallel(yo);
+    thresh[i].store_at(curve_feat[i], yo).compute_at(curve_feat[i], yi).vectorize(x, 8);
+  }
+  //maxi.compute_at(thresh[0], y);
+  //mini.compute_at(thresh[0], y);
+  //maxi.compute_root().parallel(y, 16).vectorize(x, 8);
+  //mini.compute_root().parallel(y, 16).vectorize(x, 8);
+  //mini.compute_root();
+  //maxi.compute_at(final, yo);
+  //mini.compute_at(final, yo);
+
+  // Laplacian
   for(int i = 0; i < J; i++){
     gdPyramid[i].compute_root().parallel(y, 8).vectorize(x, 8);
+  }
+  for(int i = 0; i < J-1; i++){
+    laplacian[i].compute_root().parallel(y, 8).vectorize(x, 8);
   }
 
   std::vector<Argument> args(1);
