@@ -4,7 +4,6 @@ libs/
 third_party/gtest-1.7.0/
 third_party/eigen-eigen-1306d75b4a21/
 third_party/png++-0.2.5/
-third_party/halide/
 make/*.o
 make/*.a
 make/*.png
@@ -18,6 +17,8 @@ xform_halide/halide_*.h
 images/*.png
 images/*.jpg
 apps/recipe/*.o
+apps/recipe/*.png
+apps/recipe/*.meta
 apps/recipe/extract_recipe
 Plasma/jni/halide_*
 Plasma/jni/*.out
