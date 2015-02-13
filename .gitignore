@@ -4,6 +4,7 @@ libs/
 third_party/gtest-1.7.0/
 third_party/eigen-eigen-1306d75b4a21/
 third_party/png++-0.2.5/
+third_party/halide/
 make/*.o
 make/*.a
 make/*.png
@@ -11,6 +12,14 @@ make/
 xform_halide/*.o
 xform_halide/*.out
 xform_halide/*.a
+xform_halide/halide_*.h
 .metadata/
 .DS_Store
 images/*.png
+images/*.jpg
+apps/recipe/*.o
+apps/recipe/extract_recipe
+Plasma/jni/halide_*
+Plasma/jni/*.out
+UploadToServer/jni/halide_*
+UploadToServer/jni/*.out
