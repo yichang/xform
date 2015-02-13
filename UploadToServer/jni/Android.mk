@@ -17,6 +17,7 @@ LOCAL_SRC_FILES := recon.cpp\
 		   $(ROOT)src/TransformModel.cpp\
 		   $(ROOT)src/ColorSpace.cpp\
 		   $(ROOT)src/XImage.cpp\
+		   $(ROOT)src/MapImage.cpp\
 		   $(ROOT)src/Pyramid.cpp\
 
 LOCAL_CFLAGS += -std=c++11 
