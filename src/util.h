@@ -18,6 +18,7 @@ typedef Eigen::Matrix<ImageType_1, Eigen::Dynamic, 1> ImageType_N;
 typedef Eigen::Matrix<PixelType, 3, 3> ColorMatType;  
 typedef Eigen::Matrix<PixelType, Eigen::Dynamic, 1> KernelType_1D; 
 typedef Eigen::Matrix<PixelType, Eigen::Dynamic, Eigen::Dynamic> KernelType_2D; 
+typedef Eigen::Map<ImageType_1> MapImageType_1;
 
 
 const PixelType PIX_UPPER_BOUND = 1.0f;
