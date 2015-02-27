@@ -35,8 +35,7 @@ You can check out  ```test_*.cpp``` to see the input and output of the Halide fu
 We will compile test cases written with Google test framework.
 
 ```
-cd make/ 
-  
+cd make/   
 make TransformModel_unittest; 
 ./TransformModel_unittest
 ```
