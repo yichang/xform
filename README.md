@@ -45,10 +45,14 @@ The generated results of the tests are under ```make/```.
 
 The functions under ```src/``` are used by the server App and the client App described in the below.
 
-### Server Apps
+## Server Apps
 
-To launch the server app (processing + fit the recipe), go to apps/recipe/
-type make
+To launch the server app, which includes an image processing algorithm and a recipe fitting algorithm, do the following: 
+
+```
+cd apps/recipe/
+make
+```
 
 Try test.sh to make sure it works.
 
