@@ -18,7 +18,9 @@ You can configure the dependencies to be under ```third_party```.
 
 ## Compile xform
 
-### Compile the Halide libs under ```xform_halide/```: 
+You will compile the Halide code under ```xform_halide``` and C++03 code under ```src/``` separately.
+
+### Compile the Halide library under ```xform_halide/```: 
 
 ```cd xform_halide/```
 ```make```
