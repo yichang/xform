@@ -39,9 +39,9 @@ make TransformModel_unittest
 ./TransformModel_unittest
 ```
 
-Go to test/TreansformModel_unittest to see how to use this package.
+Check ```test/TreansformModel_unittest.cpp``` to see how to use this package.
 
-Test results are under make/
+The generated results of the tests are under ```make/```.
 
 The src/ are used by the server app and the client app in the below.
 
