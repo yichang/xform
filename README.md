@@ -56,14 +56,14 @@ make
 
 Try ```test.sh``` to make sure the app works.
 
-The compiled library will be used by a socket program, eg., the one under  ```socket/```
-is a good starting point but not finished yet.
+You will need to launch a socket program on a server to use this App, eg., the one under  ```socket/```
+is a good starting point, but not finished yet.
 
 
 ## Client Apps
 
 ### ```Plasma/```
-This is the app for on-device local laplacian.
+This is an app for on-device local laplacian.
 To compile: 
 
   step 1. run sh build_halide.sh to compile halide objects
