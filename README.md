@@ -45,7 +45,7 @@ The generated results of the tests are under ```make/```.
 
 The src/ are used by the server app and the client app in the below.
 
-#### Server apps
+### Server apps
 
 To launch the server app (processing + fit the recipe), go to apps/recipe/
 type make
