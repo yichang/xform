@@ -22,7 +22,8 @@ You will compile the Halide code under ```xform_halide``` and C++03 code under `
 
 ### Compile the Halide library under ```xform_halide/```: 
 
-``` cd xform_halide/ 
+``` 
+cd xform_halide/ 
 
 make
 
