@@ -13,8 +13,7 @@ The xform library relies on the following packages:
 
 The xform package is written by Halide code and C++03 under 
 ```xform_halide/``` and ```src/``` 
-
-src/ relies on Eigen library and  the library written in Halide.
+The code in ```src/``` relies on the Eigen library and  Halide.
 
 ## Compile xform
 
