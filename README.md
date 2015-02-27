@@ -22,10 +22,11 @@ You will compile the Halide code under ```xform_halide``` and C++03 code under `
 
 ### Compile the Halide library under ```xform_halide/```: 
 
-```cd xform_halide/```
+``` cd xform_halide/ ```
+
 ```make```
 
-There are some ```test_*.cpp``` if you're interested.
+You can check out  ```test_*.cpp``` to see the input and output of the Halide functions.
 
 To test the code under src/, go to make/ and do  
 make TransformModel_unittest; ./TransformModel_unittest
