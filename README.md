@@ -18,7 +18,7 @@ You can configure the dependencies to be under ```third_party```.
 
 ## Compile xform
 
-To compile the Halide libs in xform_halide/: 
+### Compile the Halide libs under ```xform_halide/```: 
 
 cd xform_halide/
 make
