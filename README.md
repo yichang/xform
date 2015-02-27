@@ -1,8 +1,8 @@
 xform
 =====
 
-# Dependencies
-The xform library relies on the following packages
+## Dependencies
+The xform library relies on the following packages:
 
 - libpng
 - libjpeg
