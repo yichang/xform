@@ -63,16 +63,18 @@ is a good starting point, but not finished yet.
 ## Client Apps
 
 ### ```Plasma/```
-This is an app for on-device local laplacian.
-To compile: 
+This is an app to perform on-device local Laplacian filter.
+To compile the app, do the following steps: 
 
-  step 1. run sh build_halide.sh to compile halide objects
 
-  step 2. do ndk-build to  
-
-  NOTE: the accompanying local laplacian takes floating format.
-  You need to either change the interface of this app to floating input, 
-  or use the original local Laplacian in Halide that uses uint16 format. 
+```
+cd Plasma/jni
+sh build_halide.sh  # compile halide objects
+ndk-build # compile the halide object on Android
+```
+NOTE: the accompanying local laplacian takes floating format.
+You need to either change the interface of this app to floating input, 
+or use the original local Laplacian in Halide that uses uint16 format. 
 
   step3. use the dev to push the java code on the device  
 
