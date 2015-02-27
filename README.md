@@ -62,8 +62,8 @@ is a good starting point, but not finished yet.
 
 ## Client Apps
 
-### ```Plasma/```
-This is an app to perform on-device local Laplacian filter.
+### ```Plasma```
+Plasma is an app to perform on-device local Laplacian filter.
 To compile the app, do the following steps: 
 
 
@@ -72,19 +72,21 @@ cd Plasma/jni
 sh build_halide.sh       # compile halide objects
 ndk-build                # compile the halide object on Android
 ```
-NOTE: the accompanying local laplacian takes floating format.
-You need to either change the interface of this app to floating input, 
-or use the original local Laplacian in Halide that uses uint16 format. 
+NOTE: the accompanying local Laplacian filter takes floating format.
+You need to either adopt the interface of this Android App to floating input, 
+or use the original local Laplacian in Halide, which takes uint16 format. 
 
-  step3. use the dev to push the java code on the device  
+ Finally, push the compiled binary to the device using Android SDK.
 
-UploadServer/
-This is the app for cloud computing
+### UploadToServer
+
+UploadToServer is an App to perform cloud-based image processing.
 To compile:
 
-  step 1. run sh build_halide.sh to compile halide objects
-
-  step 2. do ndk-build
-
-  step 3. change the url in POST/GET method to your server and port.
+```
+cd UploadToServer/
+sh build_halide.sh         # compile halide objects
+ndk-build             #compile the halide object and native code to Android
+```
+Note: Before pushing the binary to the Android, you will need to change the url in ```POST``` and ```GET``` method to your server and port.
   
