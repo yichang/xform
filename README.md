@@ -70,7 +70,7 @@ To compile the app, do the following steps:
 ```
 cd Plasma/jni
 sh build_halide.sh       # compile halide objects
-ndk-build                # compile the halide object on Android
+ndk-build                     # compile the halide object on Android
 ```
 NOTE: the accompanying local Laplacian filter takes floating format.
 You need to either adopt the interface of this Android App to floating input, 
