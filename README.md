@@ -54,10 +54,10 @@ cd apps/recipe/
 make
 ```
 
-Try test.sh to make sure it works.
+Try ```test.sh``` to make sure the app works.
 
-The compile library can be used by any socket program, eg., the one under socket/
-is a good starting point (not yet finished)
+The compiled library will be used by a socket program, eg., the one under  ```socket/```
+is a good starting point but not finished yet.
 
 
 * Client apps
