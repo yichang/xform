@@ -20,9 +20,10 @@ You can configure the dependencies to be under ```third_party```.
 
 ### Compile the Halide libs under ```xform_halide/```: 
 
-cd xform_halide/
-make
-There are some test_*.cpp if you're interested.
+```cd xform_halide/```
+```make```
+
+There are some ```test_*.cpp``` if you're interested.
 
 To test the code under src/, go to make/ and do  
 make TransformModel_unittest; ./TransformModel_unittest
