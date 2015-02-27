@@ -60,7 +60,7 @@ The compiled library will be used by a socket program, eg., the one under  ```so
 is a good starting point but not finished yet.
 
 
-* Client apps
+## Client apps
 
 Plasma/
 This is the app for on-device local laplacian.
