@@ -69,7 +69,7 @@ To compile the app, do the following steps:
 
 ```
 cd Plasma/jni
-sh build_halide.sh  # compile halide objects
+sh build_halide.sh       # compile halide objects
 ndk-build                # compile the halide object on Android
 ```
 NOTE: the accompanying local laplacian takes floating format.
