@@ -62,7 +62,7 @@ is a good starting point, but not finished yet.
 
 ## Client Apps
 
-### ```Plasma```
+### Plasma
 Plasma is an app to perform on-device local Laplacian filter.
 To compile the app, do the following steps: 
 
