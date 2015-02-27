@@ -62,7 +62,7 @@ is a good starting point but not finished yet.
 
 ## Client Apps
 
-Plasma/
+### ```Plasma/```
 This is the app for on-device local laplacian.
 To compile: 
 
