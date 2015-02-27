@@ -6,17 +6,17 @@ The xform library relies on the following packages:
 
 - libpng
 - libjpeg
-- png++
+- png++ (a wrapper for libpng)
 - Eigen
 - Halide
 - gTest framework
 
-The xform packag is written by halide code under xform_halide/ 
-and c++ under src/
+The xform package is written by Halide code and C++03 under 
+```xform_halide/``` and ```src/``` 
 
 src/ relies on Eigen library and  the library written in Halide.
 
-* Library
+## Compile xform
 
 To compile the Halide libs in xform_halide/: 
 
