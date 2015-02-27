@@ -32,8 +32,13 @@ You can check out  ```test_*.cpp``` to see the input and output of the Halide fu
 
 ### Compile the code under ```src/```
 
-To test the code under src/, go to make/ and do  
+We will compile test cases written with Google test framework.
+
+```
+cd make/ 
+  
 make TransformModel_unittest; ./TransformModel_unittest
+```
 
 Go to test/TreansformModel_unittest to see how to use this package.
 
