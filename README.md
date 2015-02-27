@@ -24,7 +24,6 @@ You will compile the Halide code under ```xform_halide``` and C++03 code under `
 
 ```
 cd xform_halide/ 
-
 make
 ```
 
@@ -36,7 +35,7 @@ We will compile test cases written with Google test framework.
 
 ```
 cd make/   
-make TransformModel_unittest; 
+make TransformModel_unittest
 ./TransformModel_unittest
 ```
 
