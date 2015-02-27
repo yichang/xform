@@ -1,7 +1,8 @@
 xform
 =====
 
-Dependencies
+# Dependencies
+The xform library relies on the following packages
 
 - libpng
 - libjpeg
@@ -10,7 +11,7 @@ Dependencies
 - Halide
 - gTest framework
 
-This packages is written by halide code under xform_halide/ 
+The xform packag is written by halide code under xform_halide/ 
 and c++ under src/
 
 src/ relies on Eigen library and  the library written in Halide.
