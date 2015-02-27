@@ -43,9 +43,9 @@ Check ```test/TreansformModel_unittest.cpp``` to see how to use this package.
 
 The generated results of the tests are under ```make/```.
 
-The src/ are used by the server app and the client app in the below.
+The functions under ```src/``` are used by the server App and the client App described in the below.
 
-### Server apps
+### Server Apps
 
 To launch the server app (processing + fit the recipe), go to apps/recipe/
 type make
