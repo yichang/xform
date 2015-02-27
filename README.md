@@ -86,7 +86,7 @@ To compile:
 ```
 cd UploadToServer/
 sh build_halide.sh         # compile halide objects
-ndk-build                  #compile the halide object and native code to Android
+ndk-build                  # compile the halide object and native code to Android
 ```
 Note: Before pushing the binary to the Android, you will need to change the url in ```POST``` and ```GET``` method to your server and port.
   
