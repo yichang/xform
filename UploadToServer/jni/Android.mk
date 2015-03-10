@@ -7,7 +7,6 @@ include $(CLEAR_VARS)
 #LOCAL_SRC_FILES := plasma.c
 
 ROOT = ../../
-NDK = ../../../android-ndk-r10d/
 
 LOCAL_MODULE    := xformRecon
 LOCAL_SRC_FILES := recon.cpp\
@@ -24,7 +23,8 @@ LOCAL_CFLAGS += -std=c++11
 LOCAL_CFLAGS += -Ofast
 ARCH = armeabi-v7a
 LOCAL_C_INCLUDES += $(ROOT)/src/
-LOCAL_C_INCLUDES += $(ROOT)/third_party/eigen-eigen-1306d75b4a21/
+# LOCAL_C_INCLUDES += $(ROOT)/third_party/eigen-eigen-1306d75b4a21/
+LOCAL_C_INCLUDES += $(EIGEN3_INCLUDE_DIR)
 
 include $(ROOT)/third_party/halide/apps/support/Makefile.inc    
 LOCAL_C_INCLUDES += $(ROOT)/third_party/halide/apps/support/

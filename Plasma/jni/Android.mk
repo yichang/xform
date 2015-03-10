@@ -3,7 +3,6 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-NDK = /usr/local/Cellar/android-ndk/r10d/
 ARCH = armeabi-v7a
 
 LOCAL_MODULE    := native
