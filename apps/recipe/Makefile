@@ -1,15 +1,23 @@
 
-EIGEN_LIB = eigen-eigen-1306d75b4a21
-PNG_LIB = png++-0.2.5
+# EIGEN_LIB = eigen-eigen-1306d75b4a21
+# PNG_LIB = png++-0.2.5
 HL_OBJ =  ../../xform_halide/
 HL_APPS_OBJ =  ../../third_party/halide/apps/local_laplacian/
 
+# CPPFLAGS += -I./../../src/\
+# 	    -I./../../third_party/$(EIGEN_LIB)/\
+# 	    -I./../../third_party/$(PNG_LIB)/\
+# 	    -I./../../third_party/halide/apps/support/\
+# 	    -I./../../third_party/halide/apps/local_laplacian/\
+# 	    -I./../../xform_halide/ -lpng15 -ljpeg -fopenmp
+
 CPPFLAGS += -I./../../src/\
-	    -I./../../third_party/$(EIGEN_LIB)/\
-	    -I./../../third_party/$(PNG_LIB)/\
+	    -I$(EIGEN3_INCLUDE_DIR)/\
+	    -I$(PNG_INCLUDE_DIR)/\
 	    -I./../../third_party/halide/apps/support/\
+	    -I./../../third_party/halide/include/\
 	    -I./../../third_party/halide/apps/local_laplacian/\
-	    -I./../../xform_halide/ -lpng15 -ljpeg -fopenmp
+	    -I./../../xform_halide/ -lpng -ljpeg
 
 CXXFLAGS += -g -Wall -Wextra -pthread -std=gnu++0x -Ofast -msse2
 CXX = g++

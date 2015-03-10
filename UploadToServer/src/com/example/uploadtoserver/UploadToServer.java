@@ -65,13 +65,13 @@ public class UploadToServer extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload_to_server);
           
-        uploadButton = (Button)findViewById(R.id.uploadButton);
-        downloadInputButton = (Button)findViewById(R.id.downloadInputButton);
+        uploadButton         = (Button)findViewById(R.id.uploadButton);
+        downloadInputButton  = (Button)findViewById(R.id.downloadInputButton);
         downloadResultButton = (Button)findViewById(R.id.downloadResultButton);
-        updateImageButton = (Button)findViewById(R.id.updateImage);
-        reconInputButton = (Button)findViewById(R.id.reconInputButton);
-        messageText  = (TextView)findViewById(R.id.messageText);
-        currentImage = (ImageView)findViewById(R.id.currentImage);
+        updateImageButton    = (Button)findViewById(R.id.updateImage);
+        reconInputButton     = (Button)findViewById(R.id.reconInputButton);
+        messageText          = (TextView)findViewById(R.id.messageText);
+        currentImage         = (ImageView)findViewById(R.id.currentImage);
          
         messageText.setText("Uploading file path :-" + localFileName );
          

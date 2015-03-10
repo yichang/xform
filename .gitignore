@@ -24,3 +24,6 @@ Plasma/jni/halide_*
 Plasma/jni/*.out
 UploadToServer/jni/halide_*
 UploadToServer/jni/*.out
+tags
+*.dSYM
+*.o

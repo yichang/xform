@@ -1,4 +1,4 @@
-#!/bin/bash/
+#!/bin/bash
 
 num_levels=5
 num_bins=4

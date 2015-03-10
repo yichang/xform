@@ -14,7 +14,7 @@
 
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
-GTEST_DIR = ../third_party/gtest-1.7.0
+# GTEST_DIR = ../third_party/gtest-1.7.0
 
 # Where to find user code.
 USER_DIR = ../test
@@ -28,13 +28,22 @@ PNG_LIB = png++-0.2.5
 # Halide generated files are here
 HALIDE_OBJ_PATH=../xform_halide/
 
+# CPPFLAGS += -isystem $(GTEST_DIR)/include\
+# 	    -I./../src \
+# 	    -I $(HALIDE_OBJ_PATH)\
+# 	    -I./../third_party/$(EIGEN_LIB)/\
+# 	    -I./../third_party/$(PNG_LIB)/\
+# 	    -I./../third_party/halide/apps/support/\
+# 	    -lpng15 -ljpeg -fopenmp
+
 CPPFLAGS += -isystem $(GTEST_DIR)/include\
 	    -I./../src \
 	    -I $(HALIDE_OBJ_PATH)\
-	    -I./../third_party/$(EIGEN_LIB)/\
-	    -I./../third_party/$(PNG_LIB)/\
+	    -I$(EIGEN3_INCLUDE_DIR)\
+	    -I$(PNG_INCLUDE_DIR)\
 	    -I./../third_party/halide/apps/support/\
-	    -lpng15 -ljpeg -fopenmp
+	    -I./../third_party/halide/include/\
+	    -lpng -ljpeg 
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2

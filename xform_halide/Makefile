@@ -37,35 +37,35 @@ highpass: highpass.cpp
 	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./highpass.out $(num_levels) $(step_size)
 
 test_resize: test_resize.cpp resize
-	g++ test_resize.cpp halide_resize.o -o test_resize -I ../third_party/halide/apps/support/ -lpng15
+	g++ test_resize.cpp halide_resize.o -o test_resize -I ../third_party/halide/apps/support/ -lpng -I../third_party/halide/include/
 	./test_resize ../images/tiger.png ./out.png
 
 test_recon: test_recon.cpp recon resize
-	g++ test_recon.cpp halide_recon.o halide_resize.o -o test_recon -I ../third_party/halide/apps/support/ -lpng15
+	g++ test_recon.cpp halide_recon.o halide_resize.o -o test_recon -I ../third_party/halide/apps/support/ -lpng -I../third_party/halide/include/
 	./test_recon ../images/tiger.png ../make/recipe_ac.png ../make/recipe_dc.png ./recon_out.png
 
 test_dequant: test_dequant.cpp dequant
-	g++ test_dequant.cpp halide_dequant.o  -o test_dequant -I ../third_party/halide/apps/support/ -lpng15
+	g++ test_dequant.cpp halide_dequant.o  -o test_dequant -I ../third_party/halide/apps/support/ -lpng -I../third_party/halide/include/
 	./test_dequant ../make/recipe_ac.png
 
 test_recon_separate: test_recon_separate.cpp recon_separate
-	g++ test_recon_separate.cpp halide_recon_separate.o  -o test_recon_separate -I ../third_party/halide/apps/support/ -lpng15  -Wall -O3 
+	g++ test_recon_separate.cpp halide_recon_separate.o  -o test_recon_separate -I ../third_party/halide/apps/support/ -lpng  -Wall -O3 -I../third_party/halide/include/
 	./test_recon_separate ./../images/tiger.png  ./../make/recipe_ac_lumin.png ./../make/recipe_ac_chrom.png ./../make/recipe_dc.png ./../make/quant.meta ./recon_separate_out.png
 
 test_compute_features: test_compute_features.cpp compute_features
-	g++ test_compute_features.cpp halide_compute_features.o  -o test_compute_features -I ../third_party/halide/apps/support/ -lpng15 
+	g++ test_compute_features.cpp halide_compute_features.o  -o test_compute_features -I ../third_party/halide/apps/support/ -lpng -I../third_party/halide/include/
 	./test_compute_features ./../images/tiger.png
 	
 test_compute_cfeatures: test_compute_cfeatures.cpp compute_cfeatures
-	g++ test_compute_cfeatures.cpp halide_compute_cfeatures.o  -o test_compute_cfeatures -I ../third_party/halide/apps/support/ -lpng15 
+	g++ test_compute_cfeatures.cpp halide_compute_cfeatures.o  -o test_compute_cfeatures -I ../third_party/halide/apps/support/ -lpng -I../third_party/halide/include/
 	./test_compute_cfeatures ./../images/tiger.png
 
 test_downsample: test_downsample.cpp downsample
-	g++ test_downsample.cpp halide_downsample.o  -o test_downsample -I ../third_party/halide/apps/support/ -lpng15 
+	g++ test_downsample.cpp halide_downsample.o  -o test_downsample -I ../third_party/halide/apps/support/ -lpng -I../third_party/halide/include/
 	./test_downsample ./../images/tiger.png  ./downsample_out.png
 
 test_highpass: test_highpass.cpp highpass downsample
-	g++ test_highpass.cpp halide_highpass.o halide_downsample.o -o test_highpass -I ../third_party/halide/apps/support/ -lpng15 
+	g++ test_highpass.cpp halide_highpass.o halide_downsample.o -o test_highpass -I ../third_party/halide/apps/support/ -lpng -I../third_party/halide/include/
 	./test_highpass ./../images/tiger.png ./highpass_out.png
 
 clean: 

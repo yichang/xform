@@ -28,6 +28,7 @@ LOCAL_C_INCLUDES += $(ROOT)/third_party/eigen-eigen-1306d75b4a21/
 
 include $(ROOT)/third_party/halide/apps/support/Makefile.inc    
 LOCAL_C_INCLUDES += $(ROOT)/third_party/halide/apps/support/
+LOCAL_C_INCLUDES += $(ROOT)/third_party/halide/include/
 LOCAL_C_INCLUDES += $(ROOT)/third_party/halide/apps/local_laplacian/
 LOCAL_C_INCLUDES += ./halide_generated_$(TARGET_ARCH_ABI)/
 
