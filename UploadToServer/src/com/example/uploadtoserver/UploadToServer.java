@@ -51,7 +51,7 @@ public class UploadToServer extends Activity {
      
     /**********  File Path *************/
     final String localFileName     = "local.jpg";
-    final String remoteSrcFileName = "http://groups.csail.mit.edu/graphics/face/xform/uploads/input_image.jpg";
+    final String remoteSrcFileName = "http://people.csail.mit.edu/gharbi/xform_server/inputs/input_image.jpg";
      
     /* load our native library */
     static {
@@ -77,16 +77,16 @@ public class UploadToServer extends Activity {
         messageText.setText("Uploading file path :-" + localFileName );
          
         /************* PhP script path ****************/
-        serverRoot = "http://groups.csail.mit.edu/graphics/face/xform/";
+        serverRoot = "http://people.csail.mit.edu/gharbi/xform_server/";
         
         if (Sleep_mode){
-        	upLoadServerUri = "http://groups.csail.mit.edu/graphics/face/xform/uploads_sleep.php";
-        	recipeServerUri = "http://groups.csail.mit.edu/graphics/face/xform/recipe_sleep.php";       	
+        	upLoadServerUri = serverRoot+"naive_upload";
+        	recipeServerUri = serverRoot+"recipe_upload";       	
         } else{ 
-        	upLoadServerUri = "http://groups.csail.mit.edu/graphics/face/xform/uploads.php";
-        	recipeServerUri = "http://groups.csail.mit.edu/graphics/face/xform/recipe.php";
+        	/* upLoadServerUri = "http://groups.csail.mit.edu/graphics/face/xform/uploads.php"; */
+        	/* recipeServerUri = "http://groups.csail.mit.edu/graphics/face/xform/recipe.php"; */
         }
-        upLoadServerRepo = "http://groups.csail.mit.edu/graphics/face/xform/uploads/"; 
+        upLoadServerRepo = serverRoot+"uploads/"; 
         
         // Upload + Run + Download
         uploadButton.setOnClickListener(new OnClickListener() {            
@@ -157,7 +157,6 @@ public class UploadToServer extends Activity {
                         	 runOnUiThread(new Runnable() {public void run() {                       
                         		 messageText.setText("Download mode started.... \n\n");
                         	 }});   
-                             
                         	 
                              long download_startTime = System.currentTimeMillis();                           
                              downloadFile(serverRoot + "recipe_ac_lumin.png", "recipe_ac_lumin.png"); 
@@ -267,7 +266,6 @@ public class UploadToServer extends Activity {
     }
     
     public int downloadFile(String sourceFileUri, String localFileName){
-
     	   try {
    			   URL u = new URL(sourceFileUri);
    			   InputStream is = u.openStream();
@@ -286,6 +284,7 @@ public class UploadToServer extends Activity {
    	            
                 if(serverResponseCode == 200){
                     
+                   Log.e("uploadFile", "SUCESSFUL download");
                     runOnUiThread(new Runnable() {
                          public void run() {                              
                              String msg = "Download Complete \n\n";                              
@@ -311,10 +310,10 @@ public class UploadToServer extends Activity {
           String fileName = sourceFileName;
   
           HttpURLConnection conn = null;
-          DataOutputStream dos = null;  
-          String lineEnd = "\r\n";
-          String twoHyphens = "--";
-          String boundary = "*****";
+          DataOutputStream dos   = null;
+          String lineEnd         = "\r\n";
+          String twoHyphens      = "--";
+          String boundary        = "*****";
           int bytesRead, bytesAvailable, bufferSize;
           byte[] buffer;
           int maxBufferSize = 1024 * 1024; // Max 1 MB
