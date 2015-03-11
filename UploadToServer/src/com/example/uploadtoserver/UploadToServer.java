@@ -40,14 +40,14 @@ public class UploadToServer extends Activity {
     int serverResponseCode = 0;
     ProgressDialog dialog = null;
         
-    String upLoadServerUri = null;
-    String recipeServerUri = null;
+    String upLoadServerUri  = null;
+    String recipeServerUri  = null;
     String upLoadServerRepo = null;
-    String serverRoot = null;
+    String serverRoot       = null;
     
-    Boolean Sleep_mode = true;
+    Boolean Sleep_mode   = true;
     int Sleep_time_xform = 500;
-    int Sleep_time_jpeg =  500;
+    int Sleep_time_jpeg  = 500;
      
     /**********  File Path *************/
     final String localFileName = "local.jpg";
@@ -57,6 +57,7 @@ public class UploadToServer extends Activity {
     static {
     	System.loadLibrary("xformRecon");
     } 
+
     private native void recon(Bitmap input, Bitmap ac_lumin, Bitmap ac_chrom, Bitmap dc, float[] bitmap);
     
     @Override
