@@ -50,7 +50,7 @@ public class UploadToServer extends Activity {
     int Sleep_time_jpeg  = 500;
      
     /**********  File Path *************/
-    final String localFileName = "local.jpg";
+    final String localFileName     = "local.jpg";
     final String remoteSrcFileName = "http://groups.csail.mit.edu/graphics/face/xform/uploads/input_image.jpg";
      
     /* load our native library */
@@ -88,44 +88,45 @@ public class UploadToServer extends Activity {
         }
         upLoadServerRepo = "http://groups.csail.mit.edu/graphics/face/xform/uploads/"; 
         
+        // Upload + Run + Download
         uploadButton.setOnClickListener(new OnClickListener() {            
             @Override
             public void onClick(View v) {
-                 
-                dialog = ProgressDialog.show(UploadToServer.this, "", "Uploading file...", true);
-                 
-                new Thread(new Runnable() {
-                        public void run() {
-                             runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        messageText.setText("uploading started.....");
-                                    }
-                                });                
-                             
-                             // Upload and run the image
-                             uploadFile(localFileName, upLoadServerUri);
-                             
-                             if (Sleep_mode){
 
-                            	 runOnUiThread(new Runnable() {public void run() {                       
-                            		 messageText.setText("Sleep mode started.... \n\n");
-                                     }});   
-                            	 SystemClock.sleep(Sleep_time_jpeg);
-                            	 
-                             	 
-                             }
-                        	 runOnUiThread(new Runnable() {public void run() {                       
-                        		 messageText.setText("Download started... \n\n");
-                                 }});  
-                        	 
-                             // Download the result
-                             downloadFile(upLoadServerRepo + localFileName, localFileName);  
-                                                      
+                dialog = ProgressDialog.show(UploadToServer.this, "", "Uploading compressed image...", true);
+
+                new Thread(new Runnable() {
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                messageText.setText("uploading started.....");
+                            }
+                        });                
+
+                        // Upload and run the image
+                        uploadFile(localFileName, upLoadServerUri);
+
+                        if (Sleep_mode){
+
+                            runOnUiThread(new Runnable() {public void run() {                       
+                                messageText.setText("Sleep mode started.... \n\n");
+                            }});   
+                            SystemClock.sleep(Sleep_time_jpeg);
+
+
                         }
-                      }).start();        
-                }
-            });
+                        runOnUiThread(new Runnable() {public void run() {                       
+                            messageText.setText("Download started... \n\n");
+                        }});  
+
+                        // Download the result
+                        downloadFile(upLoadServerRepo + localFileName, localFileName);  
+                    }
+                }).start();        
+            }
+        });
         
+        // Upload + Fit recipe + Download
         reconInputButton.setOnClickListener(new OnClickListener() {            
             @Override
             public void onClick(View v) {
@@ -209,56 +210,60 @@ public class UploadToServer extends Activity {
                 }
             });
         
+        // Get a new input image from server
         downloadInputButton.setOnClickListener(new OnClickListener() {            
             @Override
             public void onClick(View v) {
-                 
+
                 dialog = ProgressDialog.show(UploadToServer.this, "", "Download file...", true);
-                 
+
                 new Thread(new Runnable() {
-                        public void run() {
-                             runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        messageText.setText("downloading started.....");
-                                    }
-                                });                      
-                           
-                             //uploadFile(uploadFilePath + "" + uploadFileName);
-                             downloadFile(remoteSrcFileName, localFileName);                                                      
-                        }
-                      }).start();        
-                }
-            });
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                messageText.setText("downloading started.....");
+                            }
+                        });                      
+
+                        //uploadFile(uploadFilePath + "" + uploadFileName);
+                        downloadFile(remoteSrcFileName, localFileName);                                                      
+                    }
+                }).start();        
+            }
+        });
+
         downloadResultButton.setOnClickListener(new OnClickListener() {            
             @Override
             public void onClick(View v) {
-                 
+
                 dialog = ProgressDialog.show(UploadToServer.this, "", "Download file...", true);
-                 
+
                 new Thread(new Runnable() {
-                        public void run() {
-                             runOnUiThread(new Runnable() {
-                                    public void run() {
-                                        messageText.setText("downloading started.....");
-                                    }
-                                });                      
-                           
-                             //uploadFile(uploadFilePath + "" + uploadFileName);
-                             downloadFile(upLoadServerRepo + localFileName, localFileName);                                                      
-                        }
-                      }).start();        
-                }
-            });
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                messageText.setText("downloading started.....");
+                            }
+                        });                      
+
+                        //uploadFile(uploadFilePath + "" + uploadFileName);
+                        downloadFile(upLoadServerRepo + localFileName, localFileName);                                                      
+                    }
+                }).start();        
+            }
+        });
+
+        // Update the display
         updateImageButton.setOnClickListener(new OnClickListener() {            
             @Override
             public void onClick(View v) {
-            	try{
-            	currentImage.setImageBitmap(BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), localFileName))));
-            	}catch (Exception e){
-            		e.printStackTrace();
-            	};
-            	}
-            });
+                try{
+                    currentImage.setImageBitmap(BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), localFileName))));
+                }catch (Exception e){
+                    e.printStackTrace();
+                };
+            }
+        });
     }
     
     public int downloadFile(String sourceFileUri, String localFileName){

@@ -14,31 +14,31 @@
    	<Button
          android:layout_width="fill_parent"
          android:layout_height="wrap_content"
-         android:text="Click To Download_Input"
+         android:text="Download input"
          android:id="@+id/downloadInputButton"
      />
      <Button
          android:layout_width="fill_parent"
          android:layout_height="wrap_content"
-         android:text="Upload + Run + Download"
+         android:text="Naive cloud (Upload, Run, Download)"
          android:id="@+id/uploadButton"
      />
     	<Button
          android:layout_width="fill_parent"
          android:layout_height="wrap_content"
-         android:text="Upload + Fit recipe + Reconstruction"
+         android:text="Recipe (Upload, Fit recipe, Reconstruct)"
          android:id="@+id/reconInputButton"
      />
    	<Button
          android:layout_width="fill_parent"
          android:layout_height="wrap_content"
-         android:text="Click To Download Result"
+         android:text="Download Result"
          android:id="@+id/downloadResultButton"
      />    
 	<Button
          android:layout_width="fill_parent"
          android:layout_height="wrap_content"
-         android:text="Click To Update Image"
+         android:text="Update display"
          android:id="@+id/updateImage"
      />   
        

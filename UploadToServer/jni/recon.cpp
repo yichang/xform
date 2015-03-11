@@ -96,12 +96,12 @@ void Java_com_example_uploadtoserver_UploadToServer_recon
   (JNIEnv * env, jobject obj, jobject input_bp, jobject ac_lumin_bp, jobject ac_chrom_bp, 
                             jobject dc_bp, jfloatArray meta)
 {
-        timeval t0, t_copy_recipe, t_copy_output, t_recon;
-        gettimeofday(&t0, NULL);
+    timeval t0, t_copy_recipe, t_copy_output, t_recon;
+    gettimeofday(&t0, NULL);
 
-        xform::TransformModel client_model;
-        const int meta_len = 2 * (3 * client_model.num_affine + 
-              client_model.num_scale-1 + client_model.num_bins-1);
+    xform::TransformModel client_model;
+    const int meta_len = 2 * (3 * client_model.num_affine + 
+            client_model.num_scale-1 + client_model.num_bins-1);
 	xform::PixelType* my_meta = new xform::PixelType[meta_len];
 	jfloat* flt1 = env->GetFloatArrayElements(meta,0);
 	for(int i=0; i < meta_len; i++)
