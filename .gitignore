@@ -27,3 +27,12 @@ UploadToServer/jni/*.out
 tags
 *.dSYM
 *.o
+
+third_party/*
+!third_party/halide
+third_party/halide/*
+!third_party/halide/apps
+third_party/halide/apps/*
+!third_party/halide/apps/support
+!third_party/halide/apps/local_laplacian
+!third_party/halide/apps/style_transfer
