@@ -51,7 +51,7 @@ public class UploadToServer extends Activity {
      
     /**********  File Path *************/
     final String localFileName     = "local.jpg";
-    final String remoteSrcFileName = "http://people.csail.mit.edu/gharbi/xform_server/inputs/input_image.jpg";
+    final String remoteSrcFileName = "http://bigboy.csail.mit.edu/xform_server/data/input_image.jpg";
      
     /* load our native library */
     static {
@@ -77,7 +77,7 @@ public class UploadToServer extends Activity {
         messageText.setText("Uploading file path :-" + localFileName );
          
         /************* PhP script path ****************/
-        serverRoot = "http://people.csail.mit.edu/gharbi/xform_server/";
+        serverRoot = "http://bigboy.csail.mit.edu/xform_server/";
         
         if (Sleep_mode){
         	upLoadServerUri = serverRoot+"naive_upload";
@@ -159,10 +159,10 @@ public class UploadToServer extends Activity {
                         	 }});   
                         	 
                              long download_startTime = System.currentTimeMillis();                           
-                             downloadFile(serverRoot + "recipe_ac_lumin.png", "recipe_ac_lumin.png"); 
-                             downloadFile(serverRoot + "recipe_ac_chrom.png", "recipe_ac_chrom.png"); 
-                             downloadFile(serverRoot + "recipe_dc.png", "recipe_dc.png"); 
-                             downloadFile(serverRoot + "quant.meta", "quant.meta"); 
+                             downloadFile(serverRoot + "output/recipe_ac_lumin.png", "recipe_ac_lumin.png"); 
+                             downloadFile(serverRoot + "output/recipe_ac_chrom.png", "recipe_ac_chrom.png"); 
+                             downloadFile(serverRoot + "output/recipe_dc.png", "recipe_dc.png"); 
+                             downloadFile(serverRoot + "output/quant.meta", "quant.meta"); 
                              long download_difference = System.currentTimeMillis() - download_startTime;
                              System.out.println("DOWNLOAD=" +  download_difference + "ms");
 

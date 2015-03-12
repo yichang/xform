@@ -69,16 +69,16 @@ public class Plasma extends Activity
 	private Bitmap output; 
 	private long mStartTime;
 	final String localFileName = "local.jpg";
-	final String remoteSrcFileName = "http://groups.csail.mit.edu/graphics/face/xform/uploads/input_image.jpg";
+	final String remoteSrcFileName = "http://bigboy.csail.mit.edu//xform_server/data/input_image.jpg";
 	
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        imageview=(ImageView)findViewById(R.id.view1);
-        input = getBitmapFromAsset(this, "6M.png");
-        output = Bitmap.createBitmap(input.getWidth(), input.getHeight(), Bitmap.Config.ARGB_8888);
+        imageview = (ImageView)findViewById(R.id.view1);
+        input     = getBitmapFromAsset(this, "yichang.png");
+        output    = Bitmap.createBitmap(input.getWidth(), input.getHeight(), Bitmap.Config.ARGB_8888);
         imageview.setImageBitmap(input);
         mStartTime = System.currentTimeMillis();
     }
@@ -109,10 +109,7 @@ public class Plasma extends Activity
     }
 
     /* implementend by libplasma.so */
-    //private static native void renderPlasma(Bitmap  bitmap, long time_ms);
-    //private  native void boxblur(Bitmap bitmap);
-    private  native void localLaplacian(Bitmap bitmap);
-    //private native void helloLog(String logThis);
+    private native void localLaplacian(Bitmap bitmap);
     
     // Buttons 
     public void blur(View view) {
