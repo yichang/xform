@@ -4,12 +4,6 @@
 HL_OBJ =  ../../xform_halide/
 HL_APPS_OBJ =  ../../third_party/halide/apps/local_laplacian/
 
-# CPPFLAGS += -I./../../src/\
-# 	    -I./../../third_party/$(EIGEN_LIB)/\
-# 	    -I./../../third_party/$(PNG_LIB)/\
-# 	    -I./../../third_party/halide/apps/support/\
-# 	    -I./../../third_party/halide/apps/local_laplacian/\
-# 	    -I./../../xform_halide/ -lpng15 -ljpeg -fopenmp
 
 CPPFLAGS += -I./../../src/\
 	    -I$(EIGEN3_INCLUDE_DIR)/\
@@ -17,7 +11,9 @@ CPPFLAGS += -I./../../src/\
 	    -I./../../third_party/halide/apps/support/\
 	    -I./../../third_party/halide/include/\
 	    -I./../../third_party/halide/apps/local_laplacian/\
-	    -I./../../xform_halide/ -lpng -ljpeg
+	    -I./../../xform_halide/
+LFLAGS = -lpng -ljpeg
+
 
 CXXFLAGS += -g -Wall -Wextra -pthread -std=gnu++0x -Ofast -msse2
 CXX = g++
@@ -65,5 +61,5 @@ TransformModel.o : ../../src/TransformModel.cpp \
 
 
 extract_recipe: extract_recipe.o Filter.o ColorSpace.o Pyramid.o Recipe.o TransformModel.o Warp.o MapImage.o XImage.o util.o $(HL_OBJ)halide_recon.o $(HL_OBJ)halide_resize.o $(HL_OBJ)halide_dequant.o $(HL_OBJ)halide_compute_features.o $(HL_OBJ)halide_compute_cfeatures.o $(HL_OBJ)halide_downsample.o $(HL_OBJ)halide_highpass.o $(HL_OBJ)halide_recon.o $(HL_OBJ)halide_recon_separate.o $(HL_APPS_OBJ)local_laplacian.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 

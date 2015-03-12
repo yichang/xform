@@ -22,19 +22,10 @@ USER_DIR = ../test
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
 # the compiler doesn't generate warnings in Google Test headers.
-EIGEN_LIB = eigen-eigen-1306d75b4a21
-PNG_LIB = png++-0.2.5
 
 # Halide generated files are here
 HALIDE_OBJ_PATH=../xform_halide/
 
-# CPPFLAGS += -isystem $(GTEST_DIR)/include\
-# 	    -I./../src \
-# 	    -I $(HALIDE_OBJ_PATH)\
-# 	    -I./../third_party/$(EIGEN_LIB)/\
-# 	    -I./../third_party/$(PNG_LIB)/\
-# 	    -I./../third_party/halide/apps/support/\
-# 	    -lpng15 -ljpeg -fopenmp
 
 CPPFLAGS += -isystem $(GTEST_DIR)/include\
 	    -I./../src \
@@ -42,8 +33,8 @@ CPPFLAGS += -isystem $(GTEST_DIR)/include\
 	    -I$(EIGEN3_INCLUDE_DIR)\
 	    -I$(PNG_INCLUDE_DIR)\
 	    -I./../third_party/halide/apps/support/\
-	    -I./../third_party/halide/include/\
-	    -lpng -ljpeg 
+	    -I./../third_party/halide/include/
+LFLAGS = -L/usr/lib -lpng -ljpeg 
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11 -Ofast -msse2
@@ -154,7 +145,7 @@ util_unittest.o : $(USER_DIR)/util_unittest.cc \
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/util_unittest.cc
 
 util_unittest : util_unittest.o util.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 
 XImage_unittest.o : $(USER_DIR)/XImage_unittest.cc \
                 $(GTEST_HEADERS)
@@ -168,66 +159,66 @@ MapImage_unittest.o : $(USER_DIR)/MapImage_unittest.cc \
 # I do this because for now I'm testing Image<float>, which is compiled along with halide object
 # In the future I should either disable Image<float> or compile it into something like halide_image.o
 XImage_unittest : XImage_unittest.o XImage.o util.o $(HALIDE_OBJ_PATH)halide_resize.o  gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 
 MapImage_unittest : MapImage_unittest.o MapImage.o util.o $(HALIDE_OBJ_PATH)halide_resize.o  gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 
 ColorSpace_unittest.o : $(USER_DIR)/ColorSpace_unittest.cc \
                 $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/ColorSpace_unittest.cc
 
 ColorSpace_unittest : ColorSpace_unittest.o ColorSpace.o XImage.o util.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 
 Filter_unittest.o : $(USER_DIR)/Filter_unittest.cc \
                 $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Filter_unittest.cc
 
 Filter_unittest : Filter_unittest.o Filter.o XImage.o util.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 
 Warp_unittest.o : $(USER_DIR)/Warp_unittest.cc \
                 $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Warp_unittest.cc
 
 Warp_unittest : Warp_unittest.o Warp.o XImage.o util.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 
 Pyramid_unittest.o : $(USER_DIR)/Pyramid_unittest.cc \
                 $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Pyramid_unittest.cc
 
 Pyramid_unittest : Pyramid_unittest.o Pyramid.o Warp.o XImage.o Filter.o util.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 
 SparseGrid_unittest.o : $(USER_DIR)/SparseGrid_unittest.cc \
                 $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/SparseGrid_unittest.cc
 
 SparseGrid_unittest : SparseGrid_unittest.o SparseGrid.o XImage.o util.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 
 Curve_unittest.o : $(USER_DIR)/Curve_unittest.cc \
                 $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/Curve_unittest.cc
 
 Curve_unittest : Curve_unittest.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 
 LocalLaplacian_unittest.o : $(USER_DIR)/LocalLaplacian_unittest.cc \
                 $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/LocalLaplacian_unittest.cc
 
 LocalLaplacian_unittest : LocalLaplacian_unittest.o LocalLaplacian.o Warp.o Pyramid.o Filter.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 
 TransformModel_unittest.o : $(USER_DIR)/TransformModel_unittest.cc \
                 $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/TransformModel_unittest.cc
 
 TransformModel_unittest : TransformModel_unittest.o Recipe.o TransformModel.o MapImage.o $(HALIDE_OBJ_PATH)halide_resize.o $(HALIDE_OBJ_PATH)halide_recon.o $(HALIDE_OBJ_PATH)halide_dequant.o $(HALIDE_OBJ_PATH)halide_recon_separate.o $(HALIDE_OBJ_PATH)halide_downsample.o $(HALIDE_OBJ_PATH)halide_highpass.o $(HALIDE_OBJ_PATH)halide_compute_features.o $(HALIDE_OBJ_PATH)halide_compute_cfeatures.o LocalLaplacian.o Warp.o Pyramid.o Filter.o Curve.o ColorSpace.o XImage.o util.o gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@ $(LFLAGS)
 
 
 
