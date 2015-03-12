@@ -18,7 +18,7 @@ uint32_t createPixel(int r, int g, int b, int a) {
        | ((g & 0xff) << 8)
        | ((b & 0xff));
 }
-void copy_to_HImage(JNIEnv * env, const jobject& bitmap, Image<uint16_t>* input){
+void copy_to_HImage(JNIEnv * env, const jobject& bitmap, Image<float>* input){
 
 	AndroidBitmapInfo  info;
 	uint32_t          *pixels;
@@ -43,9 +43,9 @@ void copy_to_HImage(JNIEnv * env, const jobject& bitmap, Image<uint16_t>* input)
 	    for (int y = 0; y < info.height; ++y)
 	      {
 	    	uint32_t zz = src[info.width * y + x];
-                uint16_t b = static_cast<uint16_t>((zz%256))*256;  zz /= 256;
-                uint16_t g = static_cast<uint16_t>((zz%256))*256;  zz /= 256;
-                uint16_t r = static_cast<uint16_t>((zz%256))*256;  zz /= 256;
+                float b = static_cast<float>((zz%256))/256;  zz /= 256;
+                float g = static_cast<float>((zz%256))/256;  zz /= 256;
+                float r = static_cast<float>((zz%256))/256;  zz /= 256;
 	    	(*input)(x,y,0) = r;
 	    	(*input)(x,y,1) = g;
 	    	(*input)(x,y,2) = b;
@@ -54,7 +54,7 @@ void copy_to_HImage(JNIEnv * env, const jobject& bitmap, Image<uint16_t>* input)
 	}
 }
 
-void copy_to_jBuffer(JNIEnv * env, const Image<uint16_t>& output, jobject& bitmap){
+void copy_to_jBuffer(JNIEnv * env, const Image<float>& output, jobject& bitmap){
 
 	AndroidBitmapInfo  info;
 	uint32_t          *pixels;
@@ -76,9 +76,9 @@ void copy_to_jBuffer(JNIEnv * env, const Image<uint16_t>& output, jobject& bitma
 
 	for (int x = info.width - 1; x >= 0; --x){
 	    for (int y = 0; y < info.height; ++y){
-	    	int r = static_cast<int>(output(x,y,0)/256);
-	    	int g = static_cast<int>(output(x,y,1)/256);
-	    	int b = static_cast<int>(output(x,y,2)/256);
+	    	int r = static_cast<int>(output(x,y,0)*256);
+	    	int g = static_cast<int>(output(x,y,1)*256);
+	    	int b = static_cast<int>(output(x,y,2)*256);
 	    	src[info.width * y + x] = createPixel(r, g, b, 0xff);
             }
 	}
@@ -100,17 +100,17 @@ void Java_com_example_plasma_Plasma_localLaplacian(JNIEnv * env, jobject obj, jo
       __android_log_print(ANDROID_LOG_DEBUG, DEBUG_TAG, "NDK:LC: [%s]", "NOT RGBA_8888");
     }
 
-    Image<uint16_t> input(info.width,info.height,3);
+    Image<float> input(info.width,info.height,3);
     copy_to_HImage(env, bitmap, &input);
 
-    Image<uint16_t> output(input.width(), input.height(), input.channels());
+    Image<float> output(input.width(), input.height(), input.channels());
     int levels = 50;
     float alpha =1;
     float beta = 1;
 
     gettimeofday(&t_copy_input, NULL);
 
-    local_laplacian(levels, alpha/(float(levels-1)), beta, input, output);
+    // local_laplacian(levels, alpha/(float(levels-1)), beta, input, output);
 
     gettimeofday(&t_proc, NULL);
     // Clamp to 0-255
@@ -124,7 +124,7 @@ void Java_com_example_plasma_Plasma_localLaplacian(JNIEnv * env, jobject obj, jo
     	} 
       }
     }*/
-    copy_to_jBuffer(env, output, bitmap);
+    copy_to_jBuffer(env, input, bitmap);
 
     gettimeofday(&t_copy_output, NULL);
 

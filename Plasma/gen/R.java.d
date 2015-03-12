@@ -5,4 +5,8 @@
 /Users/mgharbi/Documents/projects/xform_mobile/Plasma/res/drawable-xhdpi/ic_launcher.png \
 /Users/mgharbi/Documents/projects/xform_mobile/Plasma/res/layout/activity_main.xml \
 /Users/mgharbi/Documents/projects/xform_mobile/Plasma/res/values/strings.xml \
+/Users/mgharbi/Documents/projects/xform_mobile/Plasma/bin/res/drawable-hdpi/ic_launcher.png \
+/Users/mgharbi/Documents/projects/xform_mobile/Plasma/bin/res/drawable-ldpi/ic_launcher.png \
+/Users/mgharbi/Documents/projects/xform_mobile/Plasma/bin/res/drawable-mdpi/ic_launcher.png \
+/Users/mgharbi/Documents/projects/xform_mobile/Plasma/bin/res/drawable-xhdpi/ic_launcher.png \
 /Users/mgharbi/Documents/projects/xform_mobile/Plasma/bin/AndroidManifest.xml \
