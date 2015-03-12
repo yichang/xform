@@ -110,7 +110,7 @@ void Java_com_example_plasma_Plasma_localLaplacian(JNIEnv * env, jobject obj, jo
 
     gettimeofday(&t_copy_input, NULL);
 
-    // local_laplacian(levels, alpha/(float(levels-1)), beta, input, output);
+    local_laplacian(levels, alpha/(float(levels-1)), beta, input, output);
 
     gettimeofday(&t_proc, NULL);
     // Clamp to 0-255

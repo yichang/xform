@@ -46,7 +46,7 @@ public class UploadToServer extends Activity {
     String serverRoot       = null;
     
     Boolean Sleep_mode   = true;
-    int Sleep_time_xform = 500;
+    int Sleep_time_xform = 10;
     int Sleep_time_jpeg  = 500;
      
     /**********  File Path *************/
@@ -141,6 +141,7 @@ public class UploadToServer extends Activity {
                                     }
                                 });                      
                            
+                             // Degrade input
                              long upload_startTime = System.currentTimeMillis();
                              uploadFile(localFileName, recipeServerUri);
                              long upload_difference = System.currentTimeMillis() - upload_startTime;
