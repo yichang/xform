@@ -46,7 +46,7 @@ public class UploadToServer extends Activity {
     String serverRoot       = null;
     
     Boolean Sleep_mode   = true;
-    int Sleep_time_xform = 10;
+    int Sleep_time_xform = 0;
     int Sleep_time_jpeg  = 500;
      
     /**********  File Path *************/
@@ -142,71 +142,93 @@ public class UploadToServer extends Activity {
                                 });                      
                            
                              // Degrade input
-                             long upload_startTime = System.currentTimeMillis();
-                             uploadFile(localFileName, recipeServerUri);
-                             long upload_difference = System.currentTimeMillis() - upload_startTime;
-                             
-                             System.out.println("UPLOAD=" +  upload_difference + "ms");
-                             
-                             if (Sleep_mode){
+                             try { 
+                                 final Bitmap input = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), localFileName)));
+                                 int height = input.getHeight();
+                                 int width = input.getWidth();
+                                 int scale_factor = 2;
+                                 final Bitmap degraded_input = Bitmap.createScaledBitmap(input,width/scale_factor,height/scale_factor, false);
+                                 FileOutputStream out_degraded = new FileOutputStream(new File(getFilesDir(), localFileName));
+                                 degraded_input.compress(Bitmap.CompressFormat.JPEG, 60, out_degraded); 
+                                 out_degraded.close();                               
 
-                            	 runOnUiThread(new Runnable() {public void run() {                       
-                            		 messageText.setText("Sleep mode started.... \n\n");
+                                 new Thread(new Runnable() {
+                                     public void run() {
+                                         long upload_startTime = System.currentTimeMillis();
+                                         uploadFile(localFileName, recipeServerUri);
+                                         long upload_difference = System.currentTimeMillis() - upload_startTime;
+                                     }
+                                 }).start();        
+
+
+                                 if (Sleep_mode){
+
+                                     runOnUiThread(new Runnable() {public void run() {                       
+                                         messageText.setText("Sleep mode started.... \n\n");
                                      }});   
-                            	 SystemClock.sleep(Sleep_time_xform);             	 
-                             }
-                        	 runOnUiThread(new Runnable() {public void run() {                       
-                        		 messageText.setText("Download mode started.... \n\n");
-                        	 }});   
-                        	 
-                             long download_startTime = System.currentTimeMillis();                           
-                             downloadFile(serverRoot + "output/recipe_ac_lumin.png", "recipe_ac_lumin.png"); 
-                             downloadFile(serverRoot + "output/recipe_ac_chrom.png", "recipe_ac_chrom.png"); 
-                             downloadFile(serverRoot + "output/recipe_dc.png", "recipe_dc.png"); 
-                             downloadFile(serverRoot + "output/quant.meta", "quant.meta"); 
-                             long download_difference = System.currentTimeMillis() - download_startTime;
-                             System.out.println("DOWNLOAD=" +  download_difference + "ms");
+                                     SystemClock.sleep(Sleep_time_xform);             	 
+                                 }
+                                 runOnUiThread(new Runnable() {public void run() {                       
+                                     messageText.setText("Download mode started.... \n\n");
+                                 }});   
 
-                             runOnUiThread(new Runnable() {public void run() {                       
-                           	 		messageText.setText("Reconstucting from recipe.... \n\n");
-                           	 	}});   
-                        	 	
-                             try {
-                            	final Bitmap input = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), localFileName)));
-								final Bitmap dc = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_dc.png")));
-								final Bitmap ac_lumin = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_ac_lumin.png")));
-								final Bitmap ac_chrom = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_ac_chrom.png")));
- 
-								// meta data
-	                            File file = new File(getFilesDir(), "quant.meta");
-	                            StringBuilder text = new StringBuilder();
-                                BufferedReader br = new BufferedReader(new FileReader(file));
-                                String line = br.readLine();
-                                String[] ar=line.split(" ");
-                                float[] myFloats = new float[ar.length];
-                                for(int i=0; i < ar.length; i++)
-                               	 myFloats[i] = Float.valueOf(ar[i]);
-                             
-                                recon(input, ac_lumin, ac_chrom, dc, myFloats );
-                                
-                                FileOutputStream out = new FileOutputStream(new File(getFilesDir(), localFileName));
-                                input.compress(Bitmap.CompressFormat.JPEG, 100, out); 
-                                out.close();                               
-							}  catch (FileNotFoundException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}  catch (IOException e) {
-                                //You'll need to add proper error handling here
-								e.printStackTrace();
-                            }  catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        	runOnUiThread(new Runnable() {public void run() {                       
-                           	 		messageText.setText("Reconstruction Copmlete. \n\n");
-                           	}});   
-                            
+                                 long download_startTime = System.currentTimeMillis();                           
+                                 downloadFile(serverRoot + "output/recipe_ac_lumin.png", "recipe_ac_lumin.png"); 
+                                 downloadFile(serverRoot + "output/recipe_ac_chrom.png", "recipe_ac_chrom.png"); 
+                                 downloadFile(serverRoot + "output/recipe_dc.png", "recipe_dc.png"); 
+                                 downloadFile(serverRoot + "output/quant.meta", "quant.meta"); 
+                                 long download_difference = System.currentTimeMillis() - download_startTime;
+                                 System.out.println("DOWNLOAD=" +  download_difference + "ms");
+
+
+                                 runOnUiThread(new Runnable() {public void run() {                       
+                                     messageText.setText("Reconstucting from recipe.... \n\n");
+                                 }});   
+
+                                 try {
+                                     final Bitmap dc = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_dc.png")));
+                                     final Bitmap ac_lumin = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_ac_lumin.png")));
+                                     final Bitmap ac_chrom = BitmapFactory.decodeStream(new FileInputStream(new File(getFilesDir(), "recipe_ac_chrom.png")));
+
+                                     // meta data
+                                     File file = new File(getFilesDir(), "quant.meta");
+                                     StringBuilder text = new StringBuilder();
+                                     BufferedReader br = new BufferedReader(new FileReader(file));
+                                     String line = br.readLine();
+                                     String[] ar=line.split(" ");
+                                     float[] myFloats = new float[ar.length];
+                                     for(int i=0; i < ar.length; i++)
+                                         myFloats[i] = Float.valueOf(ar[i]);
+
+                                     recon(input, ac_lumin, ac_chrom, dc, myFloats );
+
+                                     FileOutputStream out = new FileOutputStream(new File(getFilesDir(), localFileName));
+                                     input.compress(Bitmap.CompressFormat.JPEG, 100, out); 
+                                     out.close();                               
+                                 }  catch (FileNotFoundException e) {
+                                     // TODO Auto-generated catch block
+                                     e.printStackTrace();
+                                 }  catch (IOException e) {
+                                     //You'll need to add proper error handling here
+                                     e.printStackTrace();
+                                 }  catch (Exception e) {
+                                     e.printStackTrace();
+                                 }
+                                 runOnUiThread(new Runnable() {public void run() {                       
+                                     messageText.setText("Reconstruction Complete. \n\n");
+                                 }});   
+
+                             }  catch (FileNotFoundException e) {
+                                 // TODO Auto-generated catch block
+                                 e.printStackTrace();
+                             }  catch (IOException e) {
+                                 //You'll need to add proper error handling here
+                                 e.printStackTrace();
+                             }  catch (Exception e) {
+                                 e.printStackTrace();
+                             }
                         }
-                      }).start();        
+                }).start();        
                 }
             });
         

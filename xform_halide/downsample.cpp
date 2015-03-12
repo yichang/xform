@@ -10,8 +10,8 @@ int main(int argc, char **argv){
 Var x("x"), y("y"), xi("xi"), xo("xo"), yi("yi"), yo("yo"), c("c"),
     k("k"), ni("ni"), no("no");
 
-  const int J = std::atoi(argv[1]); //num_levels
-  const int step = std::atoi(argv[2]); // step size
+  const int J = atoi(argv[1]); //num_levels
+  const int step = atoi(argv[2]); // step size
   const float scaleFactor = float(std::pow(2, J-1));
 
   ImageParam input(Float(32), 3);
