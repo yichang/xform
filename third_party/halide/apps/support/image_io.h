@@ -108,15 +108,16 @@ Image<T> load_jpg(std::string filename) {
     while(cinfo.output_scanline < cinfo.image_height)
 	{
 		jpeg_read_scanlines(&cinfo, &scanline, 1);
+        uint8_t *current = scanline;
         for (int x = 0; x < im.width(); x++) {
             for (int c = 0; c < im.channels(); c++) {
-                convert(*scanline++, ptr[c*c_stride]);
+                convert(*current++, ptr[c*c_stride]);
             }
             ptr++;
         }
 	}
     //
-    // delete[] scanline;
+    delete[] scanline;
 
     jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
