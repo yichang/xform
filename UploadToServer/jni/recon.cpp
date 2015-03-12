@@ -117,7 +117,6 @@ void Java_com_example_uploadtoserver_UploadToServer_recon
         Image<float> HL_output(HL_input.width(), HL_input.height(), HL_input.channels());
 
         gettimeofday(&t_copy_recipe, NULL);
-        //client_model_halide.reconstruct_by_Halide(HL_input, HL_ac, HL_dc, my_meta, &HL_output);
         client_model.reconstruct_separate_by_Halide(HL_input, HL_ac_lumin, HL_ac_chrom, HL_dc, my_meta, &HL_output);
         gettimeofday(&t_recon, NULL);
 

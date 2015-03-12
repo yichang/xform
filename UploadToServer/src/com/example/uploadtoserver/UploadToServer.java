@@ -313,7 +313,7 @@ public class UploadToServer extends Activity {
           DataOutputStream dos   = null;
           String lineEnd         = "\r\n";
           String twoHyphens      = "--";
-          String boundary        = "*****";
+          String boundary        = "--*****--";
           int bytesRead, bytesAvailable, bufferSize;
           byte[] buffer;
           int maxBufferSize = 1024 * 1024; // Max 1 MB
@@ -353,15 +353,16 @@ public class UploadToServer extends Activity {
                    conn.setRequestProperty("Connection", "Keep-Alive");
                    conn.setRequestProperty("ENCTYPE", "multipart/form-data");
                    conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-                   conn.setRequestProperty("uploaded_file", fileName); 
+                   /* conn.setRequestProperty("uploaded_file", fileName);  */
                     
                    dos = new DataOutputStream(conn.getOutputStream());
           
-                   dos.writeBytes(twoHyphens + boundary + lineEnd); 
-                   dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\""
-                                             + fileName + "\"" + lineEnd);
-                    
-                   dos.writeBytes(lineEnd);
+                   /* dos.writeBytes(twoHyphens + boundary + lineEnd);  */
+                   /* dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\"" */
+                   /*                           + fileName + "\"" + lineEnd); */
+                   dos.writeBytes(fileName);
+                   dos.writeBytes(boundary); 
+                   /* dos.writeBytes(lineEnd); */
           
                    // create a buffer of  maximum size
                    bytesAvailable = fileInputStream.available(); 
@@ -382,8 +383,9 @@ public class UploadToServer extends Activity {
                     }
           
                    // send multipart form data necesssary after file data...
-                   dos.writeBytes(lineEnd);
-                   dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+                   /* dos.writeBytes(lineEnd); */
+                   /* dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd); */
+                   /* dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd); */
           
                    // Responses from the server (code and message)
                    serverResponseCode = conn.getResponseCode();

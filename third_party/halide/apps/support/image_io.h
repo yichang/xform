@@ -8,6 +8,7 @@
 #define STATIC_IMAGE_LOADER_H
 
 #include <png.h>
+#include <jpeglib.h>
 #include <string>
 #include <stdio.h>
 #include <algorithm>
@@ -59,6 +60,70 @@ inline bool ends_with_ignore_case(std::string a, std::string b) {
     std::transform(a.begin(), a.end(), a.begin(), ::tolower);
     std::transform(b.begin(), b.end(), b.begin(), ::tolower);
     return a.compare(a.length()-b.length(), b.length(), b) == 0;
+}
+
+template<typename T>
+Image<T> load_jpg(std::string filename) {
+    jpeg_decompress_struct cinfo;
+
+    Image<T> im(1);
+	
+	FILE* pFile = fopen(filename.c_str(), "rb");
+    _assert(pFile != NULL, "cannot open");
+    
+    // set our custom error handler
+    jpeg_error_mgr error_mgr;
+	cinfo.err = jpeg_std_error(&error_mgr);
+	// if (setjmp(errorManager.jumpBuffer))
+	// {
+	// 	// We jump here on errorz
+	// 	Cleanup();
+	// 	jpeg_destroy_decompress(&cinfo);
+	// 	fclose(pFile);
+	// 	return NULL;
+	// }
+
+    jpeg_create_decompress(&cinfo);
+	jpeg_stdio_src(&cinfo, pFile);
+	jpeg_read_header(&cinfo, TRUE);
+	jpeg_start_decompress(&cinfo);
+
+    int width     = cinfo.image_width;
+    int height    = cinfo.image_height;
+    int channels  = cinfo.num_components;
+
+
+    if (channels != 1) {
+        im = Image<T>(width, height, channels);
+    } else {
+        im = Image<T>(width, height);
+    }
+
+
+    int c_stride = (im.channels() == 1) ? 0 : im.stride(2);
+    T *ptr = (T*)im.data();
+      
+    uint8_t *scanline = new uint8_t[width*channels];
+
+    while(cinfo.output_scanline < cinfo.image_height)
+	{
+		jpeg_read_scanlines(&cinfo, &scanline, 1);
+        for (int x = 0; x < im.width(); x++) {
+            for (int c = 0; c < im.channels(); c++) {
+                convert(*scanline++, ptr[c*c_stride]);
+            }
+            ptr++;
+        }
+	}
+    //
+    // delete[] scanline;
+
+    jpeg_finish_decompress(&cinfo);
+	jpeg_destroy_decompress(&cinfo);
+	fclose(pFile);
+
+    im.set_host_dirty();
+    return im;
 }
 
 template<typename T>
@@ -386,6 +451,10 @@ Image<T> load(std::string filename) {
         return load_png<T>(filename);
     } else if (ends_with_ignore_case(filename, ".ppm")) {
         return load_ppm<T>(filename);
+    } else if (ends_with_ignore_case(filename, ".jpg")) {
+        return load_jpg<T>(filename);
+    } else if (ends_with_ignore_case(filename, ".jpeg")) {
+        return load_jpg<T>(filename);
     } else {
         _assert(false, "[load] unsupported file extension (png|ppm supported)");
     }
