@@ -8,6 +8,7 @@
 #include "image_io.h"
 #include "static_image.h"
 #include "local_laplacian.h"
+#include "style_transfer_wrapper.h"
 
 int main(int argc, char** argv){
   
@@ -17,8 +18,17 @@ int main(int argc, char** argv){
 
   // Processing
   int levels = atoi(argv[2]);
-  float alpha = atof(argv[3]), beta = atof(argv[4]);
-  local_laplacian(levels, alpha/(levels-1), beta, HL_input_server, HL_output_server);
+  float alpha = 1;
+  float beta = 1;
+  int mode = atoi(argv[3]);
+
+  if(mode==0) {
+      // Detail enhance
+      local_laplacian(levels, alpha/(levels-1), beta, HL_input_server, HL_output_server);
+  }else{
+      // Style transfer
+      style_transfer_wrapper(HL_input_server,HL_input_server,levels,HL_output_server);
+  }
   
   // Fitting
   timeval t1, t2;

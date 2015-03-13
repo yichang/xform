@@ -20,7 +20,7 @@ typedef struct buffer_t {
 #ifdef __cplusplus
 extern "C"
 #endif
-int style_transfer(const int32_t _levels, const float _alpha, const float _beta, buffer_t *_input, buffer_t *_model, buffer_t *_style_transfer) HALIDE_FUNCTION_ATTRS;
+int style_transfer(const int32_t _levels, const float _inv_delta, const float _clamp_min, buffer_t *_input, buffer_t *_lut, buffer_t *_style_transfer) HALIDE_FUNCTION_ATTRS;
 #ifdef __cplusplus
 extern "C"
 #endif

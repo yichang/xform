@@ -17,16 +17,16 @@ int main(int argc, char **argv) {
     Image<float> output(input.width(), input.height(), 3);
 
     // Timing code
-    timeval t1, t2;
-    unsigned int bestT = 0xffffffff;
-    for (int i = 0; i < 1; i++) {
-      gettimeofday(&t1, NULL);
-      local_laplacian(levels, alpha/(levels-1), beta, input, output);
-      gettimeofday(&t2, NULL);
-      unsigned int t = (t2.tv_sec - t1.tv_sec) * 1000000 + (t2.tv_usec - t1.tv_usec);
-      if (t < bestT) bestT = t;
-    }
-    printf("%u\n", bestT);
+    // timeval t1, t2;
+    // unsigned int bestT = 0xffffffff;
+    // for (int i = 0; i < 1; i++) {
+    //   gettimeofday(&t1, NULL);
+    //   local_laplacian(levels, alpha/(levels-1), beta, input, output);
+    //   gettimeofday(&t2, NULL);
+    //   unsigned int t = (t2.tv_sec - t1.tv_sec) * 1000000 + (t2.tv_usec - t1.tv_usec);
+    //   if (t < bestT) bestT = t;
+    // }
+    // printf("%u\n", bestT);
 
 
     local_laplacian(levels, alpha/(levels-1), beta, input, output);

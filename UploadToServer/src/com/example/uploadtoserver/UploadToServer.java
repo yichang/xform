@@ -51,7 +51,7 @@ public class UploadToServer extends Activity {
      
     /**********  File Path *************/
     final String localFileName     = "local.jpg";
-    final String remoteSrcFileName = "http://bigboy.csail.mit.edu/xform_server/data/input_image.jpg";
+    final String remoteSrcFileName = "http://xform-amazon-dev.elasticbeanstalk.com/data/input_image.jpg";
      
     /* load our native library */
     static {
@@ -77,7 +77,7 @@ public class UploadToServer extends Activity {
         messageText.setText("Uploading file path :-" + localFileName );
          
         /************* PhP script path ****************/
-        serverRoot = "http://bigboy.csail.mit.edu/xform_server/";
+        serverRoot = "http://xform-amazon-dev.elasticbeanstalk.com/";
         
         if (Sleep_mode){
         	upLoadServerUri = serverRoot+"naive_upload";
@@ -152,13 +152,13 @@ public class UploadToServer extends Activity {
                                  degraded_input.compress(Bitmap.CompressFormat.JPEG, 60, out_degraded); 
                                  out_degraded.close();                               
 
-                                 new Thread(new Runnable() {
-                                     public void run() {
+                                 /* new Thread(new Runnable() { */
+                                 /*     public void run() { */
                                          long upload_startTime = System.currentTimeMillis();
                                          uploadFile(localFileName, recipeServerUri);
                                          long upload_difference = System.currentTimeMillis() - upload_startTime;
-                                     }
-                                 }).start();        
+                                 /*     } */
+                                 /* }).start();         */
 
 
                                  if (Sleep_mode){

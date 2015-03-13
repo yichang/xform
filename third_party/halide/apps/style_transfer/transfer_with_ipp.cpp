@@ -864,7 +864,6 @@ int main(int argc, char** argv)
       histogram_type::build_transfer_lookup_table(input_gradient_histogram,
 						  model_gradient_histogram,
 						  &gradient_lookup);
-
     
       Gradient_transfer_function remapping_function(gradient_lookup);
       

@@ -74,14 +74,6 @@ Image<T> load_jpg(std::string filename) {
     // set our custom error handler
     jpeg_error_mgr error_mgr;
 	cinfo.err = jpeg_std_error(&error_mgr);
-	// if (setjmp(errorManager.jumpBuffer))
-	// {
-	// 	// We jump here on errorz
-	// 	Cleanup();
-	// 	jpeg_destroy_decompress(&cinfo);
-	// 	fclose(pFile);
-	// 	return NULL;
-	// }
 
     jpeg_create_decompress(&cinfo);
 	jpeg_stdio_src(&cinfo, pFile);

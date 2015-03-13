@@ -396,31 +396,31 @@ namespace Image_filter{
     size_type bottom_j = 0;
     
     for(size_type i=1;i<n_inverse_points;i++){
-      
-      const real_type y = i * normalized_inverse_delta;
 
-      real_type bottom_y;
-      do{
-	bottom_j++;
-	bottom_y = normalized_sum_to(first_value + bottom_j*bin_delta);
-      }
-      while(bottom_y<y);
+        const real_type y = i * normalized_inverse_delta;
 
-      bottom_j--;
-      const real_type top_y = bottom_y;
-      bottom_y = normalized_sum_to(first_value + bottom_j*bin_delta);
+        real_type bottom_y;
+        do{
+            bottom_j++;
+            bottom_y = normalized_sum_to(first_value + bottom_j*bin_delta);
+        }
+        while(bottom_y<y);
 
-      const real_type bottom_x = first_value + bottom_j * bin_delta;
-      real_type alpha = (y-bottom_y) / (top_y-bottom_y);
+        bottom_j--;
+        const real_type top_y = bottom_y;
+        bottom_y = normalized_sum_to(first_value + bottom_j*bin_delta);
 
-      if (bottom_j==0) {
-	alpha = 0.5*alpha + 0.5;
-      }
-      else if (bottom_j==n_bins-1){
-	alpha *= 0.5;
-      }
+        const real_type bottom_x = first_value + bottom_j * bin_delta;
+        real_type alpha = (y-bottom_y) / (top_y-bottom_y);
 
-      normalized_inverse[i] = bottom_x + bin_delta * alpha;
+        if (bottom_j==0) {
+            alpha = 0.5*alpha + 0.5;
+        }
+        else if (bottom_j==n_bins-1){
+            alpha *= 0.5;
+        }
+
+        normalized_inverse[i] = bottom_x + bin_delta * alpha;
     }
   }
 
@@ -474,6 +474,7 @@ namespace Image_filter{
 
     for(size_type i=0,i_max=lookup->sampling();i<i_max;i++){
       lookup->set_ith_sample_point(i,model_histogram.inverse(input_histogram.normalized_sum_to(lookup->ith_sample_point(i))));
+      :sp
     }
   }
 
