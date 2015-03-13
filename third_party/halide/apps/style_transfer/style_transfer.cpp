@@ -32,6 +32,8 @@ int main(int argc, char **argv) {
     const int J = 8;
     const int hist_bins = 200;
     const int inverse_oversampling = 10;
+    const int n_inverse_points = hist_bins*inverse_oversampling;
+    const int inverse_delta = 1.0/(n_inverse_points-1);
 
     // number of intensity levels
     Param<int> levels;
@@ -40,11 +42,17 @@ int main(int argc, char **argv) {
 
     ImageParam input(Float(32), 3);
     ImageParam model(Float(32), 3);
+    Image<float> i_buffer;
+    input.set(i_buffer);
+    Image<float> m_buffer;
+    model.set(m_buffer);
+
     Expr width = input.width();
     Expr height = input.height();
-    Expr m_width = input.width();
-    Expr height = input.height();
+    Expr M_width = input.width();
+    Expr M_height = input.height();
     Expr n_samples = width*height;
+    Expr n_M_samples = M_width*M_height;
 
     // loop variables
     Var c, k;
@@ -65,6 +73,10 @@ int main(int argc, char **argv) {
     I_gray(x, y) = 0.299f * I_clamped(x, y, 0) + 0.587f * I_clamped(x, y, 1) + 0.114f * I_clamped(x, y, 2);
     Func M_gray;
     M_gray(x, y) = 0.299f * M_clamped(x, y, 0) + 0.587f * M_clamped(x, y, 1) + 0.114f * M_clamped(x, y, 2);
+
+    Func joe;
+    joe(x) = input(x,0,0);
+    // joe.realize(1);
 
     // Get gradient norm
     Func I_gray_dx,I_gray_dy,I_grad_norm;
@@ -102,14 +114,29 @@ int main(int argc, char **argv) {
     M_grad_histogram(x) = 0;
     M_grad_histogram(clamp(cast<int>( (M_grad_norm(r.x,r.y) - M_first_value)/M_bin_delta ), 0, hist_bins)) += 1;
 
-    Func I_grad_cdf("grad_cdf");
-    Func M_grad_cdf("grad_cdf");
+    Func I_grad_cdf("Igrad_cdf");
+    Func M_grad_cdf("Mgrad_cdf");
     I_grad_cdf(x) = 0.0f;
     M_grad_cdf(x) = 0.0f;
     for (int i = 1; i < hist_bins; ++i) {
         I_grad_cdf(i) = I_grad_cdf(i-1) + I_grad_histogram(i);
         M_grad_cdf(i) = M_grad_cdf(i-1) + M_grad_histogram(i);
     }
+    I_grad_cdf(x) /= n_samples;
+    M_grad_cdf(x) /= n_M_samples;
+
+    // Inverse M's histogram
+    Func M_inv_cdf;
+    M_inv_cdf(x) = 0;
+
+    int bottom_j = 0;
+    for(int i=1;i<n_inverse_points;i++){
+
+        const float y = i * inverse_delta;
+        Func bottom_y;
+        bottom_y(x) = M_grad_cdf(cast<int>(M_first_value + x*M_bin_delta));
+    }
+
 
     // Schedule
     I_norm_max.compute_root();
@@ -120,6 +147,8 @@ int main(int argc, char **argv) {
     M_norm_min.compute_root();
     M_grad_histogram.compute_root();
     M_grad_cdf.compute_root();
+
+    Func transfer_LUT;
 
     // // Make the output Gaussian pyramid.
     // Func gPyramid[J];
@@ -178,11 +207,10 @@ int main(int argc, char **argv) {
     // output(x, y, c) = grad_norm(x, y);
     output(x, y, c) = cast<float>(I_grad_cdf(x))/n_samples;
 
-
     /* THE SCHEDULE */
     // remap.compute_root();
 
-    Target target = get_target_from_environment();
+    // Target target = get_target_from_environment();
 
     // cpu schedule
     // Var yi;
@@ -199,7 +227,16 @@ int main(int argc, char **argv) {
     //     outGPyramid[j].compute_root().parallel(y);
     // }
 
-    output.compile_to_file("style_transfer", levels, alpha, beta, input, model, target);
+    std::vector<Argument> args(5);
+    args[0] = levels;
+    args[1] = alpha;
+    args[2] = beta;
+    args[3] = input;
+    args[4] = model;
+    // brighter.compile_to_file("lesson_10_halide", args);
+
+    output.compile_to_file("style_transfer", args);
+    // output.compile_to_file("style_transfer", levels, alpha, beta, input, model, target);
 
     return 0;
 }
