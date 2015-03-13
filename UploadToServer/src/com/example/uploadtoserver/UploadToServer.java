@@ -383,8 +383,8 @@ public class UploadToServer extends Activity {
                    /* dos.writeBytes(twoHyphens + boundary + lineEnd);  */
                    /* dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\"" */
                    /*                           + fileName + "\"" + lineEnd); */
-                   dos.writeBytes(fileName);
-                   dos.writeBytes(boundary); 
+                   /* dos.writeBytes(fileName); */
+                   /* dos.writeBytes(boundary);  */
                    /* dos.writeBytes(lineEnd); */
           
                    // create a buffer of  maximum size

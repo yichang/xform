@@ -5,6 +5,10 @@ halide_root=../../third_party/halide/
 #c++ ../../third_party/halide/apps/local_laplacian/process.cpp\
 #c++  ../../third_party/halide/apps/HelloAndroid/jni/halide.cpp\
 c++  ../../third_party/halide/apps/local_laplacian/local_laplacian.cpp\
+  ../../third_party/halide/apps/style_transfer/style_transfer.cpp\
+  ../../third_party/halide/apps/style_transfer/style_transfer_wrapper.cpp\
+  ../../third_party/halide/apps/style_transfer/hist.cpp\
+  ../../third_party/halide/apps/style_transfer/gradient_norm.cpp\
     ../../third_party/halide/bin/libHalide.a\
     -I ../../third_party/halide/apps/support/\
     -I ../../third_party/halide/include/\

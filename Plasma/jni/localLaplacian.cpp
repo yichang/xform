@@ -5,6 +5,7 @@
 #include <android/log.h>
 #include <android/bitmap.h>
 #include "local_laplacian.h"
+#include "style_transfer_wrapper.h"
 #include "static_image.h"
 #define DEBUG_TAG "NDK_AndroidNDK1SampleActivity"
 
