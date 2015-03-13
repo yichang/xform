@@ -6,35 +6,35 @@ step_size=16
 
 resize: resize.cpp
 	g++ resize.cpp -o resize.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./resize.out
+	LD_LIBRARY_PATH=../third_party/halide/bin/  ./resize.out
 
 recon: recon.cpp
 	g++ recon.cpp -o recon.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./recon.out
+	LD_LIBRARY_PATH=../third_party/halide/bin/  ./recon.out
 
 dequant: dequant.cpp
 	g++ dequant.cpp -o dequant.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./dequant.out
+	LD_LIBRARY_PATH=../third_party/halide/bin/  ./dequant.out
 
 recon_separate: recon_separate.cpp
 	g++ recon_separate.cpp -o recon_separate.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./recon_separate.out $(num_levels) $(num_bins) $(step_size)
+	LD_LIBRARY_PATH=../third_party/halide/bin/  ./recon_separate.out $(num_levels) $(num_bins) $(step_size)
 
 compute_features: compute_features.cpp
 	g++ compute_features.cpp -o compute_features.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_features.out $(num_levels) $(num_bins) $(step_size)
+	LD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_features.out $(num_levels) $(num_bins) $(step_size)
 
 compute_cfeatures: compute_cfeatures.cpp
 	g++ compute_cfeatures.cpp -o compute_cfeatures.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_cfeatures.out $(num_levels) $(step_size)
+	LD_LIBRARY_PATH=../third_party/halide/bin/  ./compute_cfeatures.out $(num_levels) $(step_size)
 
 downsample: downsample.cpp
 	g++ downsample.cpp -o downsample.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./downsample.out $(num_levels) $(step_size)
+	LD_LIBRARY_PATH=../third_party/halide/bin/  ./downsample.out $(num_levels) $(step_size)
 
 highpass: highpass.cpp
 	g++ highpass.cpp -o highpass.out -I../third_party/halide/include/ -L ../third_party/halide/bin/ -lHalide -ldl -lpthread -lz
-	DYLD_LIBRARY_PATH=../third_party/halide/bin/  ./highpass.out $(num_levels) $(step_size)
+	LD_LIBRARY_PATH=../third_party/halide/bin/  ./highpass.out $(num_levels) $(step_size)
 
 test_resize: test_resize.cpp resize
 	g++ test_resize.cpp halide_resize.o -o test_resize -I ../third_party/halide/apps/support/ -lpng -I../third_party/halide/include/
