@@ -27,7 +27,9 @@ int main(int argc, char** argv){
       local_laplacian(levels, alpha/(levels-1), beta, HL_input_server, HL_output_server);
   }else{
       // Style transfer
-      style_transfer_wrapper(HL_input_server,HL_input_server,levels,HL_output_server);
+      std::string model_file(argv[4]); 
+      Image<float> HL_model_server = load<float>(model_file);
+      style_transfer_wrapper(HL_input_server,HL_model_server,levels,HL_output_server);
   }
   
   // Fitting

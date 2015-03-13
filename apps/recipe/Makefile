@@ -17,7 +17,7 @@ CPPFLAGS += -I./../../src/\
 CXXFLAGS += -g -Wall -Wextra -pthread -std=gnu++0x -Ofast -msse2
 CXX = g++
 
-TARGETS=extract_recipe
+TARGETS=extract_recipe naive_app
 
 all : $(TARGETS)
 clean :
@@ -60,6 +60,10 @@ TransformModel.o : ../../src/TransformModel.cpp \
 
 
 extract_recipe: extract_recipe.o Filter.o ColorSpace.o Pyramid.o Recipe.o TransformModel.o Warp.o MapImage.o XImage.o util.o $(HL_OBJ)halide_recon.o $(HL_OBJ)halide_resize.o $(HL_OBJ)halide_dequant.o $(HL_OBJ)halide_compute_features.o $(HL_OBJ)halide_compute_cfeatures.o $(HL_OBJ)halide_downsample.o $(HL_OBJ)halide_highpass.o $(HL_OBJ)halide_recon.o $(HL_OBJ)halide_recon_separate.o $(LLAPLACIAN)local_laplacian.o $(STYLE)style_transfer.o $(STYLE)style_transfer_wrapper.o\
+	$(STYLE)hist.o $(STYLE)gradient_norm.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+naive_app: naive_app.o Filter.o ColorSpace.o Pyramid.o Recipe.o TransformModel.o Warp.o MapImage.o XImage.o util.o $(HL_OBJ)halide_recon.o $(HL_OBJ)halide_resize.o $(HL_OBJ)halide_dequant.o $(HL_OBJ)halide_compute_features.o $(HL_OBJ)halide_compute_cfeatures.o $(HL_OBJ)halide_downsample.o $(HL_OBJ)halide_highpass.o $(HL_OBJ)halide_recon.o $(HL_OBJ)halide_recon_separate.o $(LLAPLACIAN)local_laplacian.o $(STYLE)style_transfer.o $(STYLE)style_transfer_wrapper.o\
 	$(STYLE)hist.o $(STYLE)gradient_norm.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
 
